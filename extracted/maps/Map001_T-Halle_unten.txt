@@ -1,0 +1,397 @@
+MAP 001: T-Halle unten
+Size: 20 x 15   Tileset ID: 52
+Events: 14
+
+==============================================================================
+EVENT 001: EndPC   at (10, 11)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: Switch [0003: 1E-7 erreicht] is ON
+  Trigger: Action Button   Graphic: '106-Civilian06' facing down   Movement: Fixed
+  Commands:
+    Change Text Options: [0, 0]
+    Text: Udo: Der Druck ist unten, du hast es geschafft.
+        : Sicher, dass du an alles gedacht hast?
+    Show Choices: Ja | Nein  (cancel: 2)
+    When [Ja]
+      Call Common Event: [0007: Abspann]
+    When [Nein]
+
+==============================================================================
+EVENT 003: EV003   at (0, 0)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Autorun   Graphic: none   Movement: Fixed
+  Commands:
+    Change Menu Access: [0]
+    Variable [0029: Druck [Exp+7&Val]] = 101
+    Variable [0030: Druck Rotary [Exp+7&Val]] = 111
+    Self Switch A = ON
+    Switch [0001: initialize] = ON
+    Text: Der Jumbo muss evakuiert werden.
+    Text: Alle die es sonst machen sind nicht da.
+    Text: Doch das Schicksal des Neutralisators hängt davon 
+        : ab und nur du kannst ihn jetzt noch retten.
+    Text: Es gibt eine Anleitung zum Evakuieren des Tanks.
+        : Du solltest einen Blick darein werfen.
+    Variable [0019: Punkte] = 1000
+    Play BGM: '014-Theme03' (vol 35, pitch 100)
+
+--- Page 2 ---
+  Conditions: Self Switch A is ON
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    (none)
+
+==============================================================================
+EVENT 004: Jumbo Control   at (10, 7)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Der Druck ist \v[50]E\v[49] mbar
+    Show Choices: Ventile steuern | Pumpen steuern | nichts tun  (cancel: 3)
+    When [Ventile steuern]
+      Show Choices: V1 steuern | Umwegventil steuern | nichts tun  (cancel: 3)
+      When [V1 steuern]
+        If Variable [0024: Ventil V1] == 0
+          Show Choices: Ventil öffnen | nichts tun  (cancel: 2)
+          When [Ventil öffnen]
+            Variable [0024: Ventil V1] = 1
+            If Variable [0030: Druck Rotary [Exp+7&Val]] < Variable [0029: Druck [Exp+7&Val]]
+              Text: Ein sehr lautes Zischen lässt dich zusammenzucken.
+              Switch [0007: V1 gegen Überdruck] = ON
+            Else
+              If Variable [0030: Druck Rotary [Exp+7&Val]] > Variable [0029: Druck [Exp+7&Val]]
+                Screen Shake: [5, 5, 5]
+                Play SE: '180-Skill24' (vol 80, pitch 100)
+                Text: Ein lauter Knall lässt dich zusammenfahren.
+                If Variable [0046: #Turbos] > 0
+                  Text: Deine Ohren bluten regelrecht unter der Kakophonie 
+                      : der sterbenden Pumpen.
+                  Game Over
+                Else
+                  If Variable [0048: #Vorpumpen] > 0
+                    Text: Die Vorpumpen heulen kurz auf, um sich bei dir zu 
+                        : beschweren.
+                    Switch [0005: V1 gegen Vorpumpen] = ON
+                  Else
+                    Switch [0006: V1 gegen Unterdruck] = ON
+              Else
+                Text: Ein lautes Pfeifen ertönt.
+            Variable [0030: Druck Rotary [Exp+7&Val]] = Variable [0029: Druck [Exp+7&Val]]
+          When [nichts tun]
+        Else
+          Show Choices: Ventil schließen | nichts tun  (cancel: 2)
+          When [Ventil schließen]
+            Variable [0024: Ventil V1] = 0
+            Text: Ein lautes Pfeifen ertönt.
+          When [nichts tun]
+      When [Umwegventil steuern]
+        If Variable [0021: Ventil Umweg] == 0
+          Show Choices: Ventil öffnen | nichts tun  (cancel: 2)
+          When [Ventil öffnen]
+            Variable [0021: Ventil Umweg] = 1
+          When [nichts tun]
+        Else
+          Show Choices: Ventil schließen | nichts tun  (cancel: 2)
+          When [Ventil schließen]
+            Variable [0021: Ventil Umweg] = 0
+          When [nichts tun]
+      When [nichts tun]
+    When [Pumpen steuern]
+      Show Choices: Rotary steuern | Roots steuern | Kryopumpen steuern | nichts tun  (cancel: 4)
+      When [Rotary steuern]
+        If Variable [0031: Rotary] == 0
+          Show Choices: Pumpe starten | nichts tun  (cancel: 2)
+          When [Pumpe starten]
+            Variable [0031: Rotary] = 1
+            Text: Mit leisem Brummen setzt sich die Pumpe in 
+                : Bewegung.
+            If Variable [0021: Ventil Umweg] == 0
+              Switch [0008: Umwegventil zu ohne Roots] = ON
+            Else
+          When [nichts tun]
+        Else
+          Show Choices: Pumpe abschalten | nichts tun  (cancel: 2)
+          When [Pumpe abschalten]
+            Variable [0031: Rotary] = 0
+          When [nichts tun]
+      When [Roots steuern]
+        If Variable [0032: Roots] == 0
+          Show Choices: Pumpe starten | nichts tun  (cancel: 2)
+          When [Pumpe starten]
+            Variable [0032: Roots] = 1
+            If Variable [0029: Druck [Exp+7&Val]] > 83
+              Play BGS: '015-Quake01' (vol 100, pitch 100)
+              Screen Shake: [5, 9, 20]
+              Text: Mit lautem Grollen protestiert die Rootspumpe.
+              Screen Shake: [5, 9, 20]
+              Text: Der Boden vibriert und du hast das Gefühl, dass er 
+                  : sich jeden Moment unter dir öffnent.
+              Screen Shake: [5, 9, 20]
+              Fade Out BGS: [1]
+              Text: Nach einem kurzen, aber gefühlt ewigen Moment 
+                  : verklingt das Grollen und die Pumpe schaltet sich ab.
+              Variable [0032: Roots] = 0
+              Switch [0009: Roots zu früh] = ON
+            Else
+          When [nichts tun]
+        Else
+          Show Choices: Pumpe abschalten | nichts tun  (cancel: 2)
+          When [Pumpe abschalten]
+            Variable [0032: Roots] = 0
+          When [nichts tun]
+      When [Kryopumpen steuern]
+        If Variable [0042: Kryos] == 0
+          Show Choices: Kryos starten | nichts tun  (cancel: 2)
+          When [Kryos starten]
+            Text: Mit einem unangenehmen 2Hz Pochen laufen die 
+                : Kryopumpen an.
+            If Variable [0016: Wasser Kryo vor] == 0
+              Text: Nach kurzer Zeit verklingt das Geräusch der 
+                  : Kryopumpen wieder.
+              Switch [0010: Kryos ohne Wasser] = ON
+            Else
+              If Variable [0017: Wasser Kryo rück] == 0
+                Text: Nach kurzer Zeit verklingt das Geräusch der 
+                    : Kryopumpen wieder.
+                Switch [0010: Kryos ohne Wasser] = ON
+              Else
+                Variable [0042: Kryos] = 1
+                If Variable [0029: Druck [Exp+7&Val]] > 21
+                  Switch [0004: Kryo zu früh] = ON
+                Else
+          When [nichts tun]
+        Else
+          Show Choices: Kryos abschalten | nichts tun  (cancel: 2)
+          When [Kryos abschalten]
+            Variable [0042: Kryos] = 0
+            Text: Das markante Geräusch der laufenden Kryopumpen 
+                : verklingt und du kannst dich wieder selbst denken 
+                : hören.
+          When [nichts tun]
+      When [nichts tun]
+    When [nichts tun]
+
+==============================================================================
+EVENT 005: Jumbo Diagnostik   at (11, 8)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist der Diagnostikrechner.
+
+==============================================================================
+EVENT 006: Diagnostik-Rack   at (10, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Ein großes Rack, in dem sich Steuereinheiten, Netz- 
+        : und Messgeräte für die Diagnostik im Jumbo zu 
+        : finden sind.
+
+==============================================================================
+EVENT 007: Drucker   at (8, 6)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist ein Drucker.
+
+==============================================================================
+EVENT 008: Drucker   at (9, 6)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist ein Drucker.
+
+==============================================================================
+EVENT 009: Diagnostik-Rack   at (11, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Ein großes Rack, in dem sich Steuereinheiten, Netz- 
+        : und Messgeräte für die Diagnostik im Jumbo zu 
+        : finden sind.
+
+==============================================================================
+EVENT 010: Werkzeugschrank   at (5, 8)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist ein Werkzeugschrank.
+    Show Choices: Schrank öffnen | nichts tun  (cancel: 2)
+    When [Schrank öffnen]
+      Text: Dir fallen zwei Schraubenschlüssel der Größe 10/11 
+          : entgegen.
+      Change Items: [0034: Scharbenschlüssel 10/11] + 2
+      Self Switch A = ON
+    When [nichts tun]
+
+--- Page 2 ---
+  Conditions: Self Switch A is ON
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist ein Werkzeugschrank.
+
+==============================================================================
+EVENT 011: Wasserwand unten   at (5, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Hier ist die Kühlwasserleitung für die alte 
+        : Turbopumpe.
+    Show Choices: Vorlauf öffnen | Rücklauf öffnen | nichts tun  (cancel: 3)
+    When [Vorlauf öffnen]
+      Variable [0006: Wasser Turbo alt vor] = 1
+      Self Switch A = ON
+    When [Rücklauf öffnen]
+      Variable [0007: Wasser Turbo alt rück] = 1
+      Self Switch A = ON
+    When [nichts tun]
+
+--- Page 2 ---
+  Conditions: Self Switch A is ON
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Hier ist die Kühlwasserleitung für die alte 
+        : Turbopumpe.
+    If Variable [0006: Wasser Turbo alt vor] == 0
+      Show Choices: Vorlauf öffnen | Rücklauf schließen | nichts tun  (cancel: 3)
+      When [Vorlauf öffnen]
+        Variable [0006: Wasser Turbo alt vor] = 1
+        Self Switch A = ON
+      When [Rücklauf schließen]
+        Variable [0007: Wasser Turbo alt rück] = 0
+        Self Switch A = OFF
+      When [nichts tun]
+    Else
+      If Variable [0007: Wasser Turbo alt rück] == 0
+        Show Choices: Vorlauf schließen | Rücklauf öffnen | nichts tun  (cancel: 3)
+        When [Vorlauf schließen]
+          Variable [0006: Wasser Turbo alt vor] = 0
+          Self Switch A = OFF
+        When [Rücklauf öffnen]
+          Variable [0007: Wasser Turbo alt rück] = 1
+          Self Switch A = ON
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf schließen | Rücklauf schließen | nichts tun  (cancel: 3)
+        When [Vorlauf schließen]
+          Variable [0006: Wasser Turbo alt vor] = 0
+        When [Rücklauf schließen]
+          Variable [0007: Wasser Turbo alt rück] = 0
+        When [nichts tun]
+
+==============================================================================
+EVENT 012: Belüftung Rotary   at (11, 7)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Dieses Rohr verbindet den Jumbo mit der Rotary und 
+        : Roots im Keller.
+    If Variable [0025: Ventil Rotary Belüftung] == 0
+      Show Choices: Ventil öffnen | nichts tun  (cancel: 2)
+      When [Ventil öffnen]
+        Variable [0025: Ventil Rotary Belüftung] = 1
+        If Variable [0024: Ventil V1] == 1
+          If Variable [0029: Druck [Exp+7&Val]] < 101
+            Screen Shake: [5, 5, 5]
+            Play SE: '180-Skill24' (vol 80, pitch 100)
+            Text: Ein lauter Knall lässt dich zusammenfahren.
+            Text: Deine Ohren bluten regelrecht unter der Kakophonie 
+                : der sterbenden Pumpen.
+            Game Over
+          Else
+        Else
+        Variable [0030: Druck Rotary [Exp+7&Val]] = 101
+      When [nichts tun]
+    Else
+      Show Choices: Ventil schließen | nichts tun  (cancel: 2)
+      When [Ventil schließen]
+        Variable [0025: Ventil Rotary Belüftung] = 0
+      When [nichts tun]
+
+==============================================================================
+EVENT 013: EV013   at (10, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Druck Tank \v[29]
+        : Druck Rotary Leitung \v[30]
+        : Anzahl Vorpumpen \v[48]
+    Text: Anzahl Turbos \v[46]
+        : Saugleistung \v[47]
+
+==============================================================================
+EVENT 014: Treppe unten links   at (3, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Player Touch   Graphic: none   Movement: Fixed
+  Commands:
+    Set Move Route: Player
+        > Turn Left
+        > Move Upper Left
+    Wait for Move's Completion
+    If Variable [0026: Jumbo door] == 0
+      Transfer Player: Map [0003: T-Halle oben offen] (2, 4), facing retain
+    Else
+      Transfer Player: Map [0002: T-Halle oben] (2, 4), facing retain
+    Set Move Route: Player
+        > Turn Left
+        > Move Left
+
+==============================================================================
+EVENT 015: Treppe unten rechts   at (14, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Player Touch   Graphic: none   Movement: Fixed
+  Commands:
+    Set Move Route: Player
+        > Turn Right
+        > Move Upper Right
+    Wait for Move's Completion
+    If Variable [0026: Jumbo door] == 0
+      Transfer Player: Map [0003: T-Halle oben offen] (15, 4), facing down
+    Else
+      Transfer Player: Map [0002: T-Halle oben] (15, 4), facing down
+    Set Move Route: Player
+        > Turn Right
+    Set Move Route: Player
+        > Turn Right
+        > Move Right

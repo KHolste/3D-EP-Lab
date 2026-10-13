@@ -1,0 +1,5298 @@
+{
+ "__class__": "RPG::Map",
+ "bgm": {
+  "__class__": "RPG::AudioFile",
+  "volume": 100,
+  "name": "",
+  "pitch": 100
+ },
+ "events": {
+  "5": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Das ist der Diagnostikrechner."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Jumbo Diagnostik",
+   "y": 8,
+   "x": 11,
+   "id": 5
+  },
+  "11": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Hier ist die Kühlwasserleitung für die alte "
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Turbopumpe."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Vorlauf öffnen",
+         "Rücklauf öffnen",
+         "nichts tun"
+        ],
+        3
+       ],
+       "indent": 0,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Vorlauf öffnen"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        6,
+        6,
+        0,
+        0,
+        1
+       ],
+       "indent": 1,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        0
+       ],
+       "indent": 1,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Rücklauf öffnen"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        7,
+        7,
+        0,
+        0,
+        1
+       ],
+       "indent": 1,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        0
+       ],
+       "indent": 1,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "nichts tun"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    },
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Hier ist die Kühlwasserleitung für die alte "
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Turbopumpe."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        6,
+        0,
+        0,
+        0
+       ],
+       "indent": 0,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Vorlauf öffnen",
+         "Rücklauf schließen",
+         "nichts tun"
+        ],
+        3
+       ],
+       "indent": 1,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Vorlauf öffnen"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        6,
+        6,
+        0,
+        0,
+        1
+       ],
+       "indent": 2,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        0
+       ],
+       "indent": 2,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Rücklauf schließen"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        7,
+        7,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        1
+       ],
+       "indent": 2,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "nichts tun"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        7,
+        0,
+        0,
+        0
+       ],
+       "indent": 1,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Vorlauf schließen",
+         "Rücklauf öffnen",
+         "nichts tun"
+        ],
+        3
+       ],
+       "indent": 2,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Vorlauf schließen"
+       ],
+       "indent": 2,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        6,
+        6,
+        0,
+        0,
+        0
+       ],
+       "indent": 3,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        1
+       ],
+       "indent": 3,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Rücklauf öffnen"
+       ],
+       "indent": 2,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        7,
+        7,
+        0,
+        0,
+        1
+       ],
+       "indent": 3,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        0
+       ],
+       "indent": 3,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "nichts tun"
+       ],
+       "indent": 2,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Vorlauf schließen",
+         "Rücklauf schließen",
+         "nichts tun"
+        ],
+        3
+       ],
+       "indent": 2,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Vorlauf schließen"
+       ],
+       "indent": 2,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        6,
+        6,
+        0,
+        0,
+        0
+       ],
+       "indent": 3,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Rücklauf schließen"
+       ],
+       "indent": 2,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        7,
+        7,
+        0,
+        0,
+        0
+       ],
+       "indent": 3,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "nichts tun"
+       ],
+       "indent": 2,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": true,
+      "variable_id": 7,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Wasserwand unten",
+   "y": 5,
+   "x": 5,
+   "id": 11
+  },
+  "6": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein großes Rack, in dem sich Steuereinheiten, Netz- "
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "und Messgeräte für die Diagnostik im Jumbo zu "
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "finden sind."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Diagnostik-Rack",
+   "y": 9,
+   "x": 10,
+   "id": 6
+  },
+  "1": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        0
+       ],
+       "indent": 0,
+       "code": 104
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Udo: Der Druck ist unten, du hast es geschafft."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Sicher, dass du an alles gedacht hast?"
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ja",
+         "Nein"
+        ],
+        2
+       ],
+       "indent": 0,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ja"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        7
+       ],
+       "indent": 1,
+       "code": 117
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Nein"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 3,
+      "switch1_valid": true,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 29,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "106-Civilian06",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 20
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "EndPC",
+   "y": 11,
+   "x": 10,
+   "id": 1
+  },
+  "12": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Dieses Rohr verbindet den Jumbo mit der Rotary und "
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Roots im Keller."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        25,
+        0,
+        0,
+        0
+       ],
+       "indent": 0,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventil öffnen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 1,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventil öffnen"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        25,
+        25,
+        0,
+        0,
+        1
+       ],
+       "indent": 2,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        24,
+        0,
+        1,
+        0
+       ],
+       "indent": 2,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        29,
+        0,
+        101,
+        4
+       ],
+       "indent": 3,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        5,
+        5,
+        5
+       ],
+       "indent": 4,
+       "code": 225
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::AudioFile",
+         "volume": 80,
+         "name": "180-Skill24",
+         "pitch": 100
+        }
+       ],
+       "indent": 4,
+       "code": 250
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein lauter Knall lässt dich zusammenfahren."
+       ],
+       "indent": 4,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Deine Ohren bluten regelrecht unter der Kakophonie "
+       ],
+       "indent": 4,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "der sterbenden Pumpen."
+       ],
+       "indent": 4,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 353
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        30,
+        30,
+        0,
+        0,
+        101
+       ],
+       "indent": 2,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventil schließen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 1,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventil schließen"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        25,
+        25,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Belüftung Rotary",
+   "y": 7,
+   "x": 11,
+   "id": 12
+  },
+  "7": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Das ist ein Drucker."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Drucker",
+   "y": 6,
+   "x": 8,
+   "id": 7
+  },
+  "13": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Druck Tank \\v[29]"
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Druck Rotary Leitung \\v[30]"
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Anzahl Vorpumpen \\v[48]"
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Anzahl Turbos \\v[46]"
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Saugleistung \\v[47]"
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "EV013",
+   "y": 5,
+   "x": 10,
+   "id": 13
+  },
+  "8": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Das ist ein Drucker."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Drucker",
+   "y": 6,
+   "x": 9,
+   "id": 8
+  },
+  "3": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0
+       ],
+       "indent": 0,
+       "code": 135
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        29,
+        29,
+        0,
+        0,
+        101
+       ],
+       "indent": 0,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        30,
+        30,
+        0,
+        0,
+        111
+       ],
+       "indent": 0,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        0
+       ],
+       "indent": 0,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        1,
+        0
+       ],
+       "indent": 0,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Der Jumbo muss evakuiert werden."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Alle die es sonst machen sind nicht da."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Doch das Schicksal des Neutralisators hängt davon "
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "ab und nur du kannst ihn jetzt noch retten."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Es gibt eine Anleitung zum Evakuieren des Tanks."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Du solltest einen Blick darein werfen."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        19,
+        19,
+        0,
+        0,
+        1000
+       ],
+       "indent": 0,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::AudioFile",
+         "volume": 35,
+         "name": "014-Theme03",
+         "pitch": 100
+        }
+       ],
+       "indent": 0,
+       "code": 241
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 3,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    },
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": true,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "EV003",
+   "y": 0,
+   "x": 0,
+   "id": 3
+  },
+  "14": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        -1,
+        {
+         "__class__": "RPG::MoveRoute",
+         "list": [
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 17
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 7
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 0
+          }
+         ],
+         "skippable": false,
+         "repeat": false
+        }
+       ],
+       "indent": 0,
+       "code": 209
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 17
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 7
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 210
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        26,
+        0,
+        0,
+        0
+       ],
+       "indent": 0,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        3,
+        2,
+        4,
+        0,
+        0
+       ],
+       "indent": 1,
+       "code": 201
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        2,
+        2,
+        4,
+        0,
+        0
+       ],
+       "indent": 1,
+       "code": 201
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        -1,
+        {
+         "__class__": "RPG::MoveRoute",
+         "list": [
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 17
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 2
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 0
+          }
+         ],
+         "skippable": false,
+         "repeat": false
+        }
+       ],
+       "indent": 0,
+       "code": 209
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 17
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 2
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 1,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Treppe unten links",
+   "y": 5,
+   "x": 3,
+   "id": 14
+  },
+  "9": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein großes Rack, in dem sich Steuereinheiten, Netz- "
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "und Messgeräte für die Diagnostik im Jumbo zu "
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "finden sind."
+       ],
+       "indent": 0,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Diagnostik-Rack",
+   "y": 9,
+   "x": 11,
+   "id": 9
+  },
+  "4": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Der Druck ist \\v[50]E\\v[49] mbar"
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventile steuern",
+         "Pumpen steuern",
+         "nichts tun"
+        ],
+        3
+       ],
+       "indent": 0,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventile steuern"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "V1 steuern",
+         "Umwegventil steuern",
+         "nichts tun"
+        ],
+        3
+       ],
+       "indent": 1,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "V1 steuern"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        24,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventil öffnen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventil öffnen"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        24,
+        24,
+        0,
+        0,
+        1
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        30,
+        1,
+        29,
+        4
+       ],
+       "indent": 4,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein sehr lautes Zischen lässt dich zusammenzucken."
+       ],
+       "indent": 5,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        7,
+        7,
+        0
+       ],
+       "indent": 5,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        30,
+        1,
+        29,
+        3
+       ],
+       "indent": 5,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        5,
+        5,
+        5
+       ],
+       "indent": 6,
+       "code": 225
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::AudioFile",
+         "volume": 80,
+         "name": "180-Skill24",
+         "pitch": 100
+        }
+       ],
+       "indent": 6,
+       "code": 250
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein lauter Knall lässt dich zusammenfahren."
+       ],
+       "indent": 6,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        46,
+        0,
+        0,
+        3
+       ],
+       "indent": 6,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Deine Ohren bluten regelrecht unter der Kakophonie "
+       ],
+       "indent": 7,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "der sterbenden Pumpen."
+       ],
+       "indent": 7,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 353
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        48,
+        0,
+        0,
+        3
+       ],
+       "indent": 7,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Die Vorpumpen heulen kurz auf, um sich bei dir zu "
+       ],
+       "indent": 8,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "beschweren."
+       ],
+       "indent": 8,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        5,
+        5,
+        0
+       ],
+       "indent": 8,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 8,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        6,
+        6,
+        0
+       ],
+       "indent": 8,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 8,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein lautes Pfeifen ertönt."
+       ],
+       "indent": 6,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        30,
+        30,
+        0,
+        1,
+        29
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventil schließen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventil schließen"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        24,
+        24,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Ein lautes Pfeifen ertönt."
+       ],
+       "indent": 4,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Umwegventil steuern"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        21,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventil öffnen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventil öffnen"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        21,
+        21,
+        0,
+        0,
+        1
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Ventil schließen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Ventil schließen"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        21,
+        21,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "nichts tun"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Pumpen steuern"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Rotary steuern",
+         "Roots steuern",
+         "Kryopumpen steuern",
+         "nichts tun"
+        ],
+        4
+       ],
+       "indent": 1,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Rotary steuern"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        31,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Pumpe starten",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Pumpe starten"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        31,
+        31,
+        0,
+        0,
+        1
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Mit leisem Brummen setzt sich die Pumpe in "
+       ],
+       "indent": 4,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Bewegung."
+       ],
+       "indent": 4,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        21,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        8,
+        8,
+        0
+       ],
+       "indent": 5,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Pumpe abschalten",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Pumpe abschalten"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        31,
+        31,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "Roots steuern"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        32,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Pumpe starten",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Pumpe starten"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        32,
+        32,
+        0,
+        0,
+        1
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        29,
+        0,
+        83,
+        3
+       ],
+       "indent": 4,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::AudioFile",
+         "volume": 100,
+         "name": "015-Quake01",
+         "pitch": 100
+        }
+       ],
+       "indent": 5,
+       "code": 245
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        5,
+        9,
+        20
+       ],
+       "indent": 5,
+       "code": 225
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Mit lautem Grollen protestiert die Rootspumpe."
+       ],
+       "indent": 5,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        5,
+        9,
+        20
+       ],
+       "indent": 5,
+       "code": 225
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Der Boden vibriert und du hast das Gefühl, dass er "
+       ],
+       "indent": 5,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "sich jeden Moment unter dir öffnent."
+       ],
+       "indent": 5,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        5,
+        9,
+        20
+       ],
+       "indent": 5,
+       "code": 225
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1
+       ],
+       "indent": 5,
+       "code": 246
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Nach einem kurzen, aber gefühlt ewigen Moment "
+       ],
+       "indent": 5,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "verklingt das Grollen und die Pumpe schaltet sich ab."
+       ],
+       "indent": 5,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        32,
+        32,
+        0,
+        0,
+        0
+       ],
+       "indent": 5,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        9,
+        9,
+        0
+       ],
+       "indent": 5,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Pumpe abschalten",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Pumpe abschalten"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        32,
+        32,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "Kryopumpen steuern"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        42,
+        0,
+        0,
+        0
+       ],
+       "indent": 2,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Kryos starten",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Kryos starten"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Mit einem unangenehmen 2Hz Pochen laufen die "
+       ],
+       "indent": 4,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Kryopumpen an."
+       ],
+       "indent": 4,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        16,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Nach kurzer Zeit verklingt das Geräusch der "
+       ],
+       "indent": 5,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Kryopumpen wieder."
+       ],
+       "indent": 5,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        10,
+        10,
+        0
+       ],
+       "indent": 5,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        17,
+        0,
+        0,
+        0
+       ],
+       "indent": 5,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Nach kurzer Zeit verklingt das Geräusch der "
+       ],
+       "indent": 6,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Kryopumpen wieder."
+       ],
+       "indent": 6,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        10,
+        10,
+        0
+       ],
+       "indent": 6,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        42,
+        42,
+        0,
+        0,
+        1
+       ],
+       "indent": 6,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        29,
+        0,
+        21,
+        3
+       ],
+       "indent": 6,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        4,
+        4,
+        0
+       ],
+       "indent": 7,
+       "code": 121
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 7,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 6,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 5,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Kryos abschalten",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 3,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Kryos abschalten"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        42,
+        42,
+        0,
+        0,
+        0
+       ],
+       "indent": 4,
+       "code": 122
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Das markante Geräusch der laufenden Kryopumpen "
+       ],
+       "indent": 4,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "verklingt und du kannst dich wieder selbst denken "
+       ],
+       "indent": 4,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "hören."
+       ],
+       "indent": 4,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 3,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 4,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 3,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        3,
+        "nichts tun"
+       ],
+       "indent": 1,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 2,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        2,
+        "nichts tun"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Jumbo Control",
+   "y": 7,
+   "x": 10,
+   "id": 4
+  },
+  "15": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        -1,
+        {
+         "__class__": "RPG::MoveRoute",
+         "list": [
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 18
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 8
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 0
+          }
+         ],
+         "skippable": false,
+         "repeat": false
+        }
+       ],
+       "indent": 0,
+       "code": 209
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 18
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 8
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 210
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        26,
+        0,
+        0,
+        0
+       ],
+       "indent": 0,
+       "code": 111
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        3,
+        15,
+        4,
+        2,
+        0
+       ],
+       "indent": 1,
+       "code": 201
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 411
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        2,
+        15,
+        4,
+        2,
+        0
+       ],
+       "indent": 1,
+       "code": 201
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 412
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        -1,
+        {
+         "__class__": "RPG::MoveRoute",
+         "list": [
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 18
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 0
+          }
+         ],
+         "skippable": false,
+         "repeat": false
+        }
+       ],
+       "indent": 0,
+       "code": 209
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 18
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        -1,
+        {
+         "__class__": "RPG::MoveRoute",
+         "list": [
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 18
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 3
+          },
+          {
+           "__class__": "RPG::MoveCommand",
+           "parameters": [],
+           "code": 0
+          }
+         ],
+         "skippable": false,
+         "repeat": false
+        }
+       ],
+       "indent": 0,
+       "code": 209
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 18
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        {
+         "__class__": "RPG::MoveCommand",
+         "parameters": [],
+         "code": 3
+        }
+       ],
+       "indent": 0,
+       "code": 509
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 1,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Treppe unten rechts",
+   "y": 5,
+   "x": 14,
+   "id": 15
+  },
+  "10": {
+   "__class__": "RPG::Event",
+   "pages": [
+    {
+     "__class__": "RPG::Event::Page",
+     "move_type": 0,
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Das ist ein Werkzeugschrank."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        [
+         "Schrank öffnen",
+         "nichts tun"
+        ],
+        2
+       ],
+       "indent": 0,
+       "code": 102
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        0,
+        "Schrank öffnen"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Dir fallen zwei Schraubenschlüssel der Größe 10/11 "
+       ],
+       "indent": 1,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "entgegen."
+       ],
+       "indent": 1,
+       "code": 401
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        34,
+        0,
+        0,
+        2
+       ],
+       "indent": 1,
+       "code": 126
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "A",
+        0
+       ],
+       "indent": 1,
+       "code": 123
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        1,
+        "nichts tun"
+       ],
+       "indent": 0,
+       "code": 402
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 1,
+       "code": 0
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 404
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": false,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "direction_fix": false,
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "always_on_top": false,
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    },
+    {
+     "__class__": "RPG::Event::Page",
+     "list": [
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [
+        "Das ist ein Werkzeugschrank."
+       ],
+       "indent": 0,
+       "code": 101
+      },
+      {
+       "__class__": "RPG::EventCommand",
+       "parameters": [],
+       "indent": 0,
+       "code": 0
+      }
+     ],
+     "move_type": 0,
+     "direction_fix": false,
+     "condition": {
+      "__class__": "RPG::Event::Page::Condition",
+      "switch2_valid": false,
+      "self_switch_ch": "A",
+      "switch1_id": 1,
+      "switch1_valid": false,
+      "variable_value": 0,
+      "self_switch_valid": true,
+      "variable_id": 1,
+      "variable_valid": false,
+      "switch2_id": 1
+     },
+     "move_route": {
+      "__class__": "RPG::MoveRoute",
+      "list": [
+       {
+        "__class__": "RPG::MoveCommand",
+        "parameters": [],
+        "code": 0
+       }
+      ],
+      "skippable": false,
+      "repeat": true
+     },
+     "trigger": 0,
+     "step_anime": false,
+     "move_frequency": 3,
+     "always_on_top": false,
+     "graphic": {
+      "__class__": "RPG::Event::Page::Graphic",
+      "opacity": 255,
+      "character_name": "",
+      "pattern": 0,
+      "tile_id": 0,
+      "direction": 2,
+      "blend_type": 0,
+      "character_hue": 0
+     },
+     "walk_anime": true,
+     "move_speed": 3,
+     "through": false
+    }
+   ],
+   "name": "Werkzeugschrank",
+   "y": 8,
+   "x": 5,
+   "id": 10
+  }
+ },
+ "tileset_id": 52,
+ "bgs": {
+  "__class__": "RPG::AudioFile",
+  "volume": 80,
+  "name": "",
+  "pitch": 100
+ },
+ "autoplay_bgm": false,
+ "data": {
+  "__class__": "Table",
+  "dim": 3,
+  "xsize": 20,
+  "ysize": 15,
+  "zsize": 3,
+  "data": [
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   52,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   76,
+   56,
+   48,
+   72,
+   404,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   405,
+   406,
+   64,
+   48,
+   72,
+   412,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   413,
+   414,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   72,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   396,
+   64,
+   48,
+   50,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   68,
+   49,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   48,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   745,
+   746,
+   0,
+   789,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   747,
+   748,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   798,
+   799,
+   0,
+   797,
+   0,
+   0,
+   782,
+   783,
+   0,
+   0,
+   0,
+   0,
+   804,
+   805,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   806,
+   807,
+   0,
+   0,
+   0,
+   0,
+   790,
+   791,
+   0,
+   788,
+   0,
+   0,
+   812,
+   813,
+   0,
+   0,
+   0,
+   0,
+   0,
+   800,
+   801,
+   800,
+   801,
+   800,
+   801,
+   0,
+   0,
+   0,
+   786,
+   796,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   808,
+   809,
+   808,
+   809,
+   808,
+   809,
+   0,
+   0,
+   0,
+   794,
+   786,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   816,
+   817,
+   816,
+   817,
+   816,
+   817,
+   0,
+   0,
+   0,
+   810,
+   794,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   818,
+   819,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   787,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   802,
+   803,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   811,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "autoplay_bgs": false,
+ "height": 15,
+ "encounter_step": 30,
+ "width": 20,
+ "encounter_list": []
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>CAD-Vorschau</title>
+<style>html,body{margin:0;height:100%;background:#cfd6dd;overflow:hidden}#i{position:fixed;left:8px;top:8px;font:13px sans-serif;background:#fffc;padding:4px 8px}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><div id="i">lade…</div>
+<script type="module">
+// Vorschau einer GLB. Parameter: ?f=datei.glb&cam=x,y,z&at=x,y,z&hide=name1,name2&clipy=h (alles oberhalb h wegschneiden)
+// Koordinaten in glTF-Metern: x = CAD x, y = CAD z (hoch), z = -CAD y
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const q = new URLSearchParams(location.search), v = (k, d) => (q.get(k) || d).split(',').map(Number);
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setSize(innerWidth, innerHeight); document.body.appendChild(r.domElement);
+const sc = new THREE.Scene(); sc.background = new THREE.Color(0xcfd6dd);
+sc.add(new THREE.HemisphereLight(0xffffff, 0x556070, 1.6)); const dl = new THREE.DirectionalLight(0xffffff, 1.8); dl.position.set(5, 12, 8); sc.add(dl);
+const cam = new THREE.PerspectiveCamera(+q.get('fov') || 55, innerWidth / innerHeight, 0.05, 200); cam.position.set(...v('cam', '6,14,16'));
+const oc = new OrbitControls(cam, r.domElement); oc.target.set(...v('at', '-8,2,0')); oc.update();
+if (q.get('clipy')) { r.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, -1, 0), +q.get('clipy'))]; }
+const hide = (q.get('hide') || '').split(',').filter(Boolean);
+new GLTFLoader().load(q.get('f') || 'halle_full.glb', g => {
+  let n = 0;
+  g.scene.traverse(o => { if (hide.some(h => o.name.includes(h))) o.visible = false; if (o.isMesh) { n += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; o.material.side = THREE.DoubleSide; } });
+  sc.add(g.scene); document.getElementById('i').textContent = Math.round(n) + ' Dreiecke'; document.title = 'bereit';
+  (function loop() { r.render(sc, cam); requestAnimationFrame(loop); })();
+}, undefined, e => { document.getElementById('i').textContent = 'Fehler: ' + e; document.title = 'fehler'; });
+</script></body></html>

@@ -1,0 +1,111 @@
+Start position: Map [0001: T-Halle unten] (8, 11)
+Starting party: [0001: Aluxes]
+Title BGM: '055-Negative04' (vol 50, pitch 100)
+
+MAPS
+  001: T-Halle unten
+  002: T-Halle oben
+  003: T-Halle oben offen
+
+SWITCHES (named)
+  0001: initialize
+  0002: Doktorand weg
+  0003: 1E-7 erreicht
+  0004: Kryo zu früh
+  0005: V1 gegen Vorpumpen
+  0006: V1 gegen Unterdruck
+  0007: V1 gegen Überdruck
+  0008: Umwegventil zu ohne Roots
+  0009: Roots zu früh
+  0010: Kryos ohne Wasser
+  0011: Turbo alt ohne Wasser
+  0012: Turbo HiPace ohne Wasser
+  0013: Turbo Door ohne Wasser
+  0014: Schraubenpumpe ohne Wasser
+  0015: Turbo zu früh
+  0016: nicht in den Tank geschaut
+
+VARIABLES (named)
+  0001: Ventil Turbo alt
+  0002: Ventil HiPace 1
+  0003: Ventil HiPace 2
+  0004: Ventil Turbo Door 1
+  0005: Ventil Turbo Door 2
+  0006: Wasser Turbo alt vor
+  0007: Wasser Turbo alt rück
+  0008: Wasser HiPace 1 vor
+  0009: Wasser HiPace 1 rück
+  0010: Wasser HiPace 2 vor
+  0011: Wasser HiPace 2 rück
+  0012: Wasser Schraubenpumpe vor
+  0013: Wasser Schraubenpumpe rück
+  0014: Wasser Turbo Door vor
+  0015: Wasser Turbo Door rück
+  0016: Wasser Kryo vor
+  0017: Wasser Kryo rück
+  0018: Zeit
+  0019: Punkte
+  0021: Ventil Umweg
+  0022: Ventil Zwichenvakuum atm
+  0023: Ventil Zwichenvakuum Pumpe
+  0024: Ventil V1
+  0025: Ventil Rotary Belüftung
+  0026: Jumbo door
+  0027: Handräder
+  0029: Druck [Exp+7&Val]
+  0030: Druck Rotary [Exp+7&Val]
+  0031: Rotary
+  0032: Roots
+  0033: Turbo alt
+  0034: Turbo Door 1
+  0035: Turbo Door 2
+  0036: Turbo HiPace 1
+  0037: Turbo HiPace 2
+  0038: Vorpumpe Turbo alt
+  0039: Schraubenpumpe
+  0040: Vorpumpe HiPace 1
+  0041: Vorpumpe HiPace 2
+  0042: Kryos
+  0043: Zwischenvakuumpumpe
+  0045: Enddruck [Exp+7&Val]
+  0046: #Turbos
+  0047: Saugleistung
+  0048: #Vorpumpen
+  0049: Druck [Exp]
+  0050: Druck [Val]
+
+ITEMS
+  001: Potion
+  002: High Potion
+  003: Full Potion
+  004: Perfume
+  005: High Perfume
+  006: Full Perfume
+  007: Elixir
+  008: Full Elixir
+  009: Tonic
+  010: Full Tonic
+  011: Antidote
+  012: Dispel Herb
+  013: Sharp Stone
+  014: Barrier Stone
+  015: Resist Stone
+  016: Blink Stone
+  017: Seed of Life
+  018: Seed of Mana
+  019: Seed of Strength
+  020: Seed of Dextality
+  021: Seed of Agility
+  022: Seed of Intelligence
+  023: Door Key
+  024: Chest Key
+  025: Jail Key
+  026: Pouch
+  027: Letter
+  028: Feather
+  029: Map
+  030: Lithograph
+  031: Card
+  032: Fruit
+  033: --------------------
+  034: Scharbenschlüssel 10/11

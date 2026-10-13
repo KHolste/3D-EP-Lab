@@ -1,0 +1,29 @@
+{
+ "1": {
+  "__class__": "RPG::MapInfo",
+  "scroll_x": 320,
+  "name": "T-Halle unten",
+  "expanded": false,
+  "order": 3,
+  "scroll_y": 240,
+  "parent_id": 0
+ },
+ "2": {
+  "__class__": "RPG::MapInfo",
+  "scroll_x": 320,
+  "name": "T-Halle oben",
+  "expanded": true,
+  "order": 1,
+  "scroll_y": 240,
+  "parent_id": 0
+ },
+ "3": {
+  "__class__": "RPG::MapInfo",
+  "scroll_x": 320,
+  "name": "T-Halle oben offen",
+  "expanded": false,
+  "order": 2,
+  "scroll_y": 240,
+  "parent_id": 2
+ }
+}

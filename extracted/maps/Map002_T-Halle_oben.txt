@@ -1,0 +1,670 @@
+MAP 002: T-Halle oben
+Size: 20 x 15   Tileset ID: 52
+Events: 19
+
+==============================================================================
+EVENT 001: Treppe oben rechts   at (15, 4)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Player Touch   Graphic: none   Movement: Fixed
+  Commands:
+    Set Move Route: Player
+        > Turn Left
+    Transfer Player: Map [0001: T-Halle unten] (15, 4), facing down
+    Set Move Route: Player
+        > Turn Left
+    Set Move Route: Player
+        > Move Lower Left
+        > Move Lower Left
+
+==============================================================================
+EVENT 002: Treppe oben links   at (2, 4)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Player Touch   Graphic: none   Movement: Fixed
+  Commands:
+    Set Move Route: Player
+        > Turn Right
+    Transfer Player: Map [0001: T-Halle unten] (2, 4), facing retain
+    Set Move Route: Player
+        > Turn Right
+    Set Move Route: Player
+        > Move Lower Right
+        > Move Lower Right
+
+==============================================================================
+EVENT 003: Turbo alt   at (3, 7)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Eine alte doppelflutige Turbopumpe
+    If Variable [0001: Ventil Turbo alt] == 0
+      Show Choices: Ventil öffnen | nichts tun  (cancel: 0)
+      When [Ventil öffnen]
+        Variable [0001: Ventil Turbo alt] = 1
+      When [nichts tun]
+    Else
+      Show Choices: Ventil schließen | nichts tun  (cancel: 0)
+      When [Ventil schließen]
+        Variable [0001: Ventil Turbo alt] = 0
+      When [nichts tun]
+
+==============================================================================
+EVENT 004: Turbo HiPace1   at (5, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist die HiPace 1 Turbopumpe
+    If Variable [0002: Ventil HiPace 1] == 0
+      Show Choices: Ventil öffnen | nichts tun  (cancel: 0)
+      When [Ventil öffnen]
+        Variable [0002: Ventil HiPace 1] = 1
+      When [nichts tun]
+    Else
+      Show Choices: Ventil schließen | nichts tun  (cancel: 0)
+      When [Ventil schließen]
+        Variable [0002: Ventil HiPace 1] = 0
+      When [nichts tun]
+
+==============================================================================
+EVENT 005: Turbo HiPace2   at (8, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist die HiPace 2 Turbopumpe
+    If Variable [0003: Ventil HiPace 2] == 0
+      Show Choices: Ventil öffnen | nichts tun  (cancel: 0)
+      When [Ventil öffnen]
+        Variable [0003: Ventil HiPace 2] = 1
+      When [nichts tun]
+    Else
+      Show Choices: Ventil schließen | nichts tun  (cancel: 0)
+      When [Ventil schließen]
+        Variable [0003: Ventil HiPace 2] = 0
+      When [nichts tun]
+
+==============================================================================
+EVENT 006: Door Movement switch   at (16, 3)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: '179-Switch02' facing up   Movement: Fixed   Flags: direction_fix
+  Commands:
+    If Variable [0026: Jumbo door] == 0
+      Show Choices: Jumbo Tür zufahren | nichts tun  (cancel: 2)
+      When [Jumbo Tür zufahren]
+        Variable [0026: Jumbo door] = 1
+        Transfer Player: Map [0002: T-Halle oben] (16, 4), facing retain
+      When [nichts tun]
+    Else
+      Show Choices: Jumbo Tür auffahren | nichts tun  (cancel: 2)
+      When [Jumbo Tür auffahren]
+        If Variable [0029: Druck [Exp+7&Val]] < 101
+          Text: Der Motor signalisiert mit einem lauten Geräusch 
+              : seinen Unmut darüber, dass er gegen das Vakuum 
+              : arbeiten muss.
+          Text: Nichts geschieht...
+        Else
+          If Variable [0027: Handräder] > 0
+            Text: Der Motor signalisiert mit einem lauten Geräusch 
+                : seinen Unmut darüber, dass er gegen die 
+                : geschlossenen Handräder arbeiten muss.
+            Text: Nichts geschieht...
+          Else
+            Variable [0026: Jumbo door] = 0
+            Transfer Player: Map [0003: T-Halle oben offen] (16, 4), facing retain
+      When [nichts tun]
+
+==============================================================================
+EVENT 007: Wasserwand Kryos   at (17, 3)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Hier sind die Kühlwasserleitungen für die 
+        : Kryopumpen.
+    If Variable [0016: Wasser Kryo vor] == 0
+      If Variable [0017: Wasser Kryo rück] == 0
+        Show Choices: Vorlauf öffnen | Rücklauf öffnen | nichts tun  (cancel: 3)
+        When [Vorlauf öffnen]
+          Variable [0016: Wasser Kryo vor] = 1
+        When [Rücklauf öffnen]
+          Variable [0017: Wasser Kryo rück] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf öffnen | Rücklauf schließen | nichts tun  (cancel: 3)
+        When [Vorlauf öffnen]
+          Variable [0016: Wasser Kryo vor] = 1
+        When [Rücklauf schließen]
+          Variable [0017: Wasser Kryo rück] = 0
+        When [nichts tun]
+    Else
+      If Variable [0017: Wasser Kryo rück] == 0
+        Show Choices: Vorlauf schließen | Rücklauf öffnen | nichts tun  (cancel: 3)
+        When [Vorlauf schließen]
+          Variable [0016: Wasser Kryo vor] = 0
+        When [Rücklauf öffnen]
+          Variable [0017: Wasser Kryo rück] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf schließen | Rücklauf schließen | nichts tun  (cancel: 3)
+        When [Vorlauf schließen]
+          Variable [0016: Wasser Kryo vor] = 0
+        When [Rücklauf schließen]
+          Variable [0017: Wasser Kryo rück] = 0
+        When [nichts tun]
+
+==============================================================================
+EVENT 009: Turbo Door 1   at (13, 7)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Eine große Turbopumpe von Pfeiffer Vacuum
+    Show Choices: Ventile steuern | Turbo steuern | nichts tun  (cancel: 3)
+    When [Ventile steuern]
+      If Variable [0004: Ventil Turbo Door 1] == 0
+        Show Choices: Ventil öffnen | nichts tun  (cancel: 2)
+        When [Ventil öffnen]
+          Variable [0004: Ventil Turbo Door 1] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Ventil schließen | nichts tun  (cancel: 2)
+        When [Ventil schließen]
+          Variable [0004: Ventil Turbo Door 1] = 0
+        When [nichts tun]
+    When [Turbo steuern]
+      If Variable [0039: Schraubenpumpe] == 1
+        If Variable [0034: Turbo Door 1] == 0
+          Show Choices: Turbopumpe anschalten | nichts tun  (cancel: 2)
+          When [Turbopumpe anschalten]
+            If Variable [0014: Wasser Turbo Door vor] == 1
+              If Variable [0015: Wasser Turbo Door rück] == 1
+                Variable [0034: Turbo Door 1] = 1
+                If Variable [0029: Druck [Exp+7&Val]] > 71
+                  Switch [0015: Turbo zu früh] = ON
+                Else
+              Else
+                Text: Die Pumpe geht nicht an.
+                Switch [0013: Turbo Door ohne Wasser] = ON
+            Else
+              Text: Die Pumpe geht nicht an.
+              Switch [0013: Turbo Door ohne Wasser] = ON
+          When [nichts tun]
+        Else
+          Show Choices: Turbopumpe ausschalten | nichts tun  (cancel: 2)
+          When [Turbopumpe ausschalten]
+            Variable [0034: Turbo Door 1] = 0
+          When [nichts tun]
+      Else
+        Text: Die Steuerung der Turbo ist aus.
+    When [nichts tun]
+
+==============================================================================
+EVENT 010: Steuerung alte Turbo   at (3, 6)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das sind die MFCs für den Jumbo.
+        : Darunter ist die Vorpumpe der alten Turbopumpe
+        : und einige Schalter zum steuern.
+    Show Choices: Vorpumpe steuern | Turbo steuern | nichts tun  (cancel: 3)
+    When [Vorpumpe steuern]
+      If Variable [0038: Vorpumpe Turbo alt] == 0
+        Show Choices: Vorpumpe anschalten | nichts tun  (cancel: 2)
+        When [Vorpumpe anschalten]
+          Variable [0038: Vorpumpe Turbo alt] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorpumpe ausschalten | nichts tun  (cancel: 2)
+        When [Vorpumpe ausschalten]
+          Variable [0038: Vorpumpe Turbo alt] = 0
+        When [nichts tun]
+    When [Turbo steuern]
+      If Variable [0033: Turbo alt] == 0
+        Show Choices: Turbopumpe anschalten | nichts tun  (cancel: 2)
+        When [Turbopumpe anschalten]
+          If Variable [0006: Wasser Turbo alt vor] == 1
+            If Variable [0007: Wasser Turbo alt rück] == 1
+              Variable [0033: Turbo alt] = 1
+              If Variable [0029: Druck [Exp+7&Val]] > 71
+                Switch [0015: Turbo zu früh] = ON
+              Else
+            Else
+              Text: Die Pumpe geht nicht an.
+              Switch [0011: Turbo alt ohne Wasser] = ON
+          Else
+            Text: Die Pumpe geht nicht an.
+            Switch [0011: Turbo alt ohne Wasser] = ON
+        When [nichts tun]
+      Else
+        Show Choices: Turbopumpe ausschalten | nichts tun  (cancel: 2)
+        When [Turbopumpe ausschalten]
+          Variable [0033: Turbo alt] = 0
+        When [nichts tun]
+    When [nichts tun]
+
+==============================================================================
+EVENT 011: Steuerung HiPace1   at (9, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist die Steuerung der HiPace 1
+    Show Choices: Vorpumpe steuern | Turbo steuern | nichts tun  (cancel: 3)
+    When [Vorpumpe steuern]
+      If Variable [0040: Vorpumpe HiPace 1] == 0
+        Show Choices: Vorpumpe anschalten | nichts tun  (cancel: 2)
+        When [Vorpumpe anschalten]
+          Variable [0040: Vorpumpe HiPace 1] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorpumpe ausschalten | nichts tun  (cancel: 2)
+        When [Vorpumpe ausschalten]
+          Variable [0040: Vorpumpe HiPace 1] = 0
+        When [nichts tun]
+    When [Turbo steuern]
+      If Variable [0036: Turbo HiPace 1] == 0
+        Show Choices: Turbopumpe anschalten | nichts tun  (cancel: 2)
+        When [Turbopumpe anschalten]
+          If Variable [0008: Wasser HiPace 1 vor] == 1
+            If Variable [0009: Wasser HiPace 1 rück] == 1
+              Variable [0036: Turbo HiPace 1] = 1
+              If Variable [0029: Druck [Exp+7&Val]] > 71
+                Switch [0015: Turbo zu früh] = ON
+              Else
+            Else
+              Text: Die Pumpe geht nicht an.
+              Switch [0012: Turbo HiPace ohne Wasser] = ON
+          Else
+            Text: Die Pumpe geht nicht an.
+            Switch [0012: Turbo HiPace ohne Wasser] = ON
+        When [nichts tun]
+      Else
+        Show Choices: Turbopumpe ausschalten | nichts tun  (cancel: 2)
+        When [Turbopumpe ausschalten]
+          Variable [0036: Turbo HiPace 1] = 0
+        When [nichts tun]
+    When [nichts tun]
+
+==============================================================================
+EVENT 012: Steuerung HiPace2   at (10, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist die Steuerung der HiPace 2
+    Show Choices: Vorpumpe steuern | Turbo steuern | nichts tun  (cancel: 3)
+    When [Vorpumpe steuern]
+      If Variable [0041: Vorpumpe HiPace 2] == 0
+        Show Choices: Vorpumpe anschalten | nichts tun  (cancel: 2)
+        When [Vorpumpe anschalten]
+          Variable [0041: Vorpumpe HiPace 2] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorpumpe ausschalten | nichts tun  (cancel: 2)
+        When [Vorpumpe ausschalten]
+          Variable [0041: Vorpumpe HiPace 2] = 0
+        When [nichts tun]
+    When [Turbo steuern]
+      If Variable [0037: Turbo HiPace 2] == 0
+        Show Choices: Turbopumpe anschalten | nichts tun  (cancel: 2)
+        When [Turbopumpe anschalten]
+          If Variable [0010: Wasser HiPace 2 vor] == 1
+            If Variable [0011: Wasser HiPace 2 rück] == 1
+              Variable [0037: Turbo HiPace 2] = 1
+              If Variable [0029: Druck [Exp+7&Val]] > 71
+                Switch [0015: Turbo zu früh] = ON
+              Else
+            Else
+              Text: Die Pumpe geht nicht an.
+              Switch [0012: Turbo HiPace ohne Wasser] = ON
+          Else
+            Text: Die Pumpe geht nicht an.
+            Switch [0012: Turbo HiPace ohne Wasser] = ON
+        When [nichts tun]
+      Else
+        Show Choices: Turbopumpe ausschalten | nichts tun  (cancel: 2)
+        When [Turbopumpe ausschalten]
+          Variable [0037: Turbo HiPace 2] = 0
+        When [nichts tun]
+    When [nichts tun]
+
+==============================================================================
+EVENT 013: Handrad oben   at (11, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Show Choices: Handrad schließen | nichts tun  (cancel: 2)
+    When [Handrad schließen]
+      If Variable [0026: Jumbo door] == 0
+        Text: Du versuchst die Handräder zu schließen, um die Tür 
+            : zu verriegeln...
+        Text: Dir fällt auf, dass die Tür noch offen ist. Beschämt 
+            : trittst du von den Handrädern zurück.
+      Else
+        Variable [0027: Handräder] += 1
+        Self Switch A = ON
+    When [nichts tun]
+
+--- Page 2 ---
+  Conditions: Self Switch A is ON
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Show Choices: Handrad öffnen | nichts tun  (cancel: 2)
+    When [Handrad öffnen]
+      Variable [0027: Handräder] -= 1
+      Self Switch A = OFF
+    When [nichts tun]
+
+==============================================================================
+EVENT 014: Handrad unten   at (11, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Show Choices: Handrad schließen | nichts tun  (cancel: 2)
+    When [Handrad schließen]
+      If Variable [0026: Jumbo door] == 0
+        Text: Du versuchst die Handräder zu schließen, um die Tür 
+            : zu verriegeln...
+        Text: Dir fällt auf, dass die Tür noch offen ist. Beschämt 
+            : trittst du von den Handrädern zurück.
+      Else
+        Variable [0027: Handräder] += 1
+        Self Switch A = ON
+    When [nichts tun]
+
+--- Page 2 ---
+  Conditions: Self Switch A is ON
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Show Choices: Handrad öffnen | nichts tun  (cancel: 2)
+    When [Handrad öffnen]
+      Variable [0027: Handräder] -= 1
+      Self Switch A = OFF
+    When [nichts tun]
+
+==============================================================================
+EVENT 015: Steuerung Schraubenpumpe   at (13, 9)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist die Schraubenpumpe, die als Vorpumpe der 
+        : Turbos an der Tür dient. Darunter ist ein 
+        : Stromschaltkasten.
+    Show Choices: Vorpumpe anschalten | nichts tun  (cancel: 2)
+    When [Vorpumpe anschalten]
+      If Variable [0012: Wasser Schraubenpumpe vor] == 1
+        If Variable [0013: Wasser Schraubenpumpe rück] == 1
+          Variable [0039: Schraubenpumpe] = 1
+          Self Switch A = ON
+        Else
+          Text: Die Pumpe läuft kurz an und geht dann wieder aus.
+          Switch [0014: Schraubenpumpe ohne Wasser] = ON
+      Else
+        Text: Die Pumpe läuft kurz an und geht dann wieder aus.
+        Switch [0014: Schraubenpumpe ohne Wasser] = ON
+    When [nichts tun]
+
+--- Page 2 ---
+  Conditions: Self Switch A is ON
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Show Choices: Vorpumpe ausschalten | nichts tun  (cancel: 2)
+    When [Vorpumpe ausschalten]
+      Variable [0039: Schraubenpumpe] = 0
+      Self Switch A = OFF
+      Variable [0034: Turbo Door 1] = 0
+      Variable [0035: Turbo Door 2] = 0
+    When [nichts tun]
+
+==============================================================================
+EVENT 016: Wasserwand oben vor   at (7, 3)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Hier sind die Vorläufe der Wasserleitungen für 
+        : diverse Pumpen, den RFG und den Messarm.
+    Show Choices: HiPace 1 Vorlauf | HiPace 2 Vorlauf | Turbos Door Vorlauf | Schraubenpumpe Vorlauf  (cancel: 5)
+    When [HiPace 1 Vorlauf]
+      If Variable [0008: Wasser HiPace 1 vor] == 0
+        Show Choices: Vorlauf öffnen | nichts tun  (cancel: 2)
+        When [Vorlauf öffnen]
+          Variable [0008: Wasser HiPace 1 vor] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf schließen | nichts tun  (cancel: 2)
+        When [Vorlauf schließen]
+          Variable [0008: Wasser HiPace 1 vor] = 0
+        When [nichts tun]
+    When [HiPace 2 Vorlauf]
+      If Variable [0010: Wasser HiPace 2 vor] == 0
+        Show Choices: Vorlauf öffnen | nichts tun  (cancel: 2)
+        When [Vorlauf öffnen]
+          Variable [0010: Wasser HiPace 2 vor] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf schließen | nichts tun  (cancel: 2)
+        When [Vorlauf schließen]
+          Variable [0010: Wasser HiPace 2 vor] = 0
+        When [nichts tun]
+    When [Turbos Door Vorlauf]
+      If Variable [0014: Wasser Turbo Door vor] == 0
+        Show Choices: Vorlauf öffnen | nichts tun  (cancel: 2)
+        When [Vorlauf öffnen]
+          Variable [0014: Wasser Turbo Door vor] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf schließen | nichts tun  (cancel: 2)
+        When [Vorlauf schließen]
+          Variable [0014: Wasser Turbo Door vor] = 0
+        When [nichts tun]
+    When [Schraubenpumpe Vorlauf]
+      If Variable [0012: Wasser Schraubenpumpe vor] == 0
+        Show Choices: Vorlauf öffnen | nichts tun  (cancel: 2)
+        When [Vorlauf öffnen]
+          Variable [0012: Wasser Schraubenpumpe vor] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Vorlauf schließen | nichts tun  (cancel: 2)
+        When [Vorlauf schließen]
+          Variable [0012: Wasser Schraubenpumpe vor] = 0
+        When [nichts tun]
+    When Cancel
+
+==============================================================================
+EVENT 017: Wasserwand oben rück   at (8, 3)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Hier sind die Rückläufe der Wasserleitungen für 
+        : diverse Pumpen, den RFG und den Messarm.
+    Show Choices: HiPace 1 Rücklauf | HiPace 2 Rücklauf | Turbos Door Rücklauf | Schraubenpumpe Rücklauf  (cancel: 5)
+    When [HiPace 1 Rücklauf]
+      If Variable [0009: Wasser HiPace 1 rück] == 0
+        Show Choices: Rücklauf öffnen | nichts tun  (cancel: 2)
+        When [Rücklauf öffnen]
+          Variable [0009: Wasser HiPace 1 rück] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Rücklauf schließen | nichts tun  (cancel: 2)
+        When [Rücklauf schließen]
+          Variable [0009: Wasser HiPace 1 rück] = 0
+        When [nichts tun]
+    When [HiPace 2 Rücklauf]
+      If Variable [0011: Wasser HiPace 2 rück] == 0
+        Show Choices: Rücklauf öffnen | nichts tun  (cancel: 2)
+        When [Rücklauf öffnen]
+          Variable [0011: Wasser HiPace 2 rück] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Rücklauf schließen | nichts tun  (cancel: 2)
+        When [Rücklauf schließen]
+          Variable [0011: Wasser HiPace 2 rück] = 0
+        When [nichts tun]
+    When [Turbos Door Rücklauf]
+      If Variable [0015: Wasser Turbo Door rück] == 0
+        Show Choices: Rücklauf öffnen | nichts tun  (cancel: 2)
+        When [Rücklauf öffnen]
+          Variable [0015: Wasser Turbo Door rück] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Rücklauf schließen | nichts tun  (cancel: 2)
+        When [Rücklauf schließen]
+          Variable [0015: Wasser Turbo Door rück] = 0
+        When [nichts tun]
+    When [Schraubenpumpe Rücklauf]
+      If Variable [0013: Wasser Schraubenpumpe rück] == 0
+        Show Choices: Rücklauf öffnen | nichts tun  (cancel: 2)
+        When [Rücklauf öffnen]
+          Variable [0013: Wasser Schraubenpumpe rück] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Rücklauf schließen | nichts tun  (cancel: 2)
+        When [Rücklauf schließen]
+          Variable [0013: Wasser Schraubenpumpe rück] = 0
+        When [nichts tun]
+    When Cancel
+
+==============================================================================
+EVENT 019: Ventile Zwischenvakuum   at (6, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist das Ventil, um das Zwischenvakuum zu 
+        : belüften.
+    If Variable [0022: Ventil Zwichenvakuum atm] == 0
+      Show Choices: Ventil öffnen | nichts tun  (cancel: 0)
+      When [Ventil öffnen]
+        Variable [0022: Ventil Zwichenvakuum atm] = 1
+      When [nichts tun]
+    Else
+      Show Choices: Ventil schließen | nichts tun  (cancel: 0)
+      When [Ventil schließen]
+        Variable [0022: Ventil Zwichenvakuum atm] = 0
+      When [nichts tun]
+
+==============================================================================
+EVENT 020: Steuerung Zwischenvakuum   at (7, 5)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Das ist die Pumpe für das Zwischenvakuum.
+    Show Choices: Pumpe steuern | Ventil steuern | nichts tun  (cancel: 3)
+    When [Pumpe steuern]
+      If Variable [0043: Zwischenvakuumpumpe] == 0
+        Show Choices: Pumpe anschalten | nichts tun  (cancel: 2)
+        When [Pumpe anschalten]
+          Variable [0043: Zwischenvakuumpumpe] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Pumpe ausschalten | nichts tun  (cancel: 2)
+        When [Pumpe ausschalten]
+          Variable [0043: Zwischenvakuumpumpe] = 0
+        When [nichts tun]
+    When [Ventil steuern]
+      If Variable [0023: Ventil Zwichenvakuum Pumpe] == 0
+        Show Choices: Ventil öffnen | nichts tun  (cancel: 2)
+        When [Ventil öffnen]
+          Variable [0023: Ventil Zwichenvakuum Pumpe] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Ventil schließen | nichts tun  (cancel: 2)
+        When [Ventil schließen]
+          Variable [0023: Ventil Zwichenvakuum Pumpe] = 0
+        When [nichts tun]
+    When [nichts tun]
+
+==============================================================================
+EVENT 021: Turbo Door 2   at (13, 6)
+==============================================================================
+
+--- Page 1 ---
+  Conditions: none
+  Trigger: Action Button   Graphic: none   Movement: Fixed
+  Commands:
+    Text: Eine große Turbopumpe von Pfeiffer Vacuum
+    Show Choices: Ventile steuern | Turbo steuern | nichts tun  (cancel: 3)
+    When [Ventile steuern]
+      If Variable [0005: Ventil Turbo Door 2] == 0
+        Show Choices: Ventil öffnen | nichts tun  (cancel: 2)
+        When [Ventil öffnen]
+          Variable [0005: Ventil Turbo Door 2] = 1
+        When [nichts tun]
+      Else
+        Show Choices: Ventil schließen | nichts tun  (cancel: 2)
+        When [Ventil schließen]
+          Variable [0005: Ventil Turbo Door 2] = 0
+        When [nichts tun]
+    When [Turbo steuern]
+      If Variable [0039: Schraubenpumpe] == 1
+        If Variable [0035: Turbo Door 2] == 0
+          Show Choices: Turbopumpe anschalten | nichts tun  (cancel: 2)
+          When [Turbopumpe anschalten]
+            If Variable [0014: Wasser Turbo Door vor] == 1
+              If Variable [0015: Wasser Turbo Door rück] == 1
+                Variable [0035: Turbo Door 2] = 1
+                If Variable [0029: Druck [Exp+7&Val]] > 71
+                  Switch [0015: Turbo zu früh] = ON
+                Else
+              Else
+                Text: Die Pumpe geht nicht an.
+                Switch [0013: Turbo Door ohne Wasser] = ON
+            Else
+              Text: Die Pumpe geht nicht an.
+              Switch [0013: Turbo Door ohne Wasser] = ON
+          When [nichts tun]
+        Else
+          Show Choices: Turbopumpe ausschalten | nichts tun  (cancel: 2)
+          When [Turbopumpe ausschalten]
+            Variable [0035: Turbo Door 2] = 0
+          When [nichts tun]
+      Else
+        Text: Die Steuerung der Turbo ist aus.
+    When [nichts tun]

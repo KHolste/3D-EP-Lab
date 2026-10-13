@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Jumbo-Pumpdown 3D – Prototyp</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:"Segoe UI",Arial,sans-serif;color:#eef}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .hud{position:fixed;pointer-events:none;user-select:none}
+  .box{background:rgba(10,16,24,.72);border:1px solid rgba(140,180,220,.35);border-radius:8px;padding:10px 14px}
+  #gauge{left:14px;top:14px;min-width:230px}
+  #gauge .big{font:600 26px Consolas,monospace;color:#5dffa0}
+  #gauge .row{display:flex;justify-content:space-between;gap:18px;font-size:13px;color:#b9c7d6;margin-top:3px}
+  #gauge .row b{color:#fff;font-family:Consolas,monospace}
+  #keys{right:14px;top:14px;font-size:12px;color:#b9c7d6;line-height:1.6}
+  #keys kbd{background:#2a3644;border-radius:3px;padding:1px 5px;color:#fff;font-family:inherit}
+  #chartbox{right:14px;bottom:14px;padding:6px}
+  #cross{left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#fff;box-shadow:0 0 3px #000}
+  #prompt{left:50%;top:56%;transform:translateX(-50%);font-size:16px;white-space:nowrap;display:none}
+  #prompt kbd{background:#f2c200;color:#111;border-radius:4px;padding:1px 7px;font-weight:700;margin-right:8px}
+  #toasts{left:50%;bottom:22px;transform:translateX(-50%);width:min(640px,80vw);display:flex;flex-direction:column;gap:6px}
+  .toast{background:rgba(10,16,24,.85);border-left:4px solid #f2c200;border-radius:6px;padding:8px 12px;font-size:15px;line-height:1.35;animation:in .25s}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}}
+  .panel{position:fixed;top:50%;transform:translateY(-50%);max-height:86vh;overflow:auto;display:none;font-size:13.5px;line-height:1.45;pointer-events:none}
+  #help{left:14px;width:min(430px,44vw)} #help ol{margin:6px 0 0;padding-left:22px} #help h3,#status h3{margin:0 0 4px;font-size:15px;color:#f2c200}
+  #status{right:14px;width:300px} #status table{border-collapse:collapse;width:100%} #status td{padding:1px 4px} #status td:last-child{text-align:right;font-family:Consolas,monospace}
+  .on{color:#5dffa0}.off{color:#8794a3}
+  #overlay{position:fixed;inset:0;background:rgba(5,8,12,.78);display:flex;align-items:center;justify-content:center;z-index:10}
+  #card{background:#141c26;border:1px solid #3b5673;border-radius:12px;padding:26px 32px;max-width:640px;max-height:86vh;overflow:auto;line-height:1.5}
+  #card h1{margin:0 0 10px;font-size:26px;color:#f2c200} #card h2{margin:0 0 10px;color:#f2c200}
+  #card button{margin-top:16px;font:600 16px "Segoe UI",Arial;padding:10px 22px;border:0;border-radius:6px;background:#f2c200;color:#111;cursor:pointer}
+  #card table{border-collapse:collapse;width:100%;margin-top:8px} #card td{padding:3px 6px;border-bottom:1px solid #26384b;vertical-align:top} #card td:last-child{text-align:right;white-space:nowrap;font-family:Consolas,monospace}
+  #card .small{font-size:13px;color:#9db0c4}
+  #err{position:fixed;left:0;right:0;bottom:0;background:#700;color:#fff;font:13px Consolas,monospace;padding:6px 10px;display:none;z-index:20;white-space:pre-wrap}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="gauge" class="hud box">
+  <div class="big" id="gP">1.0E+3 mbar</div>
+  <div class="row"><span>Rotary-Leitung</span><b id="gL"></b></div>
+  <div class="row"><span>Zeit</span><b id="gT"></b></div>
+  <div class="row"><span>Zeitraffer</span><b id="gS">×1</b></div>
+</div>
+<div id="keys" class="hud box">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> gehen · <kbd>Shift</kbd> laufen<br>
+  <kbd>←</kbd><kbd>→</kbd> drehen · <kbd>↑</kbd><kbd>↓</kbd> hoch/runter sehen<br>
+  <kbd>E</kbd> / <kbd>Enter</kbd> bedienen<br>
+  <kbd>M</kbd> Maus an/aus: <b id="kMode"></b><br>
+  <kbd>H</kbd> Anleitung · <kbd>Tab</kbd> Übersicht<br>
+  <kbd>T</kbd> Zeitraffer · <kbd>Esc</kbd> Pause
+</div>
+<div id="chartbox" class="hud box"><canvas id="chart" width="300" height="160"></canvas></div>
+<div id="cross" class="hud"></div>
+<div id="prompt" class="hud box"></div>
+<div id="toasts" class="hud"></div>
+<div id="help" class="panel box"></div>
+<div id="status" class="panel box"></div>
+<div id="overlay"><div id="card"></div></div>
+<div id="err"></div>
+<pre id="testout" style="display:none"></pre>
+<script>
+  window.addEventListener('error',e=>{const d=document.getElementById('err');d.style.display='block';d.textContent+=(e.message||e)+' @'+(e.lineno||'')+'\n';});
+  setTimeout(()=>{if(!window.__loaded){const d=document.getElementById('err');d.style.display='block';d.textContent+='Three.js konnte nicht geladen werden – für diesen Prototyp ist eine Internetverbindung nötig (CDN).\n';}},8000);
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const Q = new URLSearchParams(location.search);
+const $ = id => document.getElementById(id);
+
+/* =====================================================================
+   1) SIMULATION  (Logik aus dem RPG-Maker-Original, Druck als kontinuierliches Modell)
+   ===================================================================== */
+const BR = [ // Turbopumpen-Zweige
+  {id:'alt', name:'alte Turbo',  turbo:'tAlt', fore:'fAlt',  water:['altV','altR'],   wflag:'wAlt'},
+  {id:'hp1', name:'HiPace 1',    turbo:'tHp1', fore:'fHp1',  water:['hp1V','hp1R'],   wflag:'wHp'},
+  {id:'hp2', name:'HiPace 2',    turbo:'tHp2', fore:'fHp2',  water:['hp2V','hp2R'],   wflag:'wHp'},
+  {id:'d1',  name:'Tür-Turbo 1', turbo:'tD1',  fore:'screw', water:['doorV','doorR'], wflag:'wDoor'},
+  {id:'d2',  name:'Tür-Turbo 2', turbo:'tD2',  fore:'screw', water:['doorV','doorR'], wflag:'wDoor'},
+];
+const PEN = { // Fehler -> [Punktabzug, Text]
+  notLooked:[300,'Und vielleicht das Wichtigste: Du hast nicht nachgeschaut, ob der Tank leer ist. Immerhin ist nichts Schlimmeres passiert.'],
+  v1Fore:[80,'Du hast V1 gegen Unterdruck geschaltet, während die Vorpumpen noch liefen.'],
+  v1Under:[40,'Du hast V1 gegen Unterdruck geschaltet.'],
+  v1Over:[20,'Du hast V1 gegen Überdruck geschaltet.'],
+  rootsEarly:[30,'Du hast die Roots zu früh gestartet.'],
+  turboEarly:[30,'Du hast die Turbos zu früh gestartet.'],
+  kryoEarly:[30,'Du hast die Kryos zu früh gestartet.'],
+  umweg:[10,'Das Umwegventil der Rotary hättest du beim Abpumpen schon öffnen können.'],
+  wKryo:[30,'Kein Wasser für die Kryos.'],
+  wAlt:[10,'Kein Wasser für die alte Turbo.'],
+  wHp:[20,'Kein Wasser für die HiPace-Turbos.'],
+  wDoor:[10,'Kein Wasser für die Turbos an der Tür.'],
+  wScrew:[25,'Kein Wasser für die Schraubenpumpe.'],
+};
+const WATER = {altV:'Vorlauf alte Turbo',altR:'Rücklauf alte Turbo',hp1V:'Vorlauf HiPace 1',hp1R:'Rücklauf HiPace 1',hp2V:'Vorlauf HiPace 2',hp2R:'Rücklauf HiPace 2',
+  doorV:'Vorlauf Tür-Turbos',doorR:'Rücklauf Tür-Turbos',screwV:'Vorlauf Schraubenpumpe',screwR:'Rücklauf Schraubenpumpe',kryoV:'Vorlauf Kryopumpen',kryoR:'Rücklauf Kryopumpen'};
+const VALVE = {V1:'Ventil V1',Vu:'Umwegventil Vu',vent:'Belüftungsventil Rotary-Leitung',alt:'Ventil alte Turbo',hp1:'Ventil HiPace 1',hp2:'Ventil HiPace 2',
+  d1:'Ventil Tür-Turbo 1',d2:'Ventil Tür-Turbo 2',zvAtm:'Belüftungsventil Zwischenvakuum',zvPump:'Ventil zur Zwischenvakuumpumpe'};
+const PUMP = {rotary:'Rotary',roots:'Roots',kryo:'Kryopumpen',tAlt:'alte Turbo',tHp1:'Turbo HiPace 1',tHp2:'Turbo HiPace 2',tD1:'Tür-Turbo 1',tD2:'Tür-Turbo 2',
+  fAlt:'Vorpumpe alte Turbo',fHp1:'Vorpumpe HiPace 1',fHp2:'Vorpumpe HiPace 2',screw:'Schraubenpumpe',zv:'Zwischenvakuumpumpe'};
+const zero = o => Object.fromEntries(Object.keys(o).map(k=>[k,0]));
+const fresh = () => ({door:0, hand:[0,0], dokGone:false, reached:false, over:false, v:zero(VALVE), w:zero(WATER), on:zero(PUMP),
+  p:1000, pL:0.1, t:0, flags:{}, hist:[]});
+let S = fresh();
+const LN10 = Math.LN10;
+const oc = x => x ? 'schließen' : 'öffnen', io = x => x ? 'ausschalten' : 'einschalten';
+const flag = k => { S.flags[k] = 1; };
+const nTurbo = () => BR.filter(b => S.v[b.id] && S.on[b.turbo]).length;
+const zvOK = () => S.v.zvPump && !S.v.zvAtm && S.on.zv;
+
+// dt in simulierten Minuten. Jeder Pumpweg zieht mit Rate k (Dekaden/min) auf seinen Enddruck f.
+function step(dt){
+  if (S.over) return;
+  S.t += dt;
+  if (!S.door) S.p = 1000;
+  else {
+    const zf = zvOK() ? 1 : 10;               // ohne Zwischenvakuum an der Türdichtung: Enddruck 10x schlechter
+    let K = 0, KF = 0; const add = (k,f) => { K += k; KF += k*f; };
+    if (S.v.V1) {
+      if (S.v.vent) add(3, 1000);
+      else if (S.on.rotary) { const r = S.on.roots && !S.v.Vu; add(r ? 0.40 : (S.v.Vu ? 0.12 : 0.04), (r ? 1e-2 : 0.5)*zf); }
+    }
+    for (const b of BR) {
+      if (!S.v[b.id]) continue;
+      const fl = 5e-2*zf;
+      if (S.on[b.fore] && S.on[b.turbo] && S.p < 5) { if (S.p > 2e-6*zf) add(0.05, 2e-6*zf); }
+      else if (S.on[b.fore]) add(0.02, fl);        // nur Vorpumpe: grob mitpumpen bzw. Rückströmung
+      else if (S.p < fl) add(0.005, fl);           // offenes Ventil an stehendem Zweig
+    }
+    if (S.on.kryo && S.p > 8e-8*zf) add(0.15, 8e-8*zf);
+    if (K > 0) { const F = KF/K; S.p = F + (S.p - F)*Math.exp(-K*LN10*dt); }
+    if (S.hand[0] + S.hand[1] < 2 && S.p >= 900) S.p = 1000;   // ohne angezogene Handräder dichtet die Tür nicht an
+  }
+  if (S.v.V1) S.pL = S.p;
+  else if (S.v.vent) S.pL = 1000;
+  else if (S.on.rotary && S.pL > 1e-2) S.pL = 1e-2 + (S.pL - 1e-2)*Math.exp(-0.8*LN10*dt);
+
+  if (S.door && S.v.V1 && S.v.vent && S.p < 900) { sfx('bang'); return gameOver('Ein lauter Knall lässt dich zusammenfahren. Deine Ohren bluten regelrecht unter der Kakophonie der sterbenden Pumpen.'); }
+  if (S.door && !S.dokGone && S.p < 990) return gameOver('Das Klopfen im Tank ignorierend pumpst du die Kammer ab. Als die Pumpe anzieht, hörst du einen erstickten Schrei. In deiner Panik schaffst du es nicht, die Kammer rechtzeitig zu belüften. Als du die Tür endlich öffnest, blicken dich die toten Augen eines Doktoranden anklagend an …');
+  if (S.p <= 1e-7 && !S.reached) { S.reached = true; msg('Udo: „Der Druck ist unten, du hast es geschafft." – Sprich unten am Steuerpult mit Udo, wenn du an alles gedacht hast.'); }
+  if (!S.hist.length || S.t - S.hist[S.hist.length-1][0] >= 0.2) { S.hist.push([S.t, S.p]); if (S.hist.length > 4000) S.hist = S.hist.filter((_,i)=>i%2===0); }
+}
+
+/* ---- Aktionen (jede bedienbare Stelle in der Halle) ---- */
+const ACT = {};
+const def = (id,label,fn) => { ACT[id] = {label, do:fn}; };
+for (const k of ['Vu','zvAtm','zvPump']) def(k, () => `${VALVE[k]} ${oc(S.v[k])}`, () => { S.v[k] ^= 1; });
+for (const b of BR) def('v_'+b.id, () => `${VALVE[b.id]} ${oc(S.v[b.id])}`, () => { S.v[b.id] ^= 1; });
+for (const k in WATER) def('w_'+k, () => `${WATER[k]} ${oc(S.w[k])}`, () => { S.w[k] ^= 1; });
+for (const k of ['fAlt','fHp1','fHp2','zv']) def(k, () => `${PUMP[k]} ${io(S.on[k])}`, () => { S.on[k] ^= 1; });
+for (const b of BR) def('t_'+b.id, () => `${PUMP[b.turbo]} ${io(S.on[b.turbo])}`, () => {
+  if (S.on[b.turbo]) { S.on[b.turbo] = 0; return; }
+  if (b.fore === 'screw' && !S.on.screw) return msg('Die Steuerung der Turbo ist aus.');
+  if (!S.w[b.water[0]] || !S.w[b.water[1]]) { flag(b.wflag); return msg('Die Pumpe geht nicht an.'); }
+  S.on[b.turbo] = 1; msg(`Die ${b.name} läuft hoch.`);
+  if (S.p > 1) flag('turboEarly');
+});
+def('V1', () => `${VALVE.V1} ${oc(S.v.V1)}`, () => {
+  if (S.v.V1) { S.v.V1 = 0; return msg('Ein lautes Pfeifen ertönt – V1 fährt zu.'); }
+  const p = S.p, pl = S.pL; S.v.V1 = 1;
+  if (pl < p/3) {                       // evakuierte Leitung gegen vollen Tank
+    sfx('bang'); shake(0.5); msg('Ein lauter Knall lässt dich zusammenfahren.');
+    if (S.on.rotary || S.on.roots) { flag('v1Fore'); msg('Die Vorpumpen heulen kurz auf, um sich bei dir zu beschweren.'); } else flag('v1Under');
+  } else if (pl > p*3) {                // belüftete Leitung gegen evakuierten Tank
+    sfx('bang'); shake(0.5);
+    if (nTurbo() > 0) return gameOver('Ein lauter Knall lässt dich zusammenfahren. Deine Ohren bluten regelrecht unter der Kakophonie der sterbenden Pumpen.');
+    msg('Ein sehr lautes Zischen lässt dich zusammenzucken.'); flag('v1Over'); S.p = Math.min(1000, S.p + pl*0.01);
+  } else msg('Ein lautes Pfeifen ertönt – V1 fährt auf.');
+});
+def('vent', () => `${VALVE.vent} ${oc(S.v.vent)}`, () => {
+  S.v.vent ^= 1;
+  if (S.v.vent) { sfx('hiss'); if (!S.v.V1) { S.pL = 1000; msg('Zischend strömt Luft in die Leitung zur Rotary.'); } }
+});
+def('rotary', () => `Rotary ${io(S.on.rotary)}`, () => {
+  S.on.rotary ^= 1;
+  if (S.on.rotary) { msg('Mit leisem Brummen setzt sich die Pumpe in Bewegung.'); if (!S.v.Vu) flag('umweg'); }
+});
+def('roots', () => `Roots ${io(S.on.roots)}`, () => {
+  if (S.on.roots) { S.on.roots = 0; return; }
+  if (!S.on.rotary) return msg('Ohne laufende Rotary lässt sich die Roots nicht starten.');
+  if ((S.v.V1 ? S.p : S.pL) > 30) {
+    shake(2.5); sfx('rumble'); flag('rootsEarly');
+    return msg('Mit lautem Grollen protestiert die Rootspumpe. Der Boden vibriert … nach einem gefühlt ewigen Moment schaltet sich die Pumpe wieder ab.');
+  }
+  S.on.roots = 1; msg('Die Roots läuft an.');
+});
+def('kryo', () => `Kryopumpen ${io(S.on.kryo)}`, () => {
+  if (S.on.kryo) { S.on.kryo = 0; return msg('Das markante Geräusch der Kryopumpen verklingt und du kannst dich wieder selbst denken hören.'); }
+  msg('Mit einem unangenehmen 2-Hz-Pochen laufen die Kryopumpen an.');
+  if (!S.w.kryoV || !S.w.kryoR) { flag('wKryo'); return msg('Nach kurzer Zeit verklingt das Geräusch der Kryopumpen wieder.'); }
+  S.on.kryo = 1; if (S.p > 1e-5) flag('kryoEarly');
+});
+def('screw', () => `Schraubenpumpe ${io(S.on.screw)}`, () => {
+  if (S.on.screw) { S.on.screw = 0; S.on.tD1 = S.on.tD2 = 0; return; }
+  if (!S.w.screwV || !S.w.screwR) { flag('wScrew'); return msg('Die Pumpe läuft kurz an und geht dann wieder aus.'); }
+  S.on.screw = 1; msg('Die Schraubenpumpe läuft.');
+});
+for (const i of [0,1]) def('hand'+i, () => `Handrad ${i ? 'unten' : 'oben'} ${oc(S.hand[i])}`, () => {
+  if (!S.hand[i] && !S.door) return msg('Du versuchst die Handräder zu schließen, um die Tür zu verriegeln … Dir fällt auf, dass die Tür noch offen ist. Beschämt trittst du zurück.');
+  S.hand[i] ^= 1;
+});
+def('door', () => `Jumbo-Tür ${S.door ? 'auffahren' : 'zufahren'}`, () => {
+  if (!S.door) { S.door = 1; if (!S.dokGone) flag('notLooked'); return msg('Die Tür fährt zu.'); }
+  if (S.p < 990) return msg('Der Motor signalisiert mit einem lauten Geräusch seinen Unmut darüber, dass er gegen das Vakuum arbeiten muss. Nichts geschieht …');
+  if (S.hand[0] + S.hand[1] > 0) return msg('Der Motor signalisiert mit einem lauten Geräusch seinen Unmut darüber, dass er gegen die geschlossenen Handräder arbeiten muss. Nichts geschieht …');
+  S.door = 0; msg('Die Tür fährt auf.');
+});
+def('dok', () => 'In den Tank schauen', () => {
+  if (S.door || S.dokGone) return;
+  msg('Im Tank ist ein Triebwerk mit Neutralisator eingebaut. Daneben steht ein Doktorand und misst etwas ab.');
+  msg('Du: „Der Tank wird jetzt geschlossen." – Doktorand: „Ok, bin schon weg."');
+  S.dokGone = true;
+});
+def('udo', () => 'Mit Udo sprechen: Abpumpen abschließen', () => finish());
+def('help', () => 'Anleitung lesen', () => togglePanel('help', true));
+
+function score(){
+  const rows = [[`Benötigte Zeit (${fmtT(S.t)})`, Math.floor(S.t/2)]];
+  if (S.hand[0] + S.hand[1] > 0) rows.push(['Du hast vergessen, die Handräder wieder zu öffnen.', 5]);
+  if (S.on.rotary) rows.push(['Du hast vergessen, die Rotary auszuschalten.', 15]);
+  if (S.on.roots) rows.push(['Du hast vergessen, die Roots auszuschalten.', 15]);
+  if (S.pL < 100) rows.push(['Du hast vergessen, die Leitung der Rotary zu belüften. Jetzt steigt Öl aus den Pumpen auf.', 10]);
+  for (const k in PEN) if (S.flags[k]) rows.push([PEN[k][1], PEN[k][0]]);
+  return {rows, total: 1000 - rows.reduce((a,r)=>a+r[1],0)};
+}
+const fmtP = p => p.toExponential(1).replace('e','E');
+const fmtT = t => { const m = Math.floor(t); return (m >= 60 ? Math.floor(m/60)+' h ' : '') + (m%60) + ' min'; };
+
+/* =====================================================================
+   2) UI-HELFER
+   ===================================================================== */
+const LOG = [];
+function msg(text){
+  LOG.push(text);
+  const d = document.createElement('div'); d.className = 'toast'; d.textContent = text; $('toasts').appendChild(d);
+  while ($('toasts').children.length > 4) $('toasts').firstChild.remove();
+  setTimeout(() => d.remove(), 5000 + text.length*45);
+}
+let started = false, paused = true, ended = false, noLock = false, speed = 1, shakeT = 0;
+const shake = s => { shakeT = Math.max(shakeT, s); };
+function overlay(html, btn, onBtn){
+  $('card').innerHTML = html + (btn ? `<br><button id="obtn">${btn}</button>` : '');
+  $('overlay').style.display = 'flex';
+  if (btn) $('obtn').onclick = onBtn;
+}
+const hideOverlay = () => { $('overlay').style.display = 'none'; };
+function gameOver(text){
+  S.over = true; ended = true; if (document.exitPointerLock) document.exitPointerLock();
+  overlay(`<h2>Game Over</h2><p>${text}</p>`, 'Neu starten', () => location.reload());
+}
+function finish(){
+  ended = true; if (document.exitPointerLock) document.exitPointerLock();
+  const r = score();
+  overlay(`<h2>Der Tank wurde erfolgreich auf 1E-7 mbar evakuiert.</h2><table>${r.rows.map(x=>`<tr><td>${x[0]}</td><td>−${x[1]}</td></tr>`).join('')}</table>
+    <h1 style="margin-top:14px">${r.total} / 1000 Punkten</h1>`, 'Noch einmal', () => location.reload());
+}
+function togglePanel(id, force){ const e = $(id); e.style.display = (force || e.style.display !== 'block') ? 'block' : 'none'; }
+$('help').innerHTML = `<h3>Abpumpvorgang Jumbo <span class="off">(H schließt)</span></h3><ol>
+<li>Kammer überprüfen, um Verluste in der Belegschaft zu minimieren</li>
+<li>Kammer schließen (Türschalter), Handräder schließen und anziehen</li>
+<li>Rohrleitung zur Rotary belüften (Belüftungsventil danach wieder schließen)</li>
+<li>Ventil „V1" öffnen</li><li>Umwegventil „Vu" öffnen</li><li>Rotary starten</li>
+<li>Vorpumpe Zwischenvakuum starten und Ventil darüber öffnen</li>
+<li>Wasser für Schraubenpumpe öffnen (Vor- und Rücklauf) und Schraubenpumpe starten</li>
+<li>Ventile an den Turbos an der Tür öffnen</li>
+<li>Handräder wieder öffnen (sobald der Unterdruck die Tür hält)</li>
+<li>Warten bis ca. 500 mbar</li>
+<li>Ventile und Vorpumpen der Turbopumpen starten (3 Stück)</li>
+<li>Warten bis ca. 30 mbar</li>
+<li>Umwegventil „Vu" schließen, Roots starten</li>
+<li>Wasserkühlung für Turbopumpen öffnen (Vor- und Rücklauf: HiPace 1 und 2, Tür-Turbos, alte Turbo)</li>
+<li>Warten bis Kammerdruck ≤ 1 mbar</li>
+<li>Turbopumpen starten</li>
+<li>Warten bis ca. 3E-2 mbar</li>
+<li>Ventil „V1" schließen, Roots stoppen, Rotary stoppen</li>
+<li>Rohrleitung zur Rotary belüften</li>
+<li>Warten bis ca. 1E-5 mbar</li>
+<li>Wasserkühlung für Kryopumpen öffnen (Vor- und Rücklauf)</li>
+<li>Kryopumpen starten – Ziel: 1E-7 mbar</li></ol>`;
+function drawStatus(){
+  const r = (n,v,a,b) => `<tr><td>${n}</td><td class="${v?'on':'off'}">${v?a:b}</td></tr>`;
+  $('status').innerHTML = `<h3>Übersicht</h3><table>
+    ${r('Jumbo-Tür',S.door,'zu','offen')}${r('Handräder',S.hand[0]+S.hand[1],(S.hand[0]+S.hand[1])+'/2 zu','offen')}
+    ${Object.keys(VALVE).map(k=>r(VALVE[k],S.v[k],'offen','zu')).join('')}
+    ${Object.keys(PUMP).map(k=>r(PUMP[k],S.on[k],'läuft','aus')).join('')}
+    ${Object.keys(WATER).map(k=>r(WATER[k],S.w[k],'offen','zu')).join('')}</table>`;
+}
+
+/* ---- Audio (synthetisch, keine Dateien) ---- */
+let AC = null, humG, whG, kG;
+function initAudio(){
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const mk = (type,f,lp) => { const o = AC.createOscillator(); o.type = type; o.frequency.value = f; const g = AC.createGain(); g.gain.value = 0;
+      if (lp) { const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; o.connect(fl).connect(g); } else o.connect(g);
+      g.connect(AC.destination); o.start(); return g; };
+    humG = mk('sawtooth', 49, 180); whG = mk('sine', 1180); kG = mk('sine', 62);
+  } catch(e) { AC = null; }
+}
+function sfx(kind){
+  if (!AC) return;
+  const P = {bang:[0.6,0.9,'lowpass',500], hiss:[0.9,0.12,'highpass',3500], click:[0.04,0.25,'highpass',1500], knock:[0.07,0.6,'lowpass',260], rumble:[2.5,0.7,'lowpass',90]}[kind];
+  const n = Math.floor(AC.sampleRate*P[0]), buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, kind === 'rumble' ? 0.5 : 2);
+  const s = AC.createBufferSource(); s.buffer = buf; const f = AC.createBiquadFilter(); f.type = P[2]; f.frequency.value = P[3];
+  const g = AC.createGain(); g.gain.value = P[1]; s.connect(f).connect(g).connect(AC.destination); s.start();
+}
+function audioUpdate(){
+  if (!AC) return;
+  const t = AC.currentTime, live = !paused && !ended;
+  const nf = S.on.rotary + 2*S.on.roots + S.on.fAlt + S.on.fHp1 + S.on.fHp2 + S.on.screw + S.on.zv*0.5;
+  const nt = BR.filter(b => S.on[b.turbo]).length;
+  humG.gain.setTargetAtTime(live ? Math.min(0.14, 0.03*nf) : 0, t, 0.3);
+  whG.gain.setTargetAtTime(live ? Math.min(0.03, 0.007*nt) : 0, t, 1.2);
+  kG.gain.setTargetAtTime(live && S.on.kryo && (t*2 % 1) < 0.22 ? 0.25 : 0, t, 0.02);
+}
+
+/* =====================================================================
+   3) 3D-SZENE
+   ===================================================================== */
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x20252b);
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(70, 1, 0.08, 80); camera.rotation.order = 'YXZ';
+function resize(){ renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x7a8590, 0.55));
+const sun = new THREE.DirectionalLight(0xfff3dd, 1.7); sun.position.set(9, 16, 12); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, {left:-16, right:16, top:14, bottom:-14, near:1, far:45}); sun.shadow.bias = -0.0004;
+scene.add(sun);
+
+const DY = 2.4, TY = 3.7, TR = 1.3;        // Bühnenhöhe, Tankachse, Tankradius
+const cols = [], inters = [], upd = [];
+const M = (color, o={}) => new THREE.MeshStandardMaterial({color, roughness:0.6, metalness:0.1, ...o});
+const yellow = M(0xf0b800, {roughness:0.45, metalness:0.25}), blue = M(0x1c5fc4, {roughness:0.5, metalness:0.3}),
+      steel = M(0xb9bdc4, {roughness:0.3, metalness:0.9}), dark = M(0x2a2e35, {roughness:0.45, metalness:0.6}), grey = M(0x3c4a5a);
+const hitMat = new THREE.MeshBasicMaterial({visible:false});
+function add(m, parent, shadow=true){ m.castShadow = m.receiveShadow = shadow; (parent || scene).add(m); return m; }
+function box(w,h,d,mat,x,y,z,parent){ const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); return add(m, parent); }
+function cyl(r,len,mat,x,y,z,axis='y',parent,seg=24){ const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg), mat); m.position.set(x,y,z);
+  if (axis === 'x') m.rotation.z = Math.PI/2; if (axis === 'z') m.rotation.x = Math.PI/2; return add(m, parent); }
+function bar(a,b,r,mat,parent){ const A = new THREE.Vector3(...a), d = new THREE.Vector3(...b).sub(A), L = d.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,10), mat); m.position.copy(A).addScaledVector(d, 0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d.normalize()); return add(m, parent); }
+function canvasTex(w,h,draw){ const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const g = cv.getContext('2d'); draw(g,w,h);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; }
+function plate(text,w,h,parent,x,y,z,o={}){
+  const sc = Math.min(1400, 1024/w), t = canvasTex(Math.round(w*sc), Math.round(h*sc), (g,W,H) => {
+    g.fillStyle = o.bg || '#f3f3ee'; g.fillRect(0,0,W,H); g.strokeStyle = '#1b1b1b'; g.lineWidth = Math.max(2, H*0.06); g.strokeRect(0,0,W,H);
+    g.fillStyle = o.fg || '#111'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    let fs = H*0.6; g.font = `600 ${fs}px "Segoe UI",Arial,sans-serif`; const mw = g.measureText(text).width;
+    if (mw > W*0.9) { fs *= W*0.9/mw; g.font = `600 ${fs}px "Segoe UI",Arial,sans-serif`; }
+    g.fillText(text, W/2, H/2 + fs*0.06); });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({map:t})); m.position.set(x,y,z);
+  if (o.ry) m.rotation.y = o.ry; if (o.rx) m.rotation.x = o.rx; (parent || scene).add(m); return m;
+}
+function hit(id,parent,x,y,z,sx,sy,sz,active){ const m = new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz), hitMat); m.position.set(x,y,z);
+  m.userData.id = id; m.userData.active = active; (parent || scene).add(m); inters.push(m); return m; }
+// Handventil: Hebel waagerecht = offen, senkrecht = zu
+function handValve(id,parent,x,y,z,ry,color,get){
+  const g = new THREE.Group(); g.position.set(x,y,z); g.rotation.y = ry; (parent || scene).add(g);
+  cyl(0.055, 0.1, dark, 0,0,0.03, 'z', g); cyl(0.02, 0.08, steel, 0,0,0.09, 'z', g);
+  const lever = new THREE.Group(); lever.position.z = 0.12; g.add(lever);
+  box(0.26, 0.045, 0.03, M(color, {roughness:0.4}), 0.07, 0, 0, lever);
+  lever.rotation.z = get() ? 0 : Math.PI/2;
+  hit(id, g, 0, 0, 0.08, 0.34, 0.32, 0.3);
+  upd.push(() => { lever.rotation.z += ((get() ? 0 : Math.PI/2) - lever.rotation.z)*0.2; });
+}
+// Leuchttaster: grün = an/offen
+function sw(id,parent,x,y,z,ry,get){
+  const g = new THREE.Group(); g.position.set(x,y,z); g.rotation.y = ry; (parent || scene).add(g);
+  box(0.15, 0.15, 0.03, dark, 0,0,0.015, g);
+  const mat = new THREE.MeshStandardMaterial({color:0x551111, emissive:0x220000, roughness:0.35});
+  const b = cyl(0.05, 0.035, mat, 0,0,0.045, 'z', g);
+  hit(id, g, 0, 0, 0.05, 0.24, 0.24, 0.2);
+  upd.push(() => { const on = get(); mat.color.setHex(on ? 0x22ff66 : 0x551111); mat.emissive.setHex(on ? 0x12c040 : 0x220000); b.position.z = on ? 0.038 : 0.045; });
+}
+function figure(shirt){
+  const g = new THREE.Group();
+  add(new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.55, 6, 14), M(shirt)), g).position.y = 1.12;
+  add(new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.6, 6, 14), M(0x2b3550)), g).position.y = 0.47;
+  add(new THREE.Mesh(new THREE.SphereGeometry(0.14, 18, 14), M(0xe2b48c)), g).position.y = 1.72;
+  scene.add(g); return g;
+}
+
+/* ---- Halle ---- */
+{
+  const ft = canvasTex(256, 256, (g,W,H) => { g.fillStyle = '#8f979c'; g.fillRect(0,0,W,H);
+    for (let i = 0; i < 1400; i++) { g.fillStyle = `rgba(${Math.random()<0.5?255:0},${Math.random()<0.5?255:0},${Math.random()<0.5?255:0},0.035)`; g.fillRect(Math.random()*W, Math.random()*H, 2, 2); }
+    g.strokeStyle = 'rgba(40,50,60,.35)'; g.lineWidth = 2; g.strokeRect(0,0,W,H); });
+  ft.wrapS = ft.wrapT = THREE.RepeatWrapping; ft.repeat.set(14, 9);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(28, 18), M(0xffffff, {map:ft, roughness:0.55, metalness:0.05}));
+  floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+  const wall = M(0xdfe3e6, {roughness:0.9});
+  for (const [w,x,z,ry] of [[28,0,-9,0],[28,0,9,Math.PI],[18,-14,0,Math.PI/2],[18,14,0,-Math.PI/2]]) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 8), wall); m.position.set(x,4,z); m.rotation.y = ry; m.receiveShadow = true; scene.add(m);
+    const s = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.2), M(0x5d6b78, {roughness:0.9})); s.position.set(x*0.999, 0.6, z*0.999); s.rotation.y = ry; scene.add(s);
+  }
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(28, 18), M(0x9aa3ab, {roughness:1, emissive:0x2a3036})); ceil.rotation.x = Math.PI/2; ceil.position.y = 8; scene.add(ceil);
+  const lamp = new THREE.MeshBasicMaterial({color:0xffffff});
+  for (const x of [-9,-3,3,9]) for (const z of [-4.5,0,4.5]) { const l = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.06, 0.3), lamp); l.position.set(x, 7.9, z); scene.add(l); }
+  for (const z of [-6,-2,2,6]) box(28, 0.3, 0.2, grey, 0, 7.6, z, null).castShadow = false;
+  // Hallentor
+  box(0.08, 4.4, 5, M(0x8b959e, {metalness:0.5, roughness:0.5}), 13.95, 2.2, -4); plate('HALLENTOR', 1.6, 0.25, null, 13.9, 4.8, -4, {ry:-Math.PI/2, bg:'#1c5fc4', fg:'#fff'});
+  plate('I. Physikalisches Institut – T-Halle – JUMBO', 6, 0.5, null, 0, 6.2, -8.97, {bg:'#f0b800'});
+}
+
+/* ---- Tank ---- */
+{
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(TR, TR, 5.8, 56, 1, true), yellow); body.rotation.z = Math.PI/2; body.position.set(-0.3, TY, 0); add(body);
+  const liner = new THREE.Mesh(new THREE.CylinderGeometry(TR-0.03, TR-0.03, 5.8, 56, 1, true), M(0xaeb3b8, {metalness:0.85, roughness:0.35, side:THREE.BackSide}));
+  liner.rotation.z = Math.PI/2; liner.position.copy(body.position); scene.add(liner);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(TR, 40, 20), yellow); cap.scale.x = 0.42; cap.position.set(-3.2, TY, 0); add(cap);
+  for (const [x,r,t] of [[2.52,TR+0.05,0.085],[-3.15,TR+0.03,0.06],[-1.3,TR+0.02,0.04],[0.7,TR+0.02,0.04]]) {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r, t, 12, 56), yellow); ring.rotation.y = Math.PI/2; ring.position.set(x, TY, 0); add(ring); }
+  for (const x of [-2.3, 1.6]) for (const z of [-0.85, 0.85]) { box(0.22, DY+0.25, 0.22, blue, x, (DY+0.25)/2, z); cols.push({x0:x-0.11,x1:x+0.11,z0:z-0.11,z1:z+0.11,y0:0,y1:DY}); }
+  // Kryopumpen (Kaltköpfe) auf dem Tank
+  const kmat = new THREE.MeshStandardMaterial({color:0x9aa3ad, metalness:0.8, roughness:0.35});
+  for (const x of [-2.1, -0.3, 1.5]) { cyl(0.32, 0.3, yellow, x, TY+TR+0.08, 0); cyl(0.14, 0.6, kmat, x, TY+TR+0.5, 0); box(0.3, 0.22, 0.3, dark, x, TY+TR+0.9, 0); }
+  upd.push(() => kmat.emissive.setHex(S.on.kryo ? 0x0a2a55 : 0));
+  plate('KRYOPUMPEN', 0.9, 0.14, null, -0.3, TY+TR+0.45, 0.45, {bg:'#123', fg:'#9cf'});
+  // Innenleben
+  box(5.5, 0.04, 1.7, dark, -0.3, TY-0.95, 0); cyl(0.26, 0.45, steel, -1.4, TY-0.2, 0, 'x'); cyl(0.05, 0.3, M(0xcc6633), -1.2, TY+0.15, 0.25, 'x'); box(0.1, 0.75, 0.1, steel, -1.4, TY-0.58, 0);
+  const il = new THREE.PointLight(0xfff0d0, 3, 6); il.position.set(0.5, TY+0.9, 0); scene.add(il);
+  cols.push({x0:-3.75, x1:2.6, z0:-TR, z1:TR, y0:DY-0.1, y1:5.2});
+  hit('dok', null, 2.35, TY, 0, 0.2, 2.5, 2.5, () => !S.door && !S.dokGone);
+  plate('JUMBO', 1.5, 0.42, null, -0.3, TY+0.15, TR+0.012, {bg:'#f0b800', fg:'#1a1a1a'});
+}
+// Handräder am Türflansch
+for (const i of [0,1]) {
+  const y = TY + (i ? -0.6 : 0.6), g = new THREE.Group(); g.position.set(2.4, y, 1.36); scene.add(g);
+  box(0.12, 0.12, 0.3, dark, 0, 0, -0.14, g); cyl(0.02, 0.12, steel, 0,0,0.03, 'z', g);
+  const wh = new THREE.Group(); wh.position.z = 0.08; g.add(wh);
+  add(new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.022, 10, 28), M(0xc0261c, {roughness:0.4})), wh);
+  box(0.3, 0.025, 0.02, steel, 0,0,0, wh); box(0.025, 0.3, 0.02, steel, 0,0,0, wh);
+  hit('hand'+i, g, 0, 0, 0.06, 0.4, 0.4, 0.3);
+  plate('Handrad ' + (i ? 'unten' : 'oben'), 0.32, 0.06, g, 0, -0.24, 0.02);
+  upd.push(() => { wh.rotation.z += (S.hand[i]*Math.PI*1.5 - wh.rotation.z)*0.1; });
+}
+
+/* ---- Tür (fährt in x) ---- */
+const door = new THREE.Group(); scene.add(door);
+let doorAnim = 1, doorX = 5.2;
+{
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(TR, 40, 20), yellow); cap.scale.x = 0.4; cap.position.set(0.12, TY, 0); add(cap, door);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(TR+0.05, 0.09, 12, 56), yellow); ring.rotation.y = Math.PI/2; ring.position.set(0.07, TY, 0); add(ring, door);
+  for (const z of [-1.55, 1.55]) { box(0.14, 2.9, 0.14, blue, 0.45, DY+1.45, z, door); box(1.3, 0.12, 0.14, blue, 0.65, DY+0.1, z, door); box(0.5, 0.12, 0.12, blue, 0.25, TY, z*0.93, door); }
+  box(0.14, 0.14, 3.24, blue, 0.45, 5.3, 0, door);
+  [['d1',-0.55,'Tür-Turbo 1'],['d2',0.55,'Tür-Turbo 2']].forEach(([id,z,name]) => {
+    const b = BR.find(q => q.id === id), y = TY+0.1;
+    cyl(0.2, 0.25, steel, 0.55, y, z, 'x', door); box(0.1, 0.5, 0.5, dark, 0.7, y, z, door);
+    cyl(0.21, 0.5, steel, 1.0, y, z, 'x', door); cyl(0.23, 0.06, dark, 0.85, y, z, 'x', door); cyl(0.23, 0.06, dark, 1.2, y, z, 'x', door);
+    handValve('v_'+id, door, 0.72, y+0.34, z, Math.PI/2, 0xf0b800, () => S.v[id]);
+    sw('t_'+id, door, 1.25, y, z, Math.PI/2, () => S.on[b.turbo]);
+    plate(name, 0.46, 0.08, door, 1.27, y+0.62, z, {ry:Math.PI/2});
+    plate('Ventil', 0.2, 0.05, door, 0.9, y+0.5, z, {ry:Math.PI/2}); plate('Turbo an/aus', 0.26, 0.05, door, 1.27, y-0.2, z, {ry:Math.PI/2});
+  });
+  for (const z of [-1.55, 1.55]) box(4.8, 0.05, 0.08, steel, 5.0, DY+0.03, z);
+}
+const doorCol = {x0:0, x1:0, z0:-1.65, z1:1.65, y0:DY, y1:5.4}; cols.push(doorCol);
+
+/* ---- Bühne, Geländer, Treppe ---- */
+const inDeck = (x,z) => (x >= -6 && x <= 9 && z >= 1.3 && z <= 4.3) || (x >= 2.6 && x <= 9 && z >= -3 && z < 1.3);
+{
+  const dt = canvasTex(64, 64, (g,W,H) => { g.fillStyle = '#39424d'; g.fillRect(0,0,W,H); g.strokeStyle = '#1a2028'; g.lineWidth = 5; g.strokeRect(0,0,W,H);
+    g.strokeStyle = '#566270'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0,H/2); g.lineTo(W,H/2); g.moveTo(W/2,0); g.lineTo(W/2,H); g.stroke(); });
+  dt.wrapS = dt.wrapT = THREE.RepeatWrapping;
+  const dm = (rx,rz) => { const t = dt.clone(); t.needsUpdate = true; t.repeat.set(rx, rz); return M(0xffffff, {map:t, metalness:0.5, roughness:0.55}); };
+  box(15, 0.1, 3, dm(30,6), 1.5, DY-0.05, 2.8); box(6.4, 0.1, 4.3, dm(13,9), 5.8, DY-0.05, -0.85);
+  box(15, 0.2, 0.12, blue, 1.5, DY-0.2, 4.3); box(15, 0.2, 0.12, blue, 1.5, DY-0.2, 1.36).position.x = 1.5;
+  for (const x of [-6,-2.5,1,4.5,9]) box(0.16, DY-0.1, 0.16, blue, x, (DY-0.1)/2, 4.3);
+  for (const x of [-6,-4.2]) box(0.16, DY-0.1, 0.16, blue, x, (DY-0.1)/2, 1.4);
+  for (const x of [2.7,5.8,9]) box(0.16, DY-0.1, 0.16, blue, x, (DY-0.1)/2, -3);
+  box(0.16, DY-0.1, 0.16, blue, 9, (DY-0.1)/2, 0.6);
+  const rail = (x0,z0,x1,z1) => { const L = Math.hypot(x1-x0, z1-z0), n = Math.max(1, Math.round(L/1.5));
+    for (let i = 0; i <= n; i++) cyl(0.03, 1.1, blue, x0+(x1-x0)*i/n, DY+0.55, z0+(z1-z0)*i/n, 'y', null, 10);
+    for (const h of [0.55, 1.1]) bar([x0,DY+h,z0], [x1,DY+h,z1], 0.03, blue);
+    cols.push({x0:Math.min(x0,x1)-0.06, x1:Math.max(x0,x1)+0.06, z0:Math.min(z0,z1)-0.06, z1:Math.max(z0,z1)+0.06, y0:DY-0.1, y1:DY+1.2}); };
+  rail(-6,4.3, 9,4.3); rail(9,4.3, 9,-3); rail(9,-3, 2.6,-3); rail(2.6,-3, 2.6,-1.35); rail(-6,1.3, -3.75,1.3); rail(-6,1.3, -6,1.8); rail(-6,3.2, -6,4.3);
+  // Treppe (x von -10.2 hoch nach -6)
+  for (let i = 0; i < 12; i++) box(0.36, 0.05, 1.4, dm(1,4), -6-0.35*(i+0.5), DY-0.2*(i+1)+0.18, 2.5);
+  for (const z of [1.8, 3.2]) { bar([-10.2,0.05,z], [-6,DY-0.05,z], 0.06, blue); bar([-10.2,1.1,z], [-6,DY+1.1,z], 0.03, blue);
+    for (let i = 0; i <= 4; i++) { const x = -10.2+4.2*i/4, y = DY*i/4; cyl(0.03, 1.1, blue, x, y+0.55, z, 'y', null, 10); }
+    cols.push({x0:-10.2, x1:-6, z0:z-0.06, z1:z+0.06, y0:0, y1:DY+1.2}); }
+  cols.push({x0:-6.05, x1:-5.95, z0:1.8, z1:3.2, y0:0, y1:2.0});
+}
+function groundAt(x,z,feet){
+  let h = 0; const ok = v => v <= feet + 0.6;
+  if (inDeck(x,z) && ok(DY)) h = DY;
+  if (x >= -10.2 && x <= -6 && z >= 1.8 && z <= 3.2) { const s = DY*(x+10.2)/4.2; if (ok(s)) h = Math.max(h, s); }
+  return h;
+}
+
+/* ---- Turbopumpen an der Tankseite mit Steuerung ---- */
+[['alt',-2.5,'Alte Turbo'],['hp1',-0.9,'HiPace 1'],['hp2',0.6,'HiPace 2']].forEach(([id,x,title]) => {
+  const b = BR.find(q => q.id === id), y = TY+0.25;
+  cyl(0.2, 0.3, steel, x, y, 1.3, 'z'); box(0.5, 0.5, 0.1, dark, x, y, 1.47);
+  cyl(0.21, 0.5, steel, x, y, 1.77, 'z'); cyl(0.23, 0.06, dark, x, y, 1.6, 'z'); cyl(0.23, 0.06, dark, x, y, 1.95, 'z');
+  handValve('v_'+id, null, x, y+0.34, 1.49, 0, 0xf0b800, () => S.v[id]);
+  plate(title, 0.5, 0.09, null, x, y+0.58, 1.53); plate('Ventil', 0.2, 0.05, null, x-0.3, y+0.34, 1.53);
+  box(0.6, 0.9, 0.4, grey, x, DY+0.45, 1.55);
+  plate('Steuerung ' + title, 0.54, 0.07, null, x, DY+0.8, 1.752);
+  sw(b.fore, null, x-0.15, DY+0.5, 1.75, 0, () => S.on[b.fore]); plate('Vorpumpe', 0.24, 0.055, null, x-0.15, DY+0.65, 1.752);
+  sw('t_'+id, null, x+0.15, DY+0.5, 1.75, 0, () => S.on[b.turbo]); plate('Turbo', 0.24, 0.055, null, x+0.15, DY+0.65, 1.752);
+  cols.push({x0:x-0.33, x1:x+0.33, z0:1.3, z1:2.02, y0:DY-0.1, y1:5});
+});
+/* ---- Zwischenvakuum ---- */
+{
+  const x = 1.7;
+  box(0.5, 0.6, 0.4, M(0x4d6b52), x, DY+0.3, 1.55); bar([x,DY+0.6,1.5], [x,DY+1.0,1.5], 0.025, steel); bar([x-0.2,DY+1.0,1.5], [2.45,DY+1.0,1.33], 0.025, steel);
+  sw('zv', null, x, DY+0.35, 1.75, 0, () => S.on.zv); plate('Zwischenvakuum-Pumpe', 0.46, 0.06, null, x, DY+0.52, 1.752);
+  handValve('zvPump', null, x-0.14, DY+1.0, 1.52, 0, 0xf0b800, () => S.v.zvPump); plate('Ventil Pumpe', 0.26, 0.05, null, x-0.14, DY+0.8, 1.56);
+  handValve('zvAtm', null, x+0.2, DY+1.3, 1.52, 0, 0xdddddd, () => S.v.zvAtm); plate('Belüftung ZV', 0.26, 0.05, null, x+0.2, DY+1.5, 1.56);
+  bar([x+0.2,DY+1.0,1.5], [x+0.2,DY+1.3,1.5], 0.02, steel);
+  cols.push({x0:x-0.27, x1:x+0.27, z0:1.3, z1:1.78, y0:DY-0.1, y1:4});
+}
+/* ---- Kühlwasser-Tafeln ---- */
+function waterBoard(x,y,z,ry,w,items){
+  const g = new THREE.Group(); g.position.set(x,y,z); g.rotation.y = ry; scene.add(g);
+  box(w, 1.3, 0.04, M(0xd5dade), 0, 0, -0.03, g);
+  [['VORLAUF','V',0x1f6fe0,'#1f6fe0',0.3],['RÜCKLAUF','R',0xd03a2a,'#d03a2a',-0.33]].forEach(([title,suf,color,css,yy]) => {
+    plate('Kühlwasser ' + title, Math.min(w-0.1, 0.9), 0.085, g, 0, yy+0.21, 0.001, {bg:css, fg:'#fff'});
+    cyl(0.03, w-0.1, M(color, {metalness:0.5, roughness:0.35}), 0, yy, 0.02, 'x', g);
+    items.forEach(([key,name], j) => { const xx = (j-(items.length-1)/2)*(w-0.3)/items.length;
+      handValve('w_'+key+suf, g, xx, yy, 0.03, 0, color, () => S.w[key+suf]); plate(name, 0.44, 0.065, g, xx, yy-0.19, 0.001); });
+  });
+  return g;
+}
+waterBoard(-3.4, DY+1.25, 4.2, Math.PI, 2.6, [['hp1','HiPace 1'],['hp2','HiPace 2'],['door','Tür-Turbos'],['screw','Schraubenpumpe']]);
+waterBoard(7.2, DY+1.25, -2.88, 0, 1.0, [['kryo','Kryopumpen']]);
+waterBoard(-4.6, 1.45, 4.55, 0, 1.0, [['alt','Alte Turbo']]);
+for (const dx of [-0.4, 0.4]) box(0.06, 0.9, 0.06, grey, -4.6+dx, 0.45, 4.5);
+cols.push({x0:-5.1, x1:-4.1, z0:4.42, z1:4.58, y0:0, y1:2.1});
+/* ---- Schraubenpumpe + Türschalter ---- */
+box(0.9, 1.0, 1.4, M(0x2e7d5b, {metalness:0.3}), 8.4, DY+0.5, -1.9); cyl(0.28, 0.9, dark, 8.4, DY+1.25, -1.9, 'z');
+sw('screw', null, 7.94, DY+0.75, -1.9, -Math.PI/2, () => S.on.screw);
+plate('Schraubenpumpe', 0.6, 0.08, null, 7.945, DY+0.95, -1.9, {ry:-Math.PI/2}); plate('Vorpumpe der Tür-Turbos', 0.6, 0.06, null, 7.945, DY+0.55, -1.9, {ry:-Math.PI/2});
+cols.push({x0:7.95, x1:8.85, z0:-2.6, z1:-1.2, y0:DY-0.1, y1:4.2});
+box(0.08, 1.2, 0.08, blue, 7.0, DY+0.6, 3.6); box(0.06, 0.4, 0.4, yellow, 7.0, DY+1.3, 3.6);
+sw('door', null, 6.965, DY+1.25, 3.6, -Math.PI/2, () => S.door); plate('JUMBO-TÜR auf / zu', 0.38, 0.07, null, 6.965, DY+1.44, 3.6, {ry:-Math.PI/2});
+
+/* ---- Erdgeschoss: Vorvakuumleitung mit V1 und Belüftung ---- */
+{
+  const x = -0.3;
+  cyl(0.12, DY+0.1, steel, x, (DY+0.1)/2, 0); box(0.5, 0.2, 0.5, dark, x, 1.85, 0); cyl(0.1, 0.55, dark, x+0.5, 1.85, 0, 'x');
+  const lm = new THREE.MeshStandardMaterial({color:0x551111, emissive:0x220000}); add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 10), lm)).position.set(x, 1.85, 0.27);
+  upd.push(() => { lm.color.setHex(S.v.V1 ? 0x22ff66 : 0x551111); lm.emissive.setHex(S.v.V1 ? 0x12c040 : 0x220000); });
+  plate('V1', 0.22, 0.12, null, x, 2.1, 0.13);
+  cyl(0.04, 0.3, steel, x, 1.15, 0.2, 'z'); handValve('vent', null, x, 1.15, 0.35, 0, 0xdddddd, () => S.v.vent);
+  plate('Belüftung Rotary-Leitung', 0.5, 0.07, null, x, 0.9, 0.14);
+  box(1.8, 0.03, 1.2, dark, x, 0.015, -1.3); plate('Keller: Rotary + Roots', 1.0, 0.14, null, x, 0.04, -1.3, {rx:-Math.PI/2, bg:'#f0b800'});
+  cols.push({x0:x-0.14, x1:x+0.14, z0:-0.14, z1:0.14, y0:0, y1:DY});
+}
+/* ---- Steuerpult ---- */
+const dcv = document.createElement('canvas'); dcv.width = 512; dcv.height = 320; const dctx = dcv.getContext('2d');
+const dtex = new THREE.CanvasTexture(dcv); dtex.colorSpace = THREE.SRGBColorSpace;
+{
+  box(3.3, 0.85, 0.8, grey, 0.4, 0.425, 6.0); cols.push({x0:-1.25, x1:2.05, z0:5.6, z1:6.4, y0:0, y1:1.3});
+  const pg = new THREE.Group(); pg.position.set(-0.1, 0.98, 6.12); pg.rotation.x = 0.6 - Math.PI/2; scene.add(pg);
+  box(2.2, 0.52, 0.05, dark, 0, 0, -0.03, pg);
+  plate('JUMBO CONTROL', 0.9, 0.07, pg, 0, 0.21, 0.001, {bg:'#f0b800'});
+  [['V1','Ventil V1',()=>S.v.V1],['Vu','Umwegventil Vu',()=>S.v.Vu],['rotary','Rotary',()=>S.on.rotary],['roots','Roots',()=>S.on.roots],['kryo','Kryopumpen',()=>S.on.kryo]]
+    .forEach(([id,name,get], i) => { const x = (i-2)*0.42; sw(id, pg, x, -0.07, 0, 0, get); plate(name, 0.36, 0.06, pg, x, 0.08, 0.001); });
+  const mg = new THREE.Group(); mg.position.set(1.55, 1.25, 5.95); mg.rotation.y = -0.3; scene.add(mg);
+  box(0.86, 0.56, 0.05, dark, 0, 0, 0, mg); box(0.08, 0.3, 0.08, dark, 0, -0.35, -0.02, mg);
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), new THREE.MeshBasicMaterial({map:dtex})); scr.position.z = 0.027; mg.add(scr);
+  box(0.32, 0.03, 0.24, M(0xb02a2a), 1.2, 0.87, 6.25); plate('ANLEITUNG', 0.28, 0.08, null, 1.2, 0.887, 6.25, {rx:-Math.PI/2}); hit('help', null, 1.2, 0.9, 6.25, 0.4, 0.15, 0.32);
+  for (const dx of [0, 0.65]) { box(0.6, 2.0, 0.6, dark, 3.4+dx, 1.0, 5.9); for (let k = 0; k < 6; k++) box(0.5, 0.18, 0.02, M(0x1a1d22, {emissive:k%2?0x062a10:0x101828}), 3.4+dx, 0.45+k*0.27, 6.21); }
+  plate('Diagnostik', 0.6, 0.1, null, 3.725, 1.95, 6.211); cols.push({x0:3.1, x1:4.35, z0:5.6, z1:6.2, y0:0, y1:2});
+}
+function drawDisplay(){
+  const g = dctx; g.fillStyle = '#04140c'; g.fillRect(0,0,512,320); g.fillStyle = '#39ff88'; g.textBaseline = 'alphabetic';
+  g.font = 'bold 26px Consolas,monospace'; g.fillText('TANKDRUCK', 22, 46);
+  g.font = 'bold 66px Consolas,monospace'; g.fillText(fmtP(S.p), 22, 122); g.font = 'bold 30px Consolas,monospace'; g.fillText('mbar', 380, 122);
+  g.font = '24px Consolas,monospace'; g.fillStyle = '#8fd8ff'; g.fillText('Rotary-Leitung  ' + fmtP(S.pL) + ' mbar', 22, 176);
+  g.fillStyle = '#9fb'; g.fillText('Zeit  ' + fmtT(S.t), 22, 214);
+  const f = (3 - Math.log10(S.p))/10; g.strokeStyle = '#39ff88'; g.lineWidth = 3; g.strokeRect(22, 244, 468, 34); g.fillStyle = '#39ff88'; g.fillRect(26, 248, 460*Math.min(1, Math.max(0, f)), 26);
+  g.font = '16px Consolas,monospace'; g.fillStyle = '#9fb'; g.fillText('1E+3', 22, 302); g.fillText('1E-7', 450, 302);
+  dtex.needsUpdate = true;
+}
+/* ---- Figuren ---- */
+const dok = figure(0xf2f2f2); dok.position.set(1.0, TY-0.93, 0.25); dok.rotation.y = -1.2;
+const DOKPATH = [[1.0,TY-0.93,0.25],[3.3,DY,0.3],[3.9,DY,3.0],[-5.4,DY,2.6],[-10.6,0,2.5],[-12.5,0,7]]; let dokSeg = 0, dokF = 0;
+const udo = figure(0x2f66b0); udo.position.set(2.7, 0, 6.9); udo.rotation.y = -0.5; udo.visible = false;
+hit('udo', null, 2.7, 1.0, 6.9, 0.7, 2.0, 0.7, () => S.reached);
+plate('UDO', 0.3, 0.1, udo, 0, 2.05, 0);
+
+/* =====================================================================
+   4) STEUERUNG + HAUPTSCHLEIFE
+   ===================================================================== */
+const P = {x:0.2, z:8.0, feet:0, yaw:0, pitch:-0.02};
+const keys = {};
+const locked = () => document.pointerLockElement === canvas;
+let mouseLook = true; try { mouseLook = localStorage.getItem('jumboMouse') !== '0'; } catch(e) {}
+function setMouse(on){ mouseLook = on; try { localStorage.setItem('jumboMouse', on ? '1' : '0'); } catch(e) {}
+  $('kMode').textContent = on ? 'Maus + Tastatur' : 'nur Tastatur'; }
+function lock(){ if (!mouseLook) return; try { const pr = canvas.requestPointerLock(); if (pr && pr.catch) pr.catch(() => { noLock = true; }); } catch(e) { noLock = true; } }
+document.addEventListener('pointerlockerror', () => { noLock = true; });
+document.addEventListener('pointerlockchange', () => {
+  if (locked()) { paused = false; noLock = false; hideOverlay(); }
+  else if (started && !ended && mouseLook) { paused = true; overlay('<h2>Pause</h2><p>Die Simulation ist angehalten.</p>', 'Weiterspielen', resume); }
+});
+function resume(){ hideOverlay(); paused = false; lock(); }
+let drag = false;
+canvas.addEventListener('mousedown', () => { if (locked() || !mouseLook) interact(); else if (started && !ended) { drag = true; lock(); } });
+addEventListener('mouseup', () => { drag = false; });
+addEventListener('mousemove', e => { if (!mouseLook || (!locked() && !drag)) return;
+  if (Math.abs(e.movementX) > 120 || Math.abs(e.movementY) > 120) return;   // Ausreißer (Touchpad/Browser) verwerfen
+  P.yaw -= e.movementX*0.0022; P.pitch = Math.max(-1.45, Math.min(1.45, P.pitch - e.movementY*0.0022)); });
+addEventListener('keydown', e => {
+  keys[e.code] = true; if (e.code === 'Tab') e.preventDefault();
+  if (e.code.startsWith('Arrow')) e.preventDefault();
+  if (!started || ended || e.repeat) return;
+  if (e.code === 'KeyE' || e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); interact(); }
+  if (e.code === 'KeyM') { setMouse(!mouseLook); if (mouseLook) lock(); else if (locked()) document.exitPointerLock();
+    msg(mouseLook ? 'Maussteuerung an.' : 'Maussteuerung aus – umsehen mit den Pfeiltasten.'); }
+  if (e.code === 'Escape' && !mouseLook) { if (paused) resume(); else { paused = true; overlay('<h2>Pause</h2><p>Die Simulation ist angehalten.</p>', 'Weiterspielen', resume); } }
+  if (e.code === 'KeyH') togglePanel('help');
+  if (e.code === 'Tab') togglePanel('status');
+  if (e.code === 'KeyT') { speed = speed === 1 ? 8 : 1; $('gS').textContent = '×' + speed; }
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+
+const ray = new THREE.Raycaster(); ray.far = 3.4; let aim = null; const aimDir = new THREE.Vector3(), aimV = new THREE.Vector3();
+function findAim(){
+  ray.setFromCamera({x:0, y:0}, camera);
+  const h = ray.intersectObjects(inters.filter(m => !m.userData.active || m.userData.active()), false);
+  aim = h.length ? h[0].object.userData.id : null;
+  if (!aim) {                                          // Zielhilfe: nächstes Bedienelement nahe der Bildmitte
+    camera.getWorldDirection(aimDir); let best = 0.94;
+    for (const m of inters) { if (m.userData.active && !m.userData.active()) continue;
+      m.getWorldPosition(aimV).sub(camera.position); const d = aimV.length(); if (d > 3.2) continue;
+      const c = aimV.dot(aimDir)/d; if (c > best) { best = c; aim = m.userData.id; } }
+  }
+  const pr = $('prompt');
+  if (aim) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd>${ACT[aim].label()}`; } else pr.style.display = 'none';
+}
+function interact(){ if (paused || ended || !aim) return; sfx('click'); ACT[aim].do(); }
+
+function movePlayer(dt){
+  const f = (keys.KeyW?1:0) - (keys.KeyS?1:0), s = (keys.KeyD?1:0) - (keys.KeyA?1:0);
+  P.yaw += ((keys.ArrowLeft?1:0) - (keys.ArrowRight?1:0))*1.9*dt;
+  P.pitch = Math.max(-1.45, Math.min(1.45, P.pitch + ((keys.ArrowUp?1:0) - (keys.ArrowDown?1:0))*1.2*dt));
+  if (f || s) {
+    const v = (keys.ShiftLeft || keys.ShiftRight ? 5.5 : 3.2)*dt/Math.hypot(f, s), sn = Math.sin(P.yaw), cs = Math.cos(P.yaw);
+    P.x += (-sn*f + cs*s)*v; P.z += (-cs*f - sn*s)*v;
+  }
+  const R = 0.3;
+  for (let it = 0; it < 2; it++) for (const c of cols) {
+    if (P.feet >= c.y1 - 0.05 || P.feet + 1.7 <= c.y0) continue;
+    const cx = Math.max(c.x0, Math.min(c.x1, P.x)), cz = Math.max(c.z0, Math.min(c.z1, P.z)), dx = P.x-cx, dz = P.z-cz, d2 = dx*dx+dz*dz;
+    if (d2 >= R*R) continue;
+    if (d2 > 1e-8) { const d = Math.sqrt(d2); P.x = cx + dx/d*R; P.z = cz + dz/d*R; }
+    else { const l = P.x-c.x0, r = c.x1-P.x, n = P.z-c.z0, q = c.z1-P.z, m = Math.min(l,r,n,q);
+      if (m === l) P.x = c.x0-R; else if (m === r) P.x = c.x1+R; else if (m === n) P.z = c.z0-R; else P.z = c.z1+R; }
+  }
+  P.x = Math.max(-13.6, Math.min(13.6, P.x)); P.z = Math.max(-8.6, Math.min(8.6, P.z));
+  const h = groundAt(P.x, P.z, P.feet);
+  P.feet = P.feet < h ? Math.min(h, P.feet + 6*dt + (h-P.feet)*0.3) : Math.max(h, P.feet - 9*dt);
+}
+function drawChart(){
+  const cv = $('chart'), g = cv.getContext('2d'), W = cv.width, H = cv.height, L = 34, B = 16, T = 6, R = 6;
+  g.clearRect(0,0,W,H); g.font = '10px Consolas,monospace'; g.textBaseline = 'middle';
+  const tmax = Math.max(30, S.t*1.05), X = t => L + (W-L-R)*t/tmax, Y = p => T + (H-T-B)*(3-Math.log10(p))/10.3;
+  for (let e = 3; e >= -7; e -= 2) { g.strokeStyle = 'rgba(160,190,220,.18)'; g.beginPath(); g.moveTo(L, Y(10**e)); g.lineTo(W-R, Y(10**e)); g.stroke(); g.fillStyle = '#9db0c4'; g.fillText('1E'+e, 2, Y(10**e)); }
+  g.setLineDash([3,3]); g.strokeStyle = 'rgba(240,184,0,.55)';
+  for (const p of [500, 30, 1, 3e-2, 1e-5]) { g.beginPath(); g.moveTo(L, Y(p)); g.lineTo(W-R, Y(p)); g.stroke(); }
+  g.setLineDash([]); g.strokeStyle = '#5dffa0'; g.lineWidth = 2; g.beginPath();
+  S.hist.forEach(([t,p], i) => i ? g.lineTo(X(t), Y(p)) : g.moveTo(X(t), Y(p))); g.lineTo(X(S.t), Y(S.p)); g.stroke(); g.lineWidth = 1;
+  g.fillStyle = '#9db0c4'; g.textBaseline = 'alphabetic'; g.fillText('0', L, H-3); g.fillText(Math.round(tmax)+' min', W-R-42, H-3); g.fillText('p [mbar]', W-R-50, T+9);
+}
+
+let last = performance.now(), slow = 1, knockT = 3;
+function frame(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  const live = started && !paused && !ended;
+  if (live) {
+    movePlayer(dt);
+    step(dt*0.25*speed);                              // 1 s Echtzeit = 15 s Simulationszeit (x Zeitraffer)
+    if (S.door && !S.dokGone && !S.over) { knockT -= dt; if (knockT < 0) { knockT = 4; [0,150,300,450].forEach(d => setTimeout(() => sfx('knock'), d)); msg('Aus dem Tank dringt ein Klopfen …'); } }
+  }
+  // Tür
+  doorAnim += Math.sign((S.door ? 0 : 1) - doorAnim)*Math.min(Math.abs((S.door ? 0 : 1) - doorAnim), dt*0.35);
+  doorX = 2.6 + 2.6*doorAnim; door.position.x = doorX; doorCol.x0 = doorX-0.05; doorCol.x1 = doorX+1.35;
+  // Doktorand geht
+  if (S.dokGone && dok.visible) {
+    const a = DOKPATH[dokSeg], b = DOKPATH[dokSeg+1], len = Math.hypot(b[0]-a[0], b[1]-a[1], b[2]-a[2]);
+    dokF += dt*3.2/len; if (dokF >= 1) { dokF = 0; dokSeg++; if (dokSeg >= DOKPATH.length-1) dok.visible = false; }
+    else { dok.position.set(a[0]+(b[0]-a[0])*dokF, a[1]+(b[1]-a[1])*dokF, a[2]+(b[2]-a[2])*dokF); dok.rotation.y = Math.atan2(b[0]-a[0], b[2]-a[2]); }
+  }
+  udo.visible = S.reached;
+  for (const u of upd) u();
+  // Kamera
+  shakeT = Math.max(0, shakeT - dt);
+  const sh = shakeT > 0 ? 0.04*Math.min(1, shakeT) : 0;
+  camera.position.set(P.x + (Math.random()-0.5)*sh, P.feet + 1.7 + (Math.random()-0.5)*sh, P.z);
+  camera.rotation.set(P.pitch, P.yaw, 0);
+  slow += dt;
+  if (slow > 0.2) { slow = 0; drawDisplay(); drawChart(); audioUpdate();
+    $('gP').textContent = fmtP(S.p) + ' mbar'; $('gL').textContent = fmtP(S.pL) + ' mbar'; $('gT').textContent = fmtT(S.t);
+    if ($('status').style.display === 'block') drawStatus(); }
+  if (started) findAim();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+/* ---- Start ---- */
+function start(m){ setMouse(m); started = true; paused = false; hideOverlay(); initAudio(); lock(); }
+overlay(`<h1>Jumbo-Pumpdown 3D</h1><p class="small">Prototyp · Spiellogik nach dem RPG-Maker-Original</p>
+<p>Der Jumbo muss evakuiert werden. Alle, die es sonst machen, sind nicht da. Doch das Schicksal des Neutralisators hängt davon ab – und nur du kannst ihn jetzt noch retten.</p>
+<p>Es gibt eine Anleitung zum Evakuieren des Tanks (rote Mappe auf dem Steuerpult oder Taste <b>H</b>). Du solltest einen Blick hineinwerfen.</p>
+<p class="small"><b>Steuerung:</b> W/A/S/D = gehen · Shift = laufen · Pfeiltasten = drehen und hoch/runter sehen (oder Maus) · E oder Enter = bedienen · H = Anleitung · Tab = Übersicht · T = Zeitraffer · M = Maus an/aus · Esc = Pause<br>
+Ziel: Tankdruck 1E-7 mbar, dann unten mit Udo sprechen. 1 Sekunde = 15 Sekunden Anlagenzeit.</p>
+<button id="kbtn">Start – nur Tastatur</button> &nbsp;`, 'Start – mit Maus', () => start(true));
+$('kbtn').onclick = () => start(false); setMouse(mouseLook);
+
+/* ---- Selbsttest (?test=1) und Kamerapositionen für Screenshots (?cam=x,y,z,yaw,pitch&do=a,b&ff=min) ---- */
+function runTest(){
+  const out = {}, a = (...ids) => ids.forEach(id => ACT[id].do());
+  const wait = c => { let n = 0; while (!c() && n++ < 200000 && !S.over) step(0.01); return +S.t.toFixed(1); };
+  a('dok','door','hand0','hand1','vent','vent','V1','Vu','rotary','zv','zvPump','w_screwV','w_screwR','screw','v_d1','v_d2');
+  out.t800 = wait(() => S.p < 800); a('hand0','hand1');
+  out.t500 = wait(() => S.p < 500); a('v_alt','v_hp1','v_hp2','fAlt','fHp1','fHp2');
+  out.t30 = wait(() => S.p < 30); a('Vu','roots','w_altV','w_altR','w_hp1V','w_hp1R','w_hp2V','w_hp2R','w_doorV','w_doorR');
+  out.rootsOn = S.on.roots;
+  out.t1 = wait(() => S.p <= 1); a('t_alt','t_hp1','t_hp2','t_d1','t_d2'); out.turbos = nTurbo();
+  out.t3e2 = wait(() => S.p <= 3e-2); a('V1','roots','rotary','vent');
+  out.t1e5 = wait(() => S.p <= 1e-5); a('w_kryoV','w_kryoR','kryo');
+  out.tEnd = wait(() => S.reached); out.pEnd = S.p; out.flags = Object.keys(S.flags); out.score = score().total; out.over = S.over;
+  // Gegenproben
+  S = fresh(); a('dok','door','V1'); out.negV1 = Object.keys(S.flags);
+  S = fresh(); a('door','hand0','hand1','vent','vent','V1','Vu','rotary'); wait(() => S.p < 500); out.negDok = S.over;
+  S = fresh(); a('dok','door','hand0','hand1','vent','vent','V1','Vu','rotary','roots'); out.negRoots = Object.keys(S.flags);
+  S = fresh(); a('dok','door','hand0','hand1','vent','vent','V1','Vu','rotary'); wait(() => S.t > 200); out.rotaryOnlyFloor = S.p;
+  $('testout').style.display = 'block'; $('testout').textContent = 'TESTRESULT ' + JSON.stringify(out); document.title = 'TEST ' + JSON.stringify(out);
+}
+window.__loaded = true; window.__jumbo = {get S(){return S;}, ACT, step, score};
+if (Q.get('test')) { try { runTest(); } catch(e) { $('testout').style.display = 'block'; $('testout').textContent = 'TESTERROR ' + e.stack; } }
+if (Q.get('cam')) {
+  const c = Q.get('cam').split(',').map(Number); P.x = c[0]; P.feet = c[1]-1.7; P.z = c[2]; P.yaw = (c[3]||0)*Math.PI/180; P.pitch = (c[4]||0)*Math.PI/180;
+  S = fresh(); hideOverlay(); started = true; paused = true; ended = false;
+  (Q.get('do') || '').split(',').filter(Boolean).forEach(id => ACT[id].do());
+  for (let i = 0, n = (+Q.get('ff')||0)*100; i < n; i++) step(0.01);
+  if (S.door) doorAnim = 0;
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

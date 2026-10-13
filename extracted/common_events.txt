@@ -1,0 +1,252 @@
+==============================================================================
+COMMON EVENT 001: Druckanzeige   Trigger: Parallel   Condition switch: [0001: initialize]
+==============================================================================
+  Variable [0049: Druck [Exp]] = Variable [0029: Druck [Exp+7&Val]]
+  Variable [0049: Druck [Exp]] /= 10
+  Variable [0049: Druck [Exp]] -= 7
+  Variable [0050: Druck [Val]] = Variable [0029: Druck [Exp+7&Val]]
+  Variable [0050: Druck [Val]] %= 10
+
+==============================================================================
+COMMON EVENT 002: Druck Tank   Trigger: Parallel   Condition switch: [0001: initialize]
+==============================================================================
+  Call Common Event: [0003: Saugleistung]
+  Call Common Event: [0004: Enddruck]
+  If Variable [0026: Jumbo door] == 1
+    If Variable [0029: Druck [Exp+7&Val]] < 101
+      Variable [0029: Druck [Exp+7&Val]] -= Variable [0047: Saugleistung]
+    Else
+      If Variable [0027: Handräder] == 2
+        Variable [0029: Druck [Exp+7&Val]] -= Variable [0047: Saugleistung]
+      Else
+    If Variable [0029: Druck [Exp+7&Val]] < Variable [0045: Enddruck [Exp+7&Val]]
+      Variable [0029: Druck [Exp+7&Val]] = Variable [0045: Enddruck [Exp+7&Val]]
+    Else
+  Else
+    Variable [0029: Druck [Exp+7&Val]] = 101
+  If Variable [0029: Druck [Exp+7&Val]] == 1
+    Switch [0003: 1E-7 erreicht] = ON
+  Else
+  If Switch [0002: Doktorand weg] == OFF
+    If Variable [0029: Druck [Exp+7&Val]] < 101
+      Text: Das Klopfen im Tank ignorierend pumpst du die 
+          : Kammer ab.
+      Text: Als die Pumpe anzieht, höhrst du einen erstickten 
+          : Schrei.
+      Text: In deiner Panik, schaffst du es nicht, die Kammer 
+          : rechtzeitig zu belüften.
+      Text: Als du die Tür endlich öffnest, blicken dich die toten 
+          : Augen eines Doktoranden anklagend an...
+      Game Over
+    Else
+      If Variable [0026: Jumbo door] == 1
+        Play SE: '041-Knock02' (vol 100, pitch 120)
+        Wait: 5 frame(s)
+        Play SE: '041-Knock02' (vol 100, pitch 120)
+        Wait: 5 frame(s)
+        Play SE: '041-Knock02' (vol 100, pitch 120)
+        Wait: 5 frame(s)
+        Play SE: '041-Knock02' (vol 100, pitch 120)
+      Else
+  Else
+  Variable [0018: Zeit] += 1
+  Wait: 400 frame(s)
+
+==============================================================================
+COMMON EVENT 003: Saugleistung   Trigger: None
+==============================================================================
+  Call Common Event: [0005: #Turbos]
+  Variable [0047: Saugleistung] = 0
+  If Variable [0046: #Turbos] == 0
+    Variable [0047: Saugleistung] += Variable [0048: #Vorpumpen]
+  Else
+    Variable [0047: Saugleistung] += Variable [0046: #Turbos]
+  Variable [0047: Saugleistung] += Variable [0042: Kryos]
+
+==============================================================================
+COMMON EVENT 004: Enddruck   Trigger: None
+==============================================================================
+  If Variable [0024: Ventil V1] == 0
+    Call Common Event: [0005: #Turbos]
+    If Variable [0046: #Turbos] > 0
+      Variable [0045: Enddruck [Exp+7&Val]] = 12
+      If Variable [0042: Kryos] == 1
+        Variable [0045: Enddruck [Exp+7&Val]] = 1
+      Else
+    Else
+  Else
+    Variable [0045: Enddruck [Exp+7&Val]] = 51
+  If Variable [0023: Ventil Zwichenvakuum Pumpe] == 1
+    If Variable [0022: Ventil Zwichenvakuum atm] == 0
+      If Variable [0043: Zwischenvakuumpumpe] == 1
+      Else
+        Variable [0045: Enddruck [Exp+7&Val]] += 10
+    Else
+      Variable [0045: Enddruck [Exp+7&Val]] += 10
+  Else
+    Variable [0045: Enddruck [Exp+7&Val]] += 10
+
+==============================================================================
+COMMON EVENT 005: #Turbos   Trigger: None
+==============================================================================
+  Variable [0048: #Vorpumpen] = 0
+  Variable [0046: #Turbos] = 0
+  If Variable [0001: Ventil Turbo alt] == 1
+    If Variable [0038: Vorpumpe Turbo alt] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: HiPace 1
+    If Variable [0033: Turbo alt] == 1
+      Variable [0046: #Turbos] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: HiPace 1
+  Else
+  Label: HiPace 1
+  If Variable [0002: Ventil HiPace 1] == 1
+    If Variable [0040: Vorpumpe HiPace 1] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: HiPace 2
+    If Variable [0036: Turbo HiPace 1] == 1
+      Variable [0046: #Turbos] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: HiPace 2
+  Else
+  Label: HiPace 2
+  If Variable [0003: Ventil HiPace 2] == 1
+    If Variable [0041: Vorpumpe HiPace 2] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: Door 1
+    If Variable [0037: Turbo HiPace 2] == 1
+      Variable [0046: #Turbos] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: Door 1
+  Else
+  Label: Door 1
+  If Variable [0004: Ventil Turbo Door 1] == 1
+    If Variable [0039: Schraubenpumpe] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: Door 2
+    If Variable [0034: Turbo Door 1] == 1
+      Variable [0046: #Turbos] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: Door 2
+  Else
+  Label: Door 2
+  If Variable [0005: Ventil Turbo Door 2] == 1
+    If Variable [0039: Schraubenpumpe] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: End
+    If Variable [0035: Turbo Door 2] == 1
+      Variable [0046: #Turbos] += 1
+    Else
+      Variable [0046: #Turbos] = -5
+      Jump to Label: End
+  Else
+  Label: End
+  If Variable [0024: Ventil V1] == 1
+    If Variable [0031: Rotary] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+    If Variable [0032: Roots] == 1
+      Variable [0048: #Vorpumpen] += 1
+    Else
+  Else
+  If Variable [0046: #Turbos] <= 0
+    Variable [0046: #Turbos] = 0
+  Else
+
+==============================================================================
+COMMON EVENT 007: Abspann   Trigger: None
+==============================================================================
+  Play ME: '002-Victory02' (vol 50, pitch 100)
+  Text: Der Tank wurde erfolgreich auf 1E-7 mbar evakuiert.
+  Variable [0019: Punkte] -= Variable [0018: Zeit]
+  If Variable [0027: Handräder] == 1
+    Text: Du hast vergessen, die Handräder wieder zu öffnen.
+    Variable [0019: Punkte] -= 5
+  Else
+  If Variable [0031: Rotary] == 1
+    Text: Du hast vergessen, die Rotary auszuschalten.
+    Variable [0019: Punkte] -= 15
+  Else
+  If Variable [0032: Roots] == 1
+    Text: Du hast vergessen, die Roots auszuschalten.
+    Variable [0019: Punkte] -= 15
+  Else
+  If Variable [0030: Druck Rotary [Exp+7&Val]] < 101
+    Text: Du hast vergessen, die Leitung der Rotary zu 
+        : belüften. Jetzt steigt Öl aus den Pumpen auf.
+    Variable [0019: Punkte] -= 10
+  Else
+  If Switch [0009: Roots zu früh] == ON
+    Text: Du hast die Roots zu früh gestartet.
+    Variable [0019: Punkte] -= 30
+  Else
+  If Switch [0015: Turbo zu früh] == ON
+    Text: Du hast die Turbos zu früh gestartet.
+    Variable [0019: Punkte] -= 30
+  Else
+  If Switch [0004: Kryo zu früh] == ON
+    Text: Du hast die Kryos zu früh gestartet.
+    Variable [0019: Punkte] -= 30
+  Else
+  If Switch [0006: V1 gegen Unterdruck] == ON
+    Text: Du hast V1 gegen Unterdruck geschaltet.
+    Variable [0019: Punkte] -= 40
+  Else
+  If Switch [0007: V1 gegen Überdruck] == ON
+    Text: Du hast V1 gegen Überdruck geschaltet.
+    Variable [0019: Punkte] -= 20
+  Else
+  If Switch [0005: V1 gegen Vorpumpen] == ON
+    Text: Du hast V1 gegen Unterdruck geschaltet, während 
+        : die Vorpumpen noch liefen.
+    Variable [0019: Punkte] -= 80
+  Else
+  If Switch [0008: Umwegventil zu ohne Roots] == ON
+    Text: Das Umwegventil der Rotary hättest du beim 
+        : Abpumpen schon öffnen können.
+    Variable [0019: Punkte] -= 10
+  Else
+  If Switch [0010: Kryos ohne Wasser] == ON
+    Text: Kein Wasser für die Kryos.
+    Variable [0019: Punkte] -= 30
+  Else
+  If Switch [0011: Turbo alt ohne Wasser] == ON
+    Text: Kein Wasser für die alte Turbo.
+    Variable [0019: Punkte] -= 10
+  Else
+  If Switch [0012: Turbo HiPace ohne Wasser] == ON
+    Text: Kein Wasser für die HiPace Turbos.
+    Variable [0019: Punkte] -= 20
+  Else
+  If Switch [0013: Turbo Door ohne Wasser] == ON
+    Text: Kein Wasser für die Turbos an der Tür.
+    Variable [0019: Punkte] -= 10
+  Else
+  If Switch [0014: Schraubenpumpe ohne Wasser] == ON
+    Text: Kein Wasser für die Schraubenpumpe.
+    Variable [0019: Punkte] -= 25
+  Else
+  If Switch [0016: nicht in den Tank geschaut] == ON
+    Text: Und vielleicht das Wichtigste:
+        : Du hast nicht nachgeschaut, ob der Tank leer ist.
+        : Immerhin ist nichts Schlimmeres passiert.
+    Variable [0019: Punkte] -= 300
+  Else
+  Text: \v[19] / 1000 Punkten
+  Return to Title Screen
+

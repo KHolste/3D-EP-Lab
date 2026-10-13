@@ -1,0 +1,8 @@
+# Python-Umgebung fuer die CAD-Werkzeuge (612 MB, laesst sich neu aufsetzen)
+tools/cadenv/
+__pycache__/
+
+# Grosse CAD-Quelldateien: die STEP-Datei (120 MB) ueberschreitet das Dateilimit von GitHub,
+# halle_full.glb (44 MB) wird mit tools/step2glb.py daraus erzeugt
+*.stp
+prototype/cad/halle_full.glb

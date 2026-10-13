@@ -1,0 +1,1763 @@
+[
+ null,
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Ghost*2",
+  "id": 1,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 1,
+    "x": 271,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 1,
+    "x": 369,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Ghost*3",
+  "id": 2,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 1,
+    "x": 222,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 1,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 1,
+    "x": 418,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Basilisk*2",
+  "id": 3,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 2,
+    "x": 266,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 2,
+    "x": 374,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Basilisk*3",
+  "id": 4,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 2,
+    "x": 212,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 2,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 2,
+    "x": 428,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Sahagin*2",
+  "id": 5,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 3,
+    "x": 261,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 3,
+    "x": 379,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Sahagin*3",
+  "id": 6,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 3,
+    "x": 202,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 3,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 3,
+    "x": 438,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Hellhound*2",
+  "id": 7,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 4,
+    "x": 268,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 4,
+    "x": 372,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Hellhound*3",
+  "id": 8,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 4,
+    "x": 216,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 4,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 4,
+    "x": 424,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Cobold*2",
+  "id": 9,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 5,
+    "x": 267,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 5,
+    "x": 373,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Cobold*3",
+  "id": 10,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 5,
+    "x": 214,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 5,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 5,
+    "x": 426,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Cockatrice*2",
+  "id": 11,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 6,
+    "x": 270,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 6,
+    "x": 370,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Cockatrice*3",
+  "id": 12,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 6,
+    "x": 220,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 6,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 6,
+    "x": 420,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Imp*2",
+  "id": 13,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 7,
+    "x": 271,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 7,
+    "x": 369,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Imp*3",
+  "id": 14,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 7,
+    "x": 222,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 7,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 7,
+    "x": 418,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Angel*2",
+  "id": 15,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 8,
+    "x": 267,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 8,
+    "x": 373,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Angel*3",
+  "id": 16,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 8,
+    "x": 214,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 8,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 8,
+    "x": 426,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Zombie*2",
+  "id": 17,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 9,
+    "x": 252,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 9,
+    "x": 388,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Zombie*3",
+  "id": 18,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 9,
+    "x": 184,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 9,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 9,
+    "x": 456,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Lamia*2",
+  "id": 19,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 10,
+    "x": 249,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 10,
+    "x": 391,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Lamia*3",
+  "id": 20,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 10,
+    "x": 178,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 10,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 10,
+    "x": 462,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Lizardman*2",
+  "id": 21,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 11,
+    "x": 242,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 11,
+    "x": 398,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Lizardman*3",
+  "id": 22,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 11,
+    "x": 164,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 11,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 11,
+    "x": 476,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Kerberos*2",
+  "id": 23,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 12,
+    "x": 248,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 12,
+    "x": 392,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Kerberos*3",
+  "id": 24,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 12,
+    "x": 176,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 12,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 12,
+    "x": 464,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Goblin*2",
+  "id": 25,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 13,
+    "x": 246,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 13,
+    "x": 394,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Goblin*3",
+  "id": 26,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 13,
+    "x": 172,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 13,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 13,
+    "x": 468,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Harpy*2",
+  "id": 27,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 14,
+    "x": 250,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 14,
+    "x": 390,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Harpy*3",
+  "id": 28,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 14,
+    "x": 180,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 14,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 14,
+    "x": 460,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Gargoyle*2",
+  "id": 29,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 15,
+    "x": 243,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 15,
+    "x": 397,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Gargoyle*3",
+  "id": 30,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 15,
+    "x": 166,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 15,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 15,
+    "x": 474,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Archangel*2",
+  "id": 31,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 16,
+    "x": 251,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 16,
+    "x": 389,
+    "immortal": false
+   }
+  ]
+ },
+ {
+  "__class__": "RPG::Troop",
+  "pages": [
+   {
+    "__class__": "RPG::Troop::Page",
+    "list": [
+     {
+      "__class__": "RPG::EventCommand",
+      "parameters": [],
+      "indent": 0,
+      "code": 0
+     }
+    ],
+    "condition": {
+     "__class__": "RPG::Troop::Page::Condition",
+     "actor_id": 1,
+     "turn_a": 0,
+     "turn_valid": false,
+     "enemy_hp": 50,
+     "switch_valid": false,
+     "switch_id": 1,
+     "enemy_index": 0,
+     "actor_valid": false,
+     "actor_hp": 50,
+     "turn_b": 0,
+     "enemy_valid": false
+    },
+    "span": 0
+   }
+  ],
+  "name": "Archangel*3",
+  "id": 32,
+  "members": [
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 16,
+    "x": 182,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 16,
+    "x": 320,
+    "immortal": false
+   },
+   {
+    "__class__": "RPG::Troop::Member",
+    "hidden": false,
+    "y": 304,
+    "enemy_id": 16,
+    "x": 458,
+    "immortal": false
+   }
+  ]
+ }
+]
