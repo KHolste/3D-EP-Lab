@@ -207,7 +207,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       if (ft) { const f = new THREE.Mesh(new THREE.PlaneGeometry(L - 0.5, 1.0), new THREE.MeshBasicMaterial({map:ft, toneMapped:false}));
         f.rotation.y = -Math.PI/2; f.position.set(XW - 0.004, 2.05, zm); scene.add(f); }
       box(weiss, 0.16, 0.03, L - 0.4, XW - 0.08, 1.535, zm);
-      // Arbeitstisch: Platte 0,9 m hoch, 0,75 m tief; links ein Schubladenblock (rot), rechts ein grauer Unterschrank, dazwischen frei
+      // Arbeitstisch nur in den beiden mittleren Feldern: Platte 0,9 m hoch, 0,75 m tief; links ein Schubladenblock (rot), rechts ein grauer Unterschrank
+      if (i > 0 && i < felder.length - 1) {
       const tl = L - 0.9, tz = za + 0.15 + tl/2, tx = XW - 0.375;
       box(buche, 0.75, 0.04, tl, tx, 0.88, tz);
       box(grau, 0.68, 0.84, 0.55, tx, 0.43, za + 0.15 + 0.3); for (let k = 0; k < 3; k++) box(rot, 0.02, k ? 0.24 : 0.16, 0.5, tx - 0.345, k ? 0.2 + (k-1)*0.27 : 0.73, za + 0.45);
@@ -215,7 +216,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       cols.push({x0:XW - 0.76, x1:XW, z0:za + 0.15, z1:za + 0.15 + tl, y0:-1, y1:0.9});
       // auf dem Tisch: Kisten, Werkzeugkoffer, Gerät
       box(holz, 0.35, 0.14, 0.45, tx + 0.05, 0.97, tz - tl*0.3); box(dunkel, 0.4, 0.05, 0.6, tx - 0.05, 0.925, tz); box(holz, 0.3, 0.2, 0.3, tx + 0.1, 1.0, tz + tl*0.3);
-      if (i % 2 === 0) { box(alu, 0.3, 0.22, 0.35, tx + 0.15, 1.01, za + 0.5); box(weiss, 0.06, 0.18, 0.06, tx + 0.18, 0.99, za + 0.8); }
+      if (i === 1) { box(alu, 0.3, 0.22, 0.35, tx + 0.15, 1.01, za + 0.5); box(weiss, 0.06, 0.18, 0.06, tx + 0.18, 0.99, za + 0.8); }
+      }
       // Elektrokanal mit Steckdosen und (im zweiten Feld) Not-Aus
       box(weiss, 0.07, 0.14, L - 0.1, XW - 0.035, 1.2, zm);
       for (let k = 0; k < Math.floor((L - 0.4)/0.7); k++) box(dunkel, 0.01, 0.07, 0.07, XW - 0.075, 1.2, za + 0.4 + k*0.7);
