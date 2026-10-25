@@ -40,6 +40,10 @@ Die Spiele selbst liegen in `prototype/` und lassen sich auch direkt öffnen:
 
 Anna (oben auf der Bühne) und Kalle (unten in der Halle) helfen weiter, wenn man sie anspricht.
 
+Neben der Halle (Raum 07) ist das übrige Gebäude nach dem Grundriss begehbar: Durch die Tür an der Längswand
+neben der EMV-Kabine geht es nach Raum 09 und von dort in die Flure und Räume. Die Räume sind noch leer und
+werden nach und nach anhand von Fotos eingerichtet (`prototype/raeume.js`).
+
 ### Testmodi
 
 Die Testmodi werden als URL-Parameter an die HTML-Datei angehängt:
@@ -55,9 +59,9 @@ Die Testmodi werden als URL-Parameter an die HTML-Datei angehängt:
 | `original/` | das RPG-Maker-XP-Original (Spiel, Grafiken, Audio, Daten) |
 | `extracted/` | aus dem Original extrahierte Daten: Maps, Events, Skripte als Text und JSON |
 | `prototype/` | die 3D-Spiele (three.js) |
-| `prototype/cad/` | erzeugte Daten: Hallenmodell, Texturen, Musik, CAD-Vorschau (`view.html`) |
+| `prototype/cad/` | erzeugte Daten: Hallenmodell, Nachbarräume, Texturen, Musik, CAD-Vorschau (`view.html`) |
 | `tools/` | Python-Werkzeuge, die die Daten in `extracted/` und `prototype/cad/` erzeugen |
-| `docs/` | Anleitung zum Abpumpvorgang, gemessene Pumpdown-Kurve, Fotos der Halle |
+| `docs/` | Anleitung zum Abpumpvorgang, gemessene Pumpdown-Kurve, Fotos der Halle, Grundriss des Gebäudes |
 
 ## Werkzeuge
 
@@ -70,6 +74,7 @@ Alle Aufrufe gehen vom Repo-Wurzelordner aus.
 | `tools/step_tess.py` | liest die tessellierten Bauteile (z. B. EMV-Kabine) direkt aus der STEP-Datei |
 | `tools/glb_opt.py` | verschlankt die GLB zu `halle_data.js` bzw. mit `lite` zu `halle_lite.js` |
 | `tools/fototex.py` | schneidet aus `docs/fotos` kachelbare Texturen für `tex_lite.js` |
+| `tools/grundriss.py` | liest die Wände der Nachbarräume aus `docs/grundriss.png` und schreibt `raeume_data.js` |
 | `tools/midi2musik.py` | rendert die MIDI-Musik des Originals mit einem SoundFont und schreibt `musik.js` |
 | `tools/glbstat.py`, `tools/glblib.py` | Hilfen: Dreiecksstatistik und GLB-Leser |
 

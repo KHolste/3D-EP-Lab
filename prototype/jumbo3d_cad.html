@@ -71,6 +71,8 @@
 <script src="cad/halle_data.js"></script>
 <script src="cad/tex_lite.js"></script>
 <script src="cad/musik.js"></script>
+<script src="cad/raeume_data.js"></script>
+<script src="raeume.js"></script>
 <script type="module">
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -642,6 +644,9 @@ for (const i of [0,1]) {
 // Kollision der Tür in zwei Teilen: breiter Flansch mit Fahrgestell, davor nur die schmalen Anbauten mit den Bedientafeln - so kommt man auch bei geschlossener Tür außen herum
 const doorCol = {x0:0, x1:0, z0:TZ-1.25, z1:TZ+1.42, y0:DY-0.1, y1:5.4}, doorCol2 = {x0:0, x1:0, z0:TZ-0.4, z1:TZ+0.75, y0:DY-0.1, y1:5.4}; cols.push(doorCol, doorCol2);
 
+/* ---- Nachbarräume nach dem Grundriss (raeume.js, Daten aus tools/grundriss.py); bringt auch die Hallenwände als Kollision mit ---- */
+window.baueRaeume(THREE, scene, cols, cadMeshes);
+
 /* ---- Bühne (Umriss aus dem CAD), Geländer, die beiden hinteren Treppen (ergänzt, fehlen im CAD),
         Zwischenbühne, CAD-Treppe und obere Ebene über der EMV-Kabine ---- */
 const STZ = -5.23;                                                 // Aussparungen der Bühne an der Rückwand: z von -6 bis STZ
@@ -1105,7 +1110,6 @@ function movePlayer(dt){
     else { const l = P.x-c.x0, r = c.x1-P.x, n = P.z-c.z0, q = c.z1-P.z, m = Math.min(l,r,n,q);
       if (m === l) P.x = c.x0-R; else if (m === r) P.x = c.x1+R; else if (m === n) P.z = c.z0-R; else P.z = c.z1+R; }
   }
-  P.x = Math.max(-15.05, Math.min(-0.62, P.x)); P.z = Math.max(-5.68, Math.min(5.68, P.z));
   const h = groundAt(P.x, P.z, P.feet);
   P.feet = P.feet < h ? Math.min(h, P.feet + 6*dt + (h-P.feet)*0.3) : Math.max(h, P.feet - 9*dt);
 }
@@ -1235,6 +1239,9 @@ if (Q.get('walk')) {
   r.vorKabine = walk(-9.5, 4.5, 0, [[90, 45]]);                           // geschlossene Kabinentür hält auf
   ACT.kab.do(); for (let i = 0; i < 40; i++) for (const u of upd) u();
   r.inKabine = walk(-9.5, 4.5, 0, [[90, 45]]);                            // durch die offene Tür in die EMV-Kabine
+  r.nach09 = walk(-9.2, 5.0, 0, [[180, 40]]);                             // durch die Tür in der Hallenwand nach Raum 09 (z deutlich über 6)
+  r.hallenwand = walk(-5.0, 5.0, 0, [[180, 40]]);                          // daneben hält die Wand auf (z bleibt bei 5.68)
+  r.flur08 = walk(-9.2, 5.0, 0, [[180, 600]]);                             // geradeaus durch 09, Flur 05, 08b und 08 bis ans Westende (z über 55)
   $('testout').style.display = 'block'; $('testout').textContent = 'WALKRESULT ' + JSON.stringify(r);
 }
 applyQuality();
