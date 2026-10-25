@@ -34,9 +34,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   mesh(quader(R.doors.map(([x0, x1, z0, z1, u]) => [x0, x1, u || 2.1, HR, z0, z1])), wandM);
   for (const [x0, x1, z0, z1] of R.walls) cols.push({x0, x1, z0, z1, y0:-1, y1:HR});
 
-  // Boden (grauer Belag) und Decke über das ganze Gebäude neben der Halle
+  // Boden und Decke über das ganze Gebäude neben der Halle. Boden: graubrauner Belag nach Foto (docs/fotos/textur_boden_aussen,
+  // Textur 'aussen' aus cad/tex_lite.js), eine Kachel 0,7 m breit und 1,6 m lang, Streifen längs der Flure (z)
   const [bx0, bx1, bz0, bz1] = R.floor, w = bx1-bx0, d = bz1-bz0;
-  const boden = mesh(new THREE.PlaneGeometry(w, d), mats(0x8f8a80, 0x141412)); boden.rotation.x = -Math.PI/2; boden.position.set((bx0+bx1)/2, 0.002, (bz0+bz1)/2);
+  let bodenM = mats(0x8f8a80, 0x141412);
+  if (window.TEX && window.TEX.aussen) {
+    const t = new THREE.TextureLoader().load(window.TEX.aussen); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping; t.repeat.set(w/0.7, d/1.6);
+    bodenM = [new THREE.MeshLambertMaterial({map:t, color:0x9a9a9a}), new THREE.MeshStandardMaterial({map:t, color:0x8a8a8a, roughness:0.75, metalness:0})];   // abgedunkelt: die Räume bekommen volles Sonnenlicht ohne Schatten
+  }
+  const boden = mesh(new THREE.PlaneGeometry(w, d), bodenM); boden.rotation.x = -Math.PI/2; boden.position.set((bx0+bx1)/2, 0.002, (bz0+bz1)/2);
   const decke = mesh(new THREE.PlaneGeometry(w, d), mats(0xe6e6e2, 0x9a9a96)); decke.rotation.x = Math.PI/2; decke.position.set((bx0+bx1)/2, HR, (bz0+bz1)/2);
 
   // Raumnummern auf dem Boden, lesbar beim Blick von der Halle aus (nach +z, im Plan: nach links)
