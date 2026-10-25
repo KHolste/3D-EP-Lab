@@ -687,7 +687,7 @@ const inDeck = (x,z) => { const y = -z;
 function groundAt(x,z,feet){
   let h = 0; const ok = v => v <= feet + 0.6, up = v => { if (ok(v)) h = Math.max(h, v); };
   if (inDeck(x,z)) up(DY);
-  if (window.raeumeBoden) for (const v of window.raeumeBoden(x, z)) up(v);              // Treppe im Treppenhaus 020 (raeume.js)
+  if (window.raeumeBoden) { const r = window.raeumeBoden(x, z, feet); if (r.loch) h = -99; for (const v of r) up(v); }   // Treppenhaus 020 mit Kellertreppe (raeume.js)
   if (x > KAB.x0 && x < KAB.x1 && z > KAB.z0 && z < KAB.z1) up(0.235);
   if (z <= STZ && z >= -6.05) {
     if (x >= ST1.xt && x <= ST1.xb) up(DY*(ST1.xb-x)/(ST1.xb-ST1.xt));
@@ -1231,7 +1231,7 @@ if (Q.get('walk')) {
   r.hallenwand = walk(-5.0, 5.0, 0, [[180, 40]]);                          // daneben hält die Wand auf (z bleibt bei 5.68)
   r.flur08 = walk(-9.2, 5.0, 0, [[180, 600]]);                             // geradeaus durch 09, Flur 05, 08b und 08 bis ans Westende (z über 55)
   r.treppe020 = walk(-10.3, 13.9, 0, [[90, 40], [180, 15], [-90, 40]]);    // Treppenhaus 020: Lauf 1 hoch, übers Podest, Lauf 2 hoch bis vor die Tür (Höhe 3.4)
-  r.unterLauf2 = walk(-10.0, 15.4, 0, [[90, 30]]);                        // vom Vorplatz unter Lauf 2: hält bei x -10.71 auf
+  r.keller = walk(-10.2, 15.4, 0, [[90, 40], [0, 15], [-90, 40]]);         // Kellertreppe: Lauf A hinunter, übers Kellerpodest, Lauf B hinunter bis vor die Kellertür (Höhe -3.4)
   $('testout').style.display = 'block'; $('testout').textContent = 'WALKRESULT ' + JSON.stringify(r);
 }
 applyQuality();
