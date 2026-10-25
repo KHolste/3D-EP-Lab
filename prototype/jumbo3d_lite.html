@@ -1227,7 +1227,8 @@ if (Q.get('walk')) {
   r.roteTuer03 = walk(-9.0, 24.25, 0, [[90, 30]]);                       // Flur 08b: rote Tür zu 03 ist zu (x bleibt bei -9.8)
   r.offen013 = walk(-9.0, 30.9, 0, [[-90, 30]]);                          // gegenüber: Tür zu 013 ist offen (x deutlich über -7)
   r.in019 = walk(-9.0, 38.8, 0, [[-90, 40]]);                             // vom Start durch die erste Tür in 019 (x über -5.5)
-  r.hinterKammern = walk(-9.0, 48.2, 0, [[-90, 75]]);                      // durch die Doppeltür und hinter den Kammern vorbei (x über -2)
+  r.zwischenKammernUndMagnet = walk(-9.0, 48.2, 0, [[-90, 20], [0, 18], [-90, 55]]);   // Doppeltür, dann zwischen Tanks und kleiner Kammer durch (x über -2)
+  r.hinterTanks = walk(-6.75, 39.9, 0, [[180, 70]]);                       // knapper Durchgang zwischen Wandpfeilern und Tankenden (z über 45.5)
   $('testout').style.display = 'block'; $('testout').textContent = 'WALKRESULT ' + JSON.stringify(r);
 }
 applyQuality();
