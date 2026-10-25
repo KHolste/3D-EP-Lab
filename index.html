@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jumbo-Pumpdown 3D</title>
+<style>
+  :root { --bg:#14181d; --card:#1e242b; --text:#e6e9ec; --muted:#9aa4ae; --accent:#e0a33a; --accent-text:#1a1306; --line:#2e363f; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px;
+         background:var(--bg); color:var(--text); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { width:100%; max-width:640px; }
+  h1 { margin:0 0 4px; font-size:2rem; letter-spacing:0.01em; }
+  .sub { margin:0 0 24px; color:var(--muted); }
+  blockquote { margin:0 0 28px; padding:12px 16px; border-left:3px solid var(--accent); background:var(--card); border-radius:0 6px 6px 0; }
+  .start { display:grid; gap:12px; margin-bottom:28px; }
+  a.btn { display:block; padding:14px 18px; border-radius:8px; text-decoration:none; color:var(--text);
+          background:var(--card); border:1px solid var(--line); }
+  a.btn:hover, a.btn:focus-visible { border-color:var(--accent); outline:none; }
+  a.btn.main { background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
+  a.btn b { display:block; font-size:1.1rem; }
+  a.btn span { font-size:0.9rem; opacity:0.8; }
+  h2 { font-size:1rem; margin:0 0 8px; color:var(--muted); font-weight:600; }
+  .keys { display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin:0 0 24px; font-size:0.95rem; }
+  kbd { display:inline-block; min-width:1.6em; padding:0 5px; text-align:center; border:1px solid var(--line);
+        border-bottom-width:2px; border-radius:4px; background:var(--card); font:0.85rem/1.6 ui-monospace, monospace; }
+  footer { font-size:0.85rem; color:var(--muted); }
+  footer a { color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Jumbo-Pumpdown 3D</h1>
+  <p class="sub">Evakuiere den Vakuumtank „Jumbo“, Schritt für Schritt wie in der echten Halle.</p>
+
+  <blockquote>Der Jumbo muss evakuiert werden. Alle, die es sonst machen, sind nicht da. Doch das Schicksal des
+  Neutralisators hängt davon ab – und nur du kannst ihn jetzt noch retten.</blockquote>
+
+  <div class="start">
+    <a class="btn main" href="prototype/jumbo3d_lite.html"><b>Spiel starten</b><span>Leichte Variante, läuft auch auf schwächeren Rechnern</span></a>
+    <a class="btn" href="prototype/jumbo3d_cad.html"><b>Volle CAD-Variante</b><span>Detailliertes Hallenmodell, lädt ca. 9 MB</span></a>
+  </div>
+
+  <h2>Steuerung</h2>
+  <div class="keys">
+    <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>gehen, mit <kbd>Shift</kbd> laufen</span>
+    <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span><span>drehen, hoch und runter sehen</span>
+    <span><kbd>E</kbd></span><span>bedienen, ansprechen</span>
+    <span><kbd>M</kbd></span><span>Maussteuerung an/aus</span>
+    <span><kbd>H</kbd></span><span>Anleitung zum Evakuieren</span>
+    <span><kbd>Esc</kbd></span><span>Pause</span>
+  </div>
+
+  <footer>Braucht eine Internetverbindung (three.js wird von jsDelivr geladen).
+  Quellcode und Werkzeuge: <a href="https://github.com/KHolste/3D-EP-Lab">github.com/KHolste/3D-EP-Lab</a></footer>
+</main>
+</body>
+</html>

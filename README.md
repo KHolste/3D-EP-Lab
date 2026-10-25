@@ -7,10 +7,14 @@ und Klappen in der richtigen Reihenfolge. Dabei folgt der Tankdruck einer Simula
 > Der Jumbo muss evakuiert werden. Alle, die es sonst machen, sind nicht da. Doch das Schicksal des Neutralisators
 > hängt davon ab – und nur du kannst ihn jetzt noch retten.
 
+**Online spielen: https://kholste.github.io/3D-EP-Lab/**
+
 ## Spielen
 
-Die Spiele laufen direkt im Browser und brauchen keinen Server. Ein Doppelklick auf die HTML-Datei genügt.
-Beim ersten Start wird three.js aus dem Netz geladen (jsDelivr), dafür braucht es eine Internetverbindung.
+Lokal: `index.html` im Hauptordner per Doppelklick öffnen und eine Variante wählen. Es braucht keinen Server,
+aber eine Internetverbindung, weil three.js von jsDelivr geladen wird.
+
+Die Spiele selbst liegen in `prototype/` und lassen sich auch direkt öffnen:
 
 | Datei | Inhalt |
 |---|---|
