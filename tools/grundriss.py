@@ -98,9 +98,16 @@ for k in FLURE:
     px, py = LABELS[k]; flur |= frei == frei[py + 4, px + 4]
 flur = ndimage.binary_dilation(flur, np.ones((3, 3))) & ~door      # Boden ein Pixel unter die Wand schieben, keine Fuge
 flure = [f for f in (to_game(r, 0.02) for r in rects(flur)) if f]
+# Raeume, die nach Fotos eingerichtet sind: weiss gestrichen, eigener Boden (Lage wie bei den Fluren aus der Beschriftung)
+WEISS = ['019']
+weiss = np.zeros_like(wall)
+for k in WEISS:
+    px, py = LABELS[k]; weiss |= frei == frei[py + 4, px + 4]
+weiss = ndimage.binary_dilation(weiss, np.ones((3, 3))) & ~door
+weiss_r = [f for f in (to_game(r, 0.02) for r in rects(weiss)) if f]
 bx0, bx1 = gx(5), gx(318); bz1, bz0 = gz(10), Z_MIN
 labels = {k: [round(gx(py + 6), 2), round(gz(px + 8), 2)] for k, (px, py) in LABELS.items()}
-out = {'walls': walls, 'doors': doors, 'flure': flure, 'floor': [round(bx0, 2), round(bx1, 2), round(bz0, 2), round(bz1, 2)], 'labels': labels}
+out = {'walls': walls, 'doors': doors, 'flure': flure, 'weiss': weiss_r, 'floor': [round(bx0, 2), round(bx1, 2), round(bz0, 2), round(bz1, 2)], 'labels': labels}
 with open(DST, 'w', encoding='utf-8') as f:
     f.write('// erzeugt von tools/grundriss.py aus docs/grundriss.png - nicht von Hand bearbeiten\n')
     f.write('// walls/doors: [x0, x1, z0, z1] in Metern (Spielkoordinaten), floor: Ausdehnung des Gebaeudes, labels: Raumnummer -> [x, z]\n')

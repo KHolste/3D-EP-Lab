@@ -31,17 +31,18 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // Flure (05 mit Treppenhaus 020, 08, 08b) haben glatt gestrichene, weiße Wände mit schwarzer Sockelleiste und gesprenkelten Boden.
   // Jede Wandseite wird in Stücke von höchstens 0,5 m zerlegt; zeigt ein Stück in einen Flur, bekommt es den Flur-Anstrich (und unten die Leiste).
   const FL = R.flure || [], imFlur = (x, z) => FL.some(([a, b, c, d]) => x > a && x < b && z > c && z < d);
+  const WS = R.weiss || [], imWeiss = (x, z) => WS.some(([a, b, c, d]) => x > a && x < b && z > c && z < d);   // eingerichtete Räume: weiß, ohne Leiste
   const beton = flaechen(), flurW = flaechen(), leiste = flaechen();
   const SH = 0.07, SD = 0.012;                       // Sockelleiste: Höhe und Stärke
   function teile(a, b, fn){ const n = Math.max(1, Math.ceil((b - a)/0.5)); for (let i = 0; i < n; i++) fn(a + (b-a)*i/n, a + (b-a)*(i+1)/n); }
   function wand(x0, x1, y0, y1, z0, z1, sockel){
     beton.add([0,1,0], [[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]]); beton.add([0,-1,0], [[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]]);
     teile(z0, z1, (a, b) => {
-      let f = imFlur(x1 + 0.05, (a+b)/2); (f ? flurW : beton).add([1,0,0], [[x1,y0,b],[x1,y0,a],[x1,y1,a],[x1,y1,b]]); if (f && sockel) kasten(leiste, x1, x1+SD, 0, SH, a, b);
-      f = imFlur(x0 - 0.05, (a+b)/2); (f ? flurW : beton).add([-1,0,0], [[x0,y0,a],[x0,y0,b],[x0,y1,b],[x0,y1,a]]); if (f && sockel) kasten(leiste, x0-SD, x0, 0, SH, a, b); });
+      let x = x1 + 0.05, z = (a+b)/2, f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([1,0,0], [[x1,y0,b],[x1,y0,a],[x1,y1,a],[x1,y1,b]]); if (f && sockel) kasten(leiste, x1, x1+SD, 0, SH, a, b);
+      x = x0 - 0.05; f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([-1,0,0], [[x0,y0,a],[x0,y0,b],[x0,y1,b],[x0,y1,a]]); if (f && sockel) kasten(leiste, x0-SD, x0, 0, SH, a, b); });
     teile(x0, x1, (a, b) => {
-      let f = imFlur((a+b)/2, z1 + 0.05); (f ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z1, z1+SD);
-      f = imFlur((a+b)/2, z0 - 0.05); (f ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
+      let x = (a+b)/2, z = z1 + 0.05, f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z1, z1+SD);
+      z = z0 - 0.05; f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
   }
   for (const [x0, x1, z0, z1] of R.walls) wand(x0, x1, 0, HR, z0, z1, true);
   for (const [x0, x1, z0, z1, u] of R.doors) wand(x0, x1, u || 2.1, HR, z0, z1, false);
@@ -120,6 +121,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   { const F = flaechen(); bodenFl(F, 0.004, FL);
     const t = tex('flurboden', 1.0, 0.5, true);
     mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x9a9a9a}), new THREE.MeshStandardMaterial({map:t, color:0x8c8c8c, roughness:0.75, metalness:0})]); }
+  // Eingerichtete Räume (019): heller, glatter Beschichtungsboden wie auf dem Foto
+  { const F = flaechen(); bodenFl(F, 0.004, WS); mesh(F.geo(), [new THREE.MeshLambertMaterial({color:0xcfcdc4}), new THREE.MeshStandardMaterial({color:0xcfcdc4, roughness:0.55, metalness:0})]); }
   // Decke: überall auf 3 m, über dem Treppenhaus offen; der Treppenraum hat seine Decke auf 6,8 m
   { const F = flaechen(), unten = (x0, x1, y, z0, z1) => F.add([0,-1,0], [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]]);
     unten(bx0, bx1, HR, bz0, T.zN); unten(bx0, bx1, HR, T.zS, bz1); unten(bx0, T.xW, HR, T.zN, T.zS); unten(T.xO, bx1, HR, T.zN, T.zS);
@@ -182,6 +185,47 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       m.position.set(X1 - 0.03, 1.05, (z0 + z1)/2); scene.add(m);
       cols.push({x0:X0, x1:X1, z0, z1, y0:-1, y1:2.1});
     }
+  }
+
+  // Raum 019 nach dem Foto docs/fotos/raum019.JPEG (Blick zur Außenwand): zwischen den Wandpfeilern je ein liegendes Fenster
+  // (Textur 'fenster019', tools/fenstertex.py), darunter ein Arbeitstisch mit Buchenplatte auf grauem Gestell, rote Schubladen,
+  // ein Elektrokanal mit Steckdosen, Heizkörper am Pfeiler; an der Decke Kabelpritschen und lange Leuchten. Ohne Personen und Kran.
+  { const XW = 0.446, Z0 = 36.41, Z1 = 49.333, pf = [];
+    for (const [x0, x1, z0, z1] of R.walls) if (x1 > 0.4 && x1 < 0.5 && x0 > -0.2 && z0 > Z0 && z1 < Z1) pf.push([z0, z1]);   // Wandpfeiler
+    pf.sort((a, b) => a[0] - b[0]);
+    const felder = []; let z = Z0; for (const [a, b] of pf) { felder.push([z, a]); z = b; } felder.push([z, Z1]);
+    const XP = Math.min(...R.walls.filter(([x0, x1, z0, z1]) => x1 > 0.4 && x1 < 0.5 && x0 > -0.2 && z0 > Z0 && z1 < Z1).map(w => w[0]));   // Vorderkante der Pfeiler
+    const mat = (color, o = {}) => { const m = [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.6, metalness:0.1, ...o})]; return m; };
+    const box = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const buche = mat(0xc98f5c, {roughness:0.7, metalness:0}), grau = mat(0xb9bdc0, {roughness:0.55, metalness:0.25}), rot = mat(0xb8231b, {roughness:0.45, metalness:0.15}),
+          weiss = mat(0xf2f2ef, {roughness:0.8, metalness:0}), dunkel = mat(0x2a2d31, {roughness:0.6}), holz = mat(0xd2b48a, {roughness:0.8, metalness:0}),
+          alu = mat(0xc4c8cc, {roughness:0.35, metalness:0.7, emissive:0x45484b}), licht = [new THREE.MeshBasicMaterial({color:0xffffff}), new THREE.MeshBasicMaterial({color:0xffffff})];
+    const ft = window.TEX && window.TEX.fenster019 ? (t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; })(new THREE.TextureLoader().load(window.TEX.fenster019)) : null;
+    felder.forEach(([za, zb], i) => {
+      const L = zb - za, zm = (za + zb)/2;
+      // Fenster: Brüstung 1,5 m, Fensterhöhe 1,0 m; weiße Laibung als Rahmen, Fensterbank
+      if (ft) { const f = new THREE.Mesh(new THREE.PlaneGeometry(L - 0.5, 1.0), new THREE.MeshBasicMaterial({map:ft, toneMapped:false}));
+        f.rotation.y = -Math.PI/2; f.position.set(XW - 0.004, 2.05, zm); scene.add(f); }
+      box(weiss, 0.16, 0.03, L - 0.4, XW - 0.08, 1.535, zm);
+      // Arbeitstisch: Platte 0,9 m hoch, 0,75 m tief; links ein Schubladenblock (rot), rechts ein grauer Unterschrank, dazwischen frei
+      const tl = L - 0.9, tz = za + 0.15 + tl/2, tx = XW - 0.375;
+      box(buche, 0.75, 0.04, tl, tx, 0.88, tz);
+      box(grau, 0.68, 0.84, 0.55, tx, 0.43, za + 0.15 + 0.3); for (let k = 0; k < 3; k++) box(rot, 0.02, k ? 0.24 : 0.16, 0.5, tx - 0.345, k ? 0.2 + (k-1)*0.27 : 0.73, za + 0.45);
+      box(grau, 0.68, 0.84, 0.5, tx, 0.43, za + 0.15 + tl - 0.27); box(rot, 0.02, 0.7, 0.45, tx - 0.345, 0.42, za + 0.15 + tl - 0.27);
+      cols.push({x0:XW - 0.76, x1:XW, z0:za + 0.15, z1:za + 0.15 + tl, y0:-1, y1:0.9});
+      // auf dem Tisch: Kisten, Werkzeugkoffer, Gerät
+      box(holz, 0.35, 0.14, 0.45, tx + 0.05, 0.97, tz - tl*0.3); box(dunkel, 0.4, 0.05, 0.6, tx - 0.05, 0.925, tz); box(holz, 0.3, 0.2, 0.3, tx + 0.1, 1.0, tz + tl*0.3);
+      if (i % 2 === 0) { box(alu, 0.3, 0.22, 0.35, tx + 0.15, 1.01, za + 0.5); box(weiss, 0.06, 0.18, 0.06, tx + 0.18, 0.99, za + 0.8); }
+      // Elektrokanal mit Steckdosen und (im zweiten Feld) Not-Aus
+      box(weiss, 0.07, 0.14, L - 0.1, XW - 0.035, 1.2, zm);
+      for (let k = 0; k < Math.floor((L - 0.4)/0.7); k++) box(dunkel, 0.01, 0.07, 0.07, XW - 0.075, 1.2, za + 0.4 + k*0.7);
+      if (i === 1) { box(mat(0xf0c000), 0.02, 0.1, 0.1, XW - 0.08, 1.2, zm); box(rot, 0.04, 0.05, 0.05, XW - 0.1, 1.2, zm); }
+      // Heizkörper unter dem Fenster am Pfeiler (im letzten Feld kein Platz neben dem Tisch)
+      if (i < felder.length - 1) { for (let k = 0; k < 8; k++) box(weiss, 0.08, 0.6, 0.03, XW - 0.12, 0.4, zb - 0.05 - k*0.075); }
+    });
+    // Decke: zwei Kabelpritschen längs, quer dazu Leuchten (lange Lichtbänder)
+    for (const x of [-1.2, -4.6]) { box(alu, 0.4, 0.04, Z1 - Z0 - 0.2, x, 2.78, (Z0 + Z1)/2); box(alu, 0.02, 0.08, Z1 - Z0 - 0.2, x - 0.2, 2.8, (Z0 + Z1)/2); box(alu, 0.02, 0.08, Z1 - Z0 - 0.2, x + 0.2, 2.8, (Z0 + Z1)/2); }
+    for (const zz of [38.4, 41.6, 44.6, 47.6]) for (const x of [-1.9, -5.3]) { box(weiss, 1.5, 0.08, 0.2, x, 2.86, zz); box(licht, 1.4, 0.01, 0.12, x, 2.815, zz); }
   }
 
   // Ostende von Flur 05 (vor 014): verglaste Tür nach draußen, Textur 'tuer05' aus dem Foto docs/fotos/tuer_flur05 (tools/tuertex.py).

@@ -51,6 +51,6 @@ for name, spec in TEX.items(): old[name] = make(name, *spec)
 with open(DST, 'w', encoding='utf-8', newline='\n') as f:
     f.write('// Fototexturen der leichten Variante (Ausschnitte aus docs/fotos), als Daten eingebettet, damit sie auch per Doppelklick laden\n')
     f.write('// boden, buehne, klappe, wand, aussen, flurwand, flurboden: erzeugt von tools/fototex.py\n')
-    f.write('// tuer05: erzeugt von tools/tuertex.py\n')
+    f.write('// tuer05: erzeugt von tools/tuertex.py; fenster019: erzeugt von tools/fenstertex.py\n')
     f.write('window.TEX={' + ',\n'.join(f'{k}:"{v}"' for k, v in old.items()) + '};\n')
 print('geschrieben:', DST, round(os.path.getsize(DST)/1024), 'kB')

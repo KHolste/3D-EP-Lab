@@ -43,7 +43,8 @@ Anna (oben auf der Bühne) und Kalle (unten in der Halle) helfen weiter, wenn ma
 Neben der Halle (Raum 07) ist das übrige Gebäude nach dem Grundriss begehbar: Durch die Tür an der Längswand
 neben der EMV-Kabine geht es nach Raum 09 und von dort in die Flure und Räume. Die Räume sind noch leer und
 werden nach und nach anhand von Fotos eingerichtet (`prototype/raeume.js`). Im Treppenhaus 020 kann man bis zur (geschlossenen)
-Tür ins 1. Obergeschoss hinaufgehen.
+Tür ins 1. Obergeschoss hinaufgehen und in den Keller hinunter. Raum 019 ist nach einem Foto eingerichtet
+(Fenster, Arbeitstische, Leuchten).
 
 ### Testmodi
 
@@ -76,6 +77,7 @@ Alle Aufrufe gehen vom Repo-Wurzelordner aus.
 | `tools/glb_opt.py` | verschlankt die GLB zu `halle_data.js` bzw. mit `lite` zu `halle_lite.js` |
 | `tools/fototex.py` | schneidet aus `docs/fotos` kachelbare Texturen für `tex_lite.js` |
 | `tools/tuertex.py` | entzerrt das Foto der Glastür am Ende von Flur 05 zur Textur `tuer05` |
+| `tools/fenstertex.py` | baut aus dem Foto von Raum 019 die Fenstertextur `fenster019` |
 | `tools/grundriss.py` | liest die Wände der Nachbarräume aus `docs/grundriss.png` und schreibt `raeume_data.js` |
 | `tools/midi2musik.py` | rendert die MIDI-Musik des Originals mit einem SoundFont und schreibt `musik.js` |
 | `tools/glbstat.py`, `tools/glblib.py` | Hilfen: Dreiecksstatistik und GLB-Leser |
