@@ -990,7 +990,7 @@ function moveNpcs(dt, now){
 /* =====================================================================
    4) STEUERUNG + HAUPTSCHLEIFE
    ===================================================================== */
-const P = {x:-6.2, z:4.6, feet:0, yaw:0, pitch:-0.02};
+const P = {x:-5.0, z:42.8, feet:0, yaw:-Math.PI/2, pitch:-0.02};   // Start in Raum 019 (Arbeitsgruppe), Blick zu den Fenstern; zur Halle über 08, 08b, 05 und 09
 const keys = {};
 const locked = () => document.pointerLockElement === canvas;
 let mouseLook = true; try { mouseLook = localStorage.getItem('jumboMouse') !== '0'; } catch(e) {}
