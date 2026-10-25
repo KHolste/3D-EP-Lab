@@ -53,7 +53,7 @@
   <kbd>E</kbd> / <kbd>Enter</kbd> bedienen<br>
   <kbd>M</kbd> Maus an/aus: <b id="kMode"></b><br>
   <kbd>H</kbd> Anleitung · <kbd>Tab</kbd> Übersicht<br>
-  <kbd>T</kbd> Zeitraffer · <kbd>G</kbd> Grafik · <kbd>B</kbd> Boden · <kbd>Esc</kbd> Pause
+  <kbd>T</kbd> Zeitraffer · <kbd>G</kbd> Grafik · <kbd>B</kbd> Boden · <kbd>N</kbd> Musik · <kbd>Esc</kbd> Pause
 </div>
 <div id="chartbox" class="hud box"><canvas id="chart" width="300" height="160"></canvas></div>
 <div id="cross" class="hud"></div>
@@ -70,6 +70,7 @@
 </script>
 <script src="cad/halle_lite.js"></script>
 <script src="cad/tex_lite.js"></script>
+<script src="cad/musik.js"></script>
 <script type="module">
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -256,11 +257,11 @@ function overlay(html, btn, onBtn){
 }
 const hideOverlay = () => { $('overlay').style.display = 'none'; };
 function gameOver(text){
-  S.over = true; ended = true; if (document.exitPointerLock) document.exitPointerLock();
+  S.over = true; ended = true; if (document.exitPointerLock) document.exitPointerLock(); musik('gameover');
   overlay(`<h2>Game Over</h2><p>${text}</p>`, 'Neu starten', () => location.reload());
 }
 function finish(){
-  ended = true; if (document.exitPointerLock) document.exitPointerLock();
+  ended = true; if (document.exitPointerLock) document.exitPointerLock(); musik('sieg');
   const r = score();
   overlay(`<h2>Der Tank wurde erfolgreich auf 1E-7 mbar evakuiert.</h2><table>${r.rows.map(x=>`<tr><td>${x[0]}</td><td>−${x[1]}</td></tr>`).join('')}</table>
     <h1 style="margin-top:14px">${r.total} / 1000 Punkten</h1>`, 'Noch einmal', () => location.reload());
@@ -306,7 +307,23 @@ function initAudio(){
       if (lp) { const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; o.connect(fl).connect(g); } else o.connect(g);
       g.connect(AC.destination); o.start(); return g; };
     humG = mk('sawtooth', 49, 180); whG = mk('sine', 1180); kG = mk('sine', 62);
+    musG = AC.createGain(); musG.gain.value = musikAn ? MUS_VOL : 0; musG.connect(AC.destination); musik('theme');
   } catch(e) { AC = null; }
+}
+/* ---- Musik aus dem RPG-Maker-Original (cad/musik.js, erzeugt von tools/midi2musik.py): wie dort läuft 014-Theme03 leise in Schleife,
+        am Ende die Sieg-Fanfare bzw. die Game-Over-Musik. Taste N schaltet die Musik ab. ---- */
+const MUS_VOL = 0.35, musBuf = {};
+let musG = null, musSrc = null, musKey = null, musikAn = true;
+try { musikAn = localStorage.getItem('jumboMusik') !== '0'; } catch(e) {}
+function musik(key){
+  const d = window.MUSIK && window.MUSIK[key]; if (!AC || !d) return;
+  musKey = key;
+  const play = b => { if (musKey !== key) return; if (musSrc) try { musSrc.stop(); } catch(e) {}
+    musSrc = AC.createBufferSource(); musSrc.buffer = b; if (d.loop !== undefined) { musSrc.loop = true; musSrc.loopStart = d.loop; musSrc.loopEnd = Math.min(d.ende, b.duration); }
+    musSrc.connect(musG); musSrc.start(); };
+  if (musBuf[key]) return play(musBuf[key]);
+  const raw = atob(d.src.slice(d.src.indexOf(',')+1)), a = new Uint8Array(raw.length); for (let i = 0; i < raw.length; i++) a[i] = raw.charCodeAt(i);
+  AC.decodeAudioData(a.buffer).then(b => { musBuf[key] = b; play(b); }).catch(() => {});
 }
 function sfx(kind){
   if (!AC) return;
@@ -916,7 +933,7 @@ hit('udo', null, -5.1, 1.0, 4.1, 0.7, 2.0, 0.7);
 plate('UDO', 0.26, 0.08, udo, 0, 1.95, 0);
 
 /* ---- Zwei Kollegen, die auf festen Wegen durchs Labor gehen. Anna (Bühne) gibt beim Ansprechen einen Tipp zum
-        nächsten Schritt, Ben (Halle) erzählt etwas zur Anlage. Wegpunkt: [x, y, z, Pause in s, Blickziel x, Blickziel z] ---- */
+        nächsten Schritt, Kalle (Halle) erzählt etwas zur Anlage. Wegpunkt: [x, y, z, Pause in s, Blickziel x, Blickziel z] ---- */
 function hint(){
   const h = S.hand[0] + S.hand[1];
   if (S.reached) return 'Der Druck ist unten. Denk an Rotary, Roots, die belüftete Rotary-Leitung und die Handräder – dann geh runter zu Udo.';
@@ -946,7 +963,7 @@ let factI = 0;
 const NPCS = [
   {id:'npc1', name:'ANNA', shirt:0x2e8b57, look:{coat:true, hair:0x7a4a22, long:true, pants:0x39404d}, speed:1.1, say:() => hint(),
    path:[[-9.2,DY,-4.8, 5, -8.3,-3.2], [-7.4,DY,-5.0, 6, -7.4,-6], [-4.7,DY,-5.0, 6, -4.7,-6], [-3.2,DY,-5.0, 4, -3.2,-6], [-4.7,DY,-5.0, 0, 0,0], [-7.4,DY,-5.0, 0, 0,0]]},
-  {id:'npc2', name:'BEN', shirt:0x35608f, look:{hair:0x2a211c, pants:0x4a4f58, tucked:true, glasses:true}, speed:1.2, say:() => FACTS[factI++ % FACTS.length] + ' Der Tank steht gerade bei ' + fmtP(S.p) + ' mbar.',
+  {id:'npc2', name:'KALLE', shirt:0x35608f, look:{hair:0x2a211c, pants:0x4a4f58, tucked:true, glasses:true}, speed:1.2, say:() => FACTS[factI++ % FACTS.length] + ' Der Tank steht gerade bei ' + fmtP(S.p) + ' mbar.',
    path:[[-9.2,0,1.4, 5, -10,2.5], [-4.3,0,1.4, 3, -4.3,-1], [-4.3,0,4.9, 5, -3.2,2.4], [-9.2,0,4.9, 3, -7.6,3.4]]}];
 for (const n of NPCS) {
   const g = n.g = figure(n.shirt, n.look), w = n.path[0]; n.ph = 0; n.amt = 0; g.position.set(w[0], w[1], w[2]); n.i = 0; n.f = 0; n.wait = w[3];
@@ -1004,6 +1021,8 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyH') togglePanel('help');
   if (e.code === 'Tab') togglePanel('status');
   if (e.code === 'KeyB' && floorTex) { floorTex.visible = !floorTex.visible; msg(floorTex.visible ? 'Boden: Schachbrett-Fliesen (Versuch).' : 'Boden: Hallenboden wie auf den Fotos.'); }
+  if (e.code === 'KeyN') { musikAn = !musikAn; if (musG) musG.gain.setTargetAtTime(musikAn ? MUS_VOL : 0, AC.currentTime, 0.15);
+    try { localStorage.setItem('jumboMusik', musikAn ? '1' : '0'); } catch(e) {} msg(musikAn ? 'Musik an.' : 'Musik aus.'); }
   if (e.code === 'KeyG') { quality = (quality + 2) % 3; qAuto = false; applyQuality(true); msg('Grafik: ' + QN[quality] + '.'); }
   if (e.code === 'KeyT') { speed = speed === 1 ? 8 : 1; $('gS').textContent = '×' + speed; }
 });
@@ -1144,7 +1163,7 @@ function frame(now){
 function start(m){ setMouse(m); started = true; paused = false; hideOverlay(); initAudio(); lock(); }
 overlay(`<h1>Jumbo-Pumpdown 3D</h1><p class="small">Leichte Variante: vereinfachtes CAD-Modell, Kabine und Details nachgebaut · Spiellogik nach dem RPG-Maker-Original</p>
 <p>Der Jumbo muss evakuiert werden. Alle, die es sonst machen, sind nicht da. Doch das Schicksal des Neutralisators hängt davon ab – und nur du kannst ihn jetzt noch retten.</p>
-<p>Es gibt eine Anleitung zum Evakuieren des Tanks (rote Mappe am Steuerrechner unter der Bühne oder Taste <b>H</b>). Du solltest einen Blick hineinwerfen. Im Labor sind außerdem Anna (oben auf der Bühne) und Ben (unten in der Halle) unterwegs – sprich sie an, wenn du nicht weiterweißt.</p>
+<p>Es gibt eine Anleitung zum Evakuieren des Tanks (rote Mappe am Steuerrechner unter der Bühne oder Taste <b>H</b>). Du solltest einen Blick hineinwerfen. Im Labor sind außerdem Anna (oben auf der Bühne) und Kalle (unten in der Halle) unterwegs – sprich sie an, wenn du nicht weiterweißt.</p>
 <p class="small"><b>Steuerung:</b> W/A/S/D = gehen · Shift = laufen · Pfeiltasten = drehen und hoch/runter sehen (oder Maus) · E oder Enter = bedienen · H = Anleitung · Tab = Übersicht · T = Zeitraffer · G = Grafikstufe · M = Maus an/aus · Esc = Pause<br>
 Ziel: Tankdruck 1E-7 mbar, dann unten mit Udo sprechen. 1 Sekunde = 15 Sekunden Anlagenzeit.</p>
 <button id="kbtn">Start – nur Tastatur</button> &nbsp;`, 'Start – mit Maus', () => start(true));
