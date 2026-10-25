@@ -230,12 +230,12 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const zz of [38.4, 41.6, 44.6, 47.6]) for (const x of [-1.9, -5.3]) { box(weiss, 1.5, 0.08, 0.2, x, 2.86, zz); box(licht, 1.4, 0.01, 0.12, x, 2.815, zz); }
   }
 
-  // Raum 019: zwei liegende Vakuumkammern (nach Fotos aus dem Labor): Edelstahl, 1,6 m Durchmesser, 4 m lang mit gewölbten Böden.
+  // Raum 019: zwei liegende Vakuumkammern (nach Fotos aus dem Labor): Edelstahl, 1,6 m Durchmesser, 3,2 m lang mit gewölbten Böden.
   // Die Türen (Flansch, blauer Schwenkarm mit JLU-Schild, Schauglas, KF-Stutzen, Griff) gehen zur Fensterseite auf, das hintere Ende steht
   // nah an der Gangwand (zwischen Wandpfeilern und hinterem Stutzen kommt man gerade noch durch). Oben Ventil und Messkopf, an der Seite
   // eine Durchführung mit Kabeln, daneben ein Geräteschrank mit Monitor; jeder Tank hat zwischen den Tanks seine eigene Unterverteilung.
   // Gebaut wird in einer Gruppe (Tür nach -x) und die Gruppe dann um 180° gedreht an ihren Platz gesetzt (A, B), samt Kollision.
-  { const X0 = -5.6, X1 = -1.6, R0 = 0.8, YC = 1.0, KZ = [43.6, 46.0], A = -7.75, B = 87.6, G = new THREE.Group(), colsK = []; scene.add(G);
+  { const X0 = -4.8, X1 = -1.6, R0 = 0.8, YC = 1.0, KZ = [43.6, 46.0], A = -7.75, B = 87.6, G = new THREE.Group(), colsK = []; scene.add(G);
     const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.5, metalness:0.1, ...o})];
     const stahl = M(0xd3d6d8, {roughness:0.38, metalness:0.5, emissive:0x2a2c2e}), stahlD = M(0xb4b8bb, {roughness:0.35, metalness:0.6, emissive:0x1e2022}), blau = M(0x1f4fb0, {roughness:0.45, metalness:0.2}),
           schwarz = M(0x1b1d20, {roughness:0.5}), glas = M(0x0d1418, {roughness:0.1, metalness:0.6}), grau = M(0xd5d6d3, {roughness:0.7, metalness:0}),
@@ -296,10 +296,10 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     });
     // neben Kammer 1: schwarzer Geräteschrank mit Monitor und Tastatur (Tische vorerst weggelassen)
     const z1 = KZ[0] - 1.35;
-    kiste(schwarz, 0.6, 1.0, 0.6, -4.75, 0.5, z1); kiste(weiss, 0.03, 0.34, 0.52, -4.75, 1.33, z1); kiste(schwarz, 0.005, 0.3, 0.48, -4.77, 1.33, z1);   // Schrank, Monitor
-    kiste(weiss, 0.18, 0.02, 0.12, -4.7, 1.01, z1); kiste(schwarz, 0.16, 0.02, 0.45, -4.95, 1.01, z1);                                      // Fuß, Tastatur
-    for (const s of [-1, 1]) zyl(0.035, 0.02, alu, -4.75 + s*0.24, 1.01, z1 + s*0.24, 'y', 10);                                              // Ösen
-    colsK.push({x0:-5.1, x1:-4.1, z0:z1 - 0.35, z1:z1 + 0.35, y0:-1, y1:1.6});
+    kiste(schwarz, 0.6, 1.0, 0.6, (X0 + 0.85), 0.5, z1); kiste(weiss, 0.03, 0.34, 0.52, (X0 + 0.85), 1.33, z1); kiste(schwarz, 0.005, 0.3, 0.48, (X0 + 0.83), 1.33, z1);   // Schrank, Monitor
+    kiste(weiss, 0.18, 0.02, 0.12, (X0 + 0.9), 1.01, z1); kiste(schwarz, 0.16, 0.02, 0.45, (X0 + 0.65), 1.01, z1);                                      // Fuß, Tastatur
+    for (const s of [-1, 1]) zyl(0.035, 0.02, alu, (X0 + 0.85) + s*0.24, 1.01, z1 + s*0.24, 'y', 10);                                              // Ösen
+    colsK.push({x0:X0 + 0.5, x1:X0 + 1.2, z0:z1 - 0.35, z1:z1 + 0.35, y0:-1, y1:1.6});
       G.rotation.y = Math.PI; G.position.set(A, 0, B);                     // Tür zur Fensterseite: (x, z) -> (A - x, B - z)
     for (const c of colsK) cols.push({x0:A - c.x1, x1:A - c.x0, z0:B - c.z1, z1:B - c.z0, y0:c.y0, y1:c.y1});
     // Unterverteilungen: je Tank eine schwarze Säule bis zur Decke im Zwischenraum, Steckdosen (rot 400 V, blau 230 V) zur Fensterseite
