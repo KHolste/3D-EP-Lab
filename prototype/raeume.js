@@ -391,10 +391,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     rohr([-2.0, 1.95, WZ0 + 0.06], [-0.9, 1.95, WZ0 + 0.06], 0.015, kupfer, 8);
     for (let i = 0; i < 5; i++) { const x = -1.9 + i*0.22; rohr([x, 1.95, WZ0 + 0.06], [x, 1.55, WZ0 + 0.06], 0.012, kupfer, 8); kiste(stahlD, 0.05, 0.05, 0.05, x, 1.7, WZ0 + 0.07); }
     for (let i = 0; i < 3; i++) { kiste(gruen, 0.22, 0.28, 0.1, -0.65 + i*0.27, 1.75, WZ0 + 0.05); kiste(M(0x90a8a0, {emissive:0x203028}), 0.14, 0.12, 0.01, -0.65 + i*0.27, 1.76, WZ0 + 0.105); }
-      // hinter dem Magneten an der Wand: weißer Schrank mit zwei Türen (Foto), 1,0 m breit, 0,6 m tief, 2 m hoch
-    kiste(weiss, 1.0, 2.0, 0.6, MX, 1.0, WZ0 + 0.3); kiste(M(0xd8d8d4), 0.005, 1.95, 0.005, MX, 1.0, WZ0 + 0.602);
-    for (const dx of [-0.06, 0.06]) kiste(M(0x9aa0a6), 0.02, 0.18, 0.02, MX + dx, 1.05, WZ0 + 0.61);
-    colsS.push({x0:MX - 0.5, x1:MX + 0.5, z0:WZ0, z1:WZ0 + 0.6, y0:-1, y1:2.1});
+      // an der Wand, so nah wie möglich an der Fensterseite (bis an den Wandpfeiler): weißer Schrank mit zwei Türen (Foto),
+    // 1,0 m breit, 0,6 m tief, 2 m hoch; hellgrau mit dunklem Sockel, Fugen und Griffen, damit er sich von der weißen Wand abhebt
+    { const SX = A + 0.087 + 0.02 + 0.5, h = 2.0, fz = WZ0 + 0.6;          // Baukoordinate der Mitte (Pfeiler-Vorderkante bei x = -0.087)
+      const korpus = M(0xd6d4cc, {roughness:0.6}), fuge = M(0x55595d), sockel = M(0x3c4045);
+      kiste(korpus, 1.0, h - 0.08, 0.6, SX, 0.08 + (h - 0.08)/2, WZ0 + 0.3); kiste(sockel, 0.98, 0.08, 0.56, SX, 0.04, WZ0 + 0.28);
+      kiste(fuge, 0.012, h - 0.12, 0.006, SX, 0.08 + (h - 0.08)/2, fz + 0.003);                                      // Mittelfuge
+      for (const y of [0.1, h - 0.02]) kiste(fuge, 1.0, 0.012, 0.006, SX, y, fz + 0.003);                           // Kanten oben/unten
+      for (const x of [SX - 0.496, SX + 0.496]) kiste(fuge, 0.008, h - 0.08, 0.006, x, 0.08 + (h - 0.08)/2, fz + 0.003);
+      for (const dx of [-0.06, 0.06]) kiste(M(0x2a2d31), 0.025, 0.22, 0.03, SX + dx, 1.05, fz + 0.02);              // Griffe
+      colsS.push({x0:SX - 0.5, x1:SX + 0.5, z0:WZ0, z1:WZ0 + 0.6, y0:-1, y1:2.1}); }
     G.rotation.y = Math.PI; G.position.set(A, 0, B);
     for (const c of colsS) cols.push({x0:A - c.x1, x1:A - c.x0, z0:B - c.z1, z1:B - c.z0, y0:c.y0, y1:c.y1});
   }
