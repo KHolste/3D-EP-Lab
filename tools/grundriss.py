@@ -90,15 +90,23 @@ walls = [p for w in walls for p in cut(w)]
 ZW = round(gz(HALLE_PX), 3)                                 # Wand zur Halle: im Plan breiter offen als im CAD, Reste schliessen
 walls += [[HD[0] - 0.6, HD[0], Z_MIN, ZW], [HD[1], HD[1] + 0.6, Z_MIN, ZW]]
 doors = [p for d in doors for p in cut(d)] + [[HD[0], HD[1], Z_MIN, ZW, 2.1]]   # 5. Wert: Unterkante des Sturzes
+# Flure: freie Flaeche um die Beschriftung von 05, 08 und 08b (Tueroeffnungen gelten als Grenze); 05 schliesst das offene Treppenhaus 020 ein
+FLURE = ['05', '08', '08b']
+frei, _ = ndimage.label(~(wall | door))
+flur = np.zeros_like(wall)
+for k in FLURE:
+    px, py = LABELS[k]; flur |= frei == frei[py + 4, px + 4]
+flur = ndimage.binary_dilation(flur, np.ones((3, 3))) & ~door      # Boden ein Pixel unter die Wand schieben, keine Fuge
+flure = [f for f in (to_game(r, 0.02) for r in rects(flur)) if f]
 bx0, bx1 = gx(5), gx(318); bz1, bz0 = gz(10), Z_MIN
 labels = {k: [round(gx(py + 6), 2), round(gz(px + 8), 2)] for k, (px, py) in LABELS.items()}
-out = {'walls': walls, 'doors': doors, 'floor': [round(bx0, 2), round(bx1, 2), round(bz0, 2), round(bz1, 2)], 'labels': labels}
+out = {'walls': walls, 'doors': doors, 'flure': flure, 'floor': [round(bx0, 2), round(bx1, 2), round(bz0, 2), round(bz1, 2)], 'labels': labels}
 with open(DST, 'w', encoding='utf-8') as f:
     f.write('// erzeugt von tools/grundriss.py aus docs/grundriss.png - nicht von Hand bearbeiten\n')
     f.write('// walls/doors: [x0, x1, z0, z1] in Metern (Spielkoordinaten), floor: Ausdehnung des Gebaeudes, labels: Raumnummer -> [x, z]\n')
     f.write('window.RAEUME=' + json.dumps(out, separators=(',', ':')) + ';\n')
-print(f'{len(walls)} Wandstuecke, {len(doors)} Tuerstuerze, Gebaeude x {bx0:.2f}..{bx1:.2f} z {bz0:.2f}..{bz1:.2f} m -> {DST}')
+print(f'{len(walls)} Wandstuecke, {len(doors)} Tuerstuerze, {len(flure)} Flurstuecke, Gebaeude x {bx0:.2f}..{bx1:.2f} z {bz0:.2f}..{bz1:.2f} m -> {DST}')
 
 if '--png' in sys.argv:                                     # Kontrollbild: Waende schwarz, Tuerstuerze rot
-    v = np.full((H, W, 3), 255, np.uint8); v[wall] = 0; v[door] = (220, 40, 40)
+    v = np.full((H, W, 3), 255, np.uint8); v[flur] = (150, 200, 255); v[wall] = 0; v[door] = (220, 40, 40)
     Image.fromarray(v).save(sys.argv[sys.argv.index('--png') + 1])
