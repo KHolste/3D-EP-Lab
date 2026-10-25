@@ -10,3 +10,7 @@ prototype/cad/halle_full.glb
 # Privates Bild, nicht veroeffentlichen
 udo.jpeg
 Screenshot*.png
+
+# Originalfotos (teils mit Personen) und lokale Einstellungen von Claude Code
+pics/
+.claude/
