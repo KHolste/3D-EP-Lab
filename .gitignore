@@ -6,3 +6,6 @@ __pycache__/
 # halle_full.glb (44 MB) wird mit tools/step2glb.py daraus erzeugt
 *.stp
 prototype/cad/halle_full.glb
+
+# Privates Bild, nicht veroeffentlichen
+udo.jpeg
