@@ -56,6 +56,21 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const boden = mesh(new THREE.PlaneGeometry(w, d), bodenM); boden.rotation.x = -Math.PI/2; boden.position.set((bx0+bx1)/2, 0.002, (bz0+bz1)/2);
   const decke = mesh(new THREE.PlaneGeometry(w, d), mats(0xe6e6e2, 0x9a9a96)); decke.rotation.x = Math.PI/2; decke.position.set((bx0+bx1)/2, HR, (bz0+bz1)/2);
 
+  // Ostende von Flur 05 (vor 014): verglaste Tür nach draußen, Textur 'tuer05' aus dem Foto docs/fotos/tuer_flur05 (tools/tuertex.py).
+  // Die Tür bleibt zu; die Tueranlage ist 2,7 m breit und sitzt rechts in der Ecke, wie auf dem Foto. Unbeleuchtet, damit das Tageslicht hell bleibt.
+  if (window.TEX && window.TEX.tuer05) {
+    const t = new THREE.TextureLoader().load(window.TEX.tuer05); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    const XW = 0.446, Z1 = 19.385, B = 2.7, Ht = 2.25;                       // Wandfläche (x) und rechte Ecke (z) aus raeume_data.js
+    const tuer = new THREE.Mesh(new THREE.PlaneGeometry(B, Ht), new THREE.MeshBasicMaterial({map:t, toneMapped:false}));
+    tuer.rotation.y = -Math.PI/2; tuer.position.set(XW - 0.005, Ht/2, Z1 - B/2); scene.add(tuer);
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96; const g = cv.getContext('2d');
+    g.fillStyle = '#18a558'; g.fillRect(0, 0, 256, 96); g.strokeStyle = '#f4f4f0'; g.lineWidth = 4; g.strokeRect(6, 6, 244, 84);
+    g.fillStyle = '#f4f4f0'; g.font = 'bold 30px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('NOTAUSGANG', 128, 50);
+    const st = new THREE.CanvasTexture(cv); st.colorSpace = THREE.SRGBColorSpace;
+    const schild = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.42), [0,1,2,3,4,5].map(i => i === 1 ? new THREE.MeshBasicMaterial({map:st}) : new THREE.MeshBasicMaterial({color:0x8a8f94})));
+    schild.position.set(XW - 0.03, 2.42, Z1 - 0.45); scene.add(schild);
+  }
+
   // Raumnummern auf dem Boden, lesbar beim Blick von der Halle aus (nach +z, im Plan: nach links)
   for (const [nr, [x, z]] of Object.entries(R.labels)) {
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128; const g = cv.getContext('2d');
