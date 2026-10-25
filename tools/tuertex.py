@@ -3,7 +3,8 @@
 # Aufruf: python tools\tuertex.py        braucht: pip install pillow numpy scipy
 #
 # Entzerrt wird ueber die Glasscheibe des rechten Fluegels, die in Wirklichkeit ein Rechteck ist (Ecken im Foto ausgemessen).
-# Das Foto zeigt den linken Fluegel nur zum Teil: was links fehlt, wird vom rechten Fluegel gespiegelt ergaenzt.
+# Das Foto zeigt den linken Fluegel nur zum Teil und nicht ganz in der Ebene des rechten (er steht wohl einen Spalt offen):
+# er wird deshalb ganz vom rechten Fluegel gespiegelt (samt Stossgriff, so hat jeder Fluegel einen).
 # Vor dem dunklen Seitenteil rechts steht ein Fahrrad; das Seitenteil wird deshalb als glatte dunkle Flaeche gemalt.
 import base64, io, os, re
 import numpy as np
@@ -46,11 +47,7 @@ def abbild(u, v):
 def probe(x, y):
     return np.stack([ndimage.map_coordinates(foto[..., c], [y, x], order=1, mode='nearest') for c in range(3)], -1)
 
-x, y = abbild(U, Hh); direkt = probe(x, y)
-xm, ym = abbild(np.abs(U), Hh); gespiegelt = probe(xm, ym)
-# links vom Fluegelstoss: echtes Foto, solange es im Bild liegt, mit weichem Uebergang zur gespiegelten Ergaenzung
-a = np.clip((x - 15) / 60, 0, 1)[..., None] * (U < 0)[..., None]
-out = np.where((U >= 0)[..., None], direkt, a*direkt + (1 - a)*gespiegelt)
+x, y = abbild(np.abs(U), Hh); out = probe(x, y)           # links: Spiegelbild des rechten Fluegels
 
 # Seitenteile und Rahmen: dunkel lackiertes Aluminium
 dunkel = np.array([24, 25, 27], float)
