@@ -857,15 +857,13 @@ function drawDisplay(){
   box(2.56, 0.008, 0.04, alu, -1.63, 0.004, 3.23); box(0.04, 0.008, 2.56, alu, -2.9, 0.004, 4.5);
   box(0.6, 0.32, 0.4, M(0x8e959b), -1.0, 0.172, 5.3); box(0.6, 0.3, 0.4, schwarz, -1.0, 0.482, 5.3); box(0.4, 0.3, 0.3, lackW, -1.75, 0.162, 5.4); box(0.6, 0.28, 0.4, M(0xb3261e), -0.8, 0.152, 4.6);
   cols.push({x0:-2.0, x1:-0.5, z0:5.05, z1:5.6, y0:0, y1:0.7}, {x0:-1.12, x1:-0.5, z0:4.38, z1:4.82, y0:0, y1:0.4});
-  // Messplatz in der freien Hallenfläche: Labortisch, schwarze Laser-Einhausung, fahrbarer Aufbautisch aus Aluprofil
+  // Messplatz in der freien Hallenfläche: Labortisch (Laser-Einhausung und Aufbautisch entfernt, damit man sich freier bewegen kann)
   const t1 = tisch(-7.6, 0, 3.3, 1.6, 0.8); monitor(t1, -0.4, t1.userData.h+0.36, -0.15, Math.PI, null, 0.5, 0.3);
   geraet(t1, 0.35, -0.05, 0.42, 0.14, 0.34); geraet(t1, 0.35, -0.05, 0.3, 0.26, 0.3, M(0x2c5fb0)).position.y += 0.07; geraet(t1, -0.45, 0.22, 0.4, 0.02, 0.14, schwarz);
   stuhl(-7.9, 0, 2.55, 0.25);
-  const lb = tisch(-7.4, 0, 1.85, 1.15, 0.75, 0, schwarz, schwarz, 0.72); geraet(lb, 0, 0, 1.1, 0.36, 0.7, schwarz); plate('LASER', 0.3, 0.07, lb, 0.3, 0.95, 0.352, {bg:'#f0b800'});
-  const at = tisch(-5.6, 0, 2.6, 1.1, 0.8, 0.2, alu, M(0x8f949a, {roughness:0.5, metalness:0.5}), 0.8); geraet(at, -0.2, 0, 0.3, 0.2, 0.3); geraet(at, 0.25, 0.1, 0.2, 0.12, 0.16, schwarz);
   hocker(-6.5, 0, 3.0);
-  // Vor der Ostwand neben dem Hallentor (Fotos IMG_0829, 0845, 0846): grauer Schrank mit Zeichnungen und Kisten obendrauf, davor fahrbare
-  // Aufbautische mit Experimenten, ein Holzwagen mit T-Stück und eine schwarze Kiste
+  // Vor der Ostwand neben dem Hallentor (Fotos IMG_0829, 0845, 0846): grauer Schrank mit Zeichnungen und Kisten obendrauf
+  // (die fahrbaren Aufbautische, der Holzwagen und die schwarze Kiste davor sind entfernt, ebenso das Regal vor der Tür nach 09)
   const sg = grp(-2.4, 0, 2.35, -Math.PI/2); box(1.0, 1.9, 0.9, lackG, 0, 0.95, 0, sg); foot(-2.4, 2.35, 1.0, 0.9, -Math.PI/2, -0.1, 2.3);
   const sf = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.9), new THREE.MeshStandardMaterial({roughness:0.6, metalness:0.2, map:canvasTex(256, 512, (g,W,H) => { g.fillStyle = '#c6c9cb'; g.fillRect(0,0,W,H);
     g.strokeStyle = '#8b9095'; g.lineWidth = 3; g.strokeRect(6, 6, W-12, H-30); g.beginPath(); g.moveTo(W/2, 6); g.lineTo(W/2, H-24); g.stroke();
@@ -876,17 +874,6 @@ function drawDisplay(){
   for (const [z, y] of [[-0.2, 1.35], [0.22, 1.35], [-0.2, 0.9], [0.22, 0.9]]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.42), new THREE.MeshBasicMaterial({map:plan})); p.rotation.y = -Math.PI/2; p.position.set(-0.502, y, z); sg.add(p); }
   const klar = new THREE.MeshStandardMaterial({color:0xdfe8ec, transparent:true, opacity:0.45, roughness:0.2});
   box(0.55, 0.3, 0.4, klar, -0.15, 2.05, 0.1, sg); box(0.3, 0.2, 0.25, klar, 0.3, 2.0, -0.2, sg); box(0.4, 0.06, 0.3, karton, 0.2, 1.93, 0.2, sg);
-  const wagen = (x, z, w, d, ry) => { const t = tisch(x, 0, z, w, d, ry, alu, alu, 0.85); box(w-0.1, 0.02, d-0.1, alu, 0, 0.3, 0, t); return t; };
-  const w1 = wagen(-3.45, 2.3, 0.8, 0.7, 0.1); cyl(0.16, 0.22, steel, 0.1, 0.98, 0, 'y', w1); cyl(0.2, 0.02, steel, 0.1, 1.1, 0, 'y', w1); cyl(0.05, 0.3, steel, 0.1, 1.0, 0.2, 'z', w1, 12);
-  geraet(w1, -0.22, 0.15, 0.22, 0.14, 0.2, lackW); box(0.3, 0.25, 0.3, M(0x4a4f57), 0, 0.44, 0, w1); cyl(0.07, 0.3, schwarz, -0.2, 0.46, 0.1, 'y', w1, 12);
-  const w2 = wagen(-2.75, 1.25, 0.6, 0.5, -0.1); geraet(w2, 0, 0, 0.26, 0.2, 0.3, lackW); cyl(0.04, 0.16, steel, 0.18, 0.93, 0.1, 'y', w2, 12); box(0.3, 0.2, 0.25, lackG, 0, 0.41, 0, w2);
-  const hw = tisch(-1.25, 0, 1.15, 0.7, 0.6, 0, alu, holz, 0.6); box(0.6, 0.02, 0.5, holz, 0, 0.12, 0, hw); cyl(0.09, 0.3, steel, 0, 0.7, 0, 'x', hw, 16); cyl(0.09, 0.16, steel, 0, 0.7, 0.1, 'z', hw, 16); cyl(0.11, 0.02, steel, 0.16, 0.7, 0, 'x', hw, 16);
-  box(0.75, 0.75, 0.75, schwarz, -1.3, 0.375, 2.2); cols.push({x0:-1.68, x1:-0.92, z0:1.82, z1:2.58, y0:0, y1:0.8});
-  // Regal als Raumteiler zwischen Messplatz und EMV-Kabine: zwei hohe, offene Gestelle voller Geräte (Foto IMG_0846)
-  for (const z of [3.75, 4.4]) { const g = grp(-8.62, 0, z, Math.PI/2); for (const sx of [-0.29, 0.29]) for (const sz of [-0.36, 0.36]) box(0.04, 2.0, 0.04, lackG, sx, 1.0, sz, g);
-    box(0.62, 0.03, 0.76, lackG, 0, 1.99, 0, g); box(0.62, 0.05, 0.76, lackG, 0, 0.05, 0, g);
-    for (let k = 0; k < 7; k++) box(0.54, k%3 ? 0.14 : 0.22, 0.6, M([0xd9d9d3, 0x23272d, 0x7a8088, 0x2c5fb0][(k + (z > 4 ? 1 : 0)) % 4], {roughness:0.6}), 0, 0.22+k*0.25, 0, g); }
-  box(0.4, 0.2, 0.3, klar, -8.62, 2.11, 3.8); box(0.3, 0.1, 0.4, karton, -8.62, 2.06, 4.4); cols.push({x0:-9.0, x1:-8.24, z0:3.42, z1:4.73, y0:0, y1:2.2});
   // Südwand: Werktisch mit Holzplatte und zwei Diagnostik-Schränke
   const wt = tisch(-7.6, 0, 5.6, 2.0, 0.7, 0, lackG, holz, 0.8); geraet(wt, -0.6, 0.05, 0.4, 0.3, 0.35); geraet(wt, 0.1, 0.1, 0.5, 0.16, 0.3, M(0x7a8088)); geraet(wt, 0.7, 0.05, 0.25, 0.22, 0.25, lackW);
   for (const x of [-4.9, -4.25]) { box(0.6, 2.0, 0.6, lackG, x, 1.0, 5.68); for (let k = 0; k < 6; k++) box(0.5, 0.18, 0.02, M(0x1a1d22, {emissive:k%2 ? 0x062a10 : 0x101828}), x, 0.45+k*0.27, 5.37); }
