@@ -162,6 +162,28 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     tuer('1. OG', T.H, (T.zT1 + T.zS)/2); tuer('Keller', T.K, (T.zN + T.zT0)/2);
     const lampe = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.3), new THREE.MeshBasicMaterial({color:0xffffff})); lampe.position.set((T.xW + T.xO)/2, T.oben - 0.03, (T.zN + T.zS)/2); scene.add(lampe); }
 
+  // Flur 08b, rechte Seite (von 05 aus gesehen, Räume 04 bis 01): die Räume gehören nicht zur Arbeitsgruppe, die Türen sind zu.
+  // Rote Türblätter bündig zur Flurseite; Öffnungen aus dem Grundriss (Wand zwischen den Räumen und 08b, bis zur Mitteltür nach 08).
+  // Die Türen links im Flur und die Türen zu 018 (dahinter) bleiben offen.
+  { const X0 = -10.43, X1 = -10.1, Z0 = 19.6, Z1 = 36.1, oeff = [];
+    for (const [x0, x1, z0, z1] of R.doors) if (x0 >= X0 && x1 <= X1 && z0 >= Z0 && z1 <= Z1 && z1 - z0 > 0.5) {
+      const o = oeff.find(o => z0 < o[1] && z1 > o[0]); if (o) { o[0] = Math.min(o[0], z0); o[1] = Math.max(o[1], z1); } else oeff.push([z0, z1]); }
+    const rot = new THREE.MeshStandardMaterial({color:0xb02a22, roughness:0.45, metalness:0.1});
+    for (const [z0, z1] of oeff) {
+      const B = z1 - z0, zwei = B > 1.5, c = document.createElement('canvas'); c.width = zwei ? 512 : 256; c.height = 512; const g = c.getContext('2d');
+      g.fillStyle = '#b02a22'; g.fillRect(0, 0, c.width, 512);
+      const blatt = (x, w, griff) => { const gr = g.createLinearGradient(x, 0, x + w, 0); gr.addColorStop(0, 'rgba(255,255,255,0.06)'); gr.addColorStop(1, 'rgba(0,0,0,0.08)');
+        g.fillStyle = gr; g.fillRect(x, 0, w, 512); g.strokeStyle = 'rgba(60,10,8,0.55)'; g.lineWidth = 4; g.strokeRect(x + 2, 2, w - 4, 508);
+        g.fillStyle = '#c9ccce'; g.fillRect(griff - 18, 248, 36, 9); g.fillRect(griff - 5, 240, 10, 26); };
+      if (zwei) { blatt(0, 256, 230); blatt(256, 256, 282); } else blatt(0, 256, 220);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+      const vorn = new THREE.MeshStandardMaterial({map:t, roughness:0.45, metalness:0.1});
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.1, B), [vorn, rot, rot, rot, rot, rot]);   // +x zeigt in den Flur
+      m.position.set(X1 - 0.03, 1.05, (z0 + z1)/2); scene.add(m);
+      cols.push({x0:X0, x1:X1, z0, z1, y0:-1, y1:2.1});
+    }
+  }
+
   // Ostende von Flur 05 (vor 014): verglaste Tür nach draußen, Textur 'tuer05' aus dem Foto docs/fotos/tuer_flur05 (tools/tuertex.py).
   // Die Tür bleibt zu; die Tueranlage ist 2,7 m breit und sitzt rechts in der Ecke, wie auf dem Foto. Unbeleuchtet, damit das Tageslicht hell bleibt.
   if (window.TEX && window.TEX.tuer05) {

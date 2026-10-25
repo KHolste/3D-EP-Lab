@@ -1224,6 +1224,8 @@ if (Q.get('walk')) {
   r.flur08 = walk(-9.2, 5.0, 0, [[180, 600]]);                             // geradeaus durch 09, Flur 05, 08b und 08 bis ans Westende (z über 55)
   r.treppe020 = walk(-10.3, 13.9, 0, [[90, 40], [180, 15], [-90, 40]]);    // Treppenhaus 020: Lauf 1 hoch, übers Podest, Lauf 2 hoch bis vor die Tür (Höhe 3.4)
   r.keller = walk(-10.2, 15.4, 0, [[90, 40], [0, 15], [-90, 40]]);         // Kellertreppe: Lauf A hinunter, übers Kellerpodest, Lauf B hinunter bis vor die Kellertür (Höhe -3.4)
+  r.roteTuer03 = walk(-9.0, 24.25, 0, [[90, 30]]);                       // Flur 08b: rote Tür zu 03 ist zu (x bleibt bei -9.8)
+  r.offen013 = walk(-9.0, 30.9, 0, [[-90, 30]]);                          // gegenüber: Tür zu 013 ist offen (x deutlich über -7)
   $('testout').style.display = 'block'; $('testout').textContent = 'WALKRESULT ' + JSON.stringify(r);
 }
 applyQuality();
