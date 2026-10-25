@@ -230,6 +230,156 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const zz of [38.4, 41.6, 44.6, 47.6]) for (const x of [-1.9, -5.3]) { box(weiss, 1.5, 0.08, 0.2, x, 2.86, zz); box(licht, 1.4, 0.01, 0.12, x, 2.815, zz); }
   }
 
+  // Raum 019: zwei liegende Vakuumkammern (nach Fotos aus dem Labor): Edelstahl, 1,6 m Durchmesser, 4 m lang mit gewölbten Böden.
+  // Die Tür sitzt am Ende zur Flurwand (Flansch, blauer Schwenkarm mit JLU-Schild, Schauglas, KF-Stutzen, Griff), oben Ventil und
+  // Messkopf, an der Seite eine Durchführung mit Kabeln. Beim Hereinkommen durch die erste Tür (von der Halle aus) liegen sie rechts;
+  // dahinter bleibt ein breiter Gang bis zur Doppeltür. Davor ein Geräteschrank mit Monitor.
+  { const X0 = -5.6, X1 = -1.6, R0 = 0.8, YC = 1.0, KZ = [43.6, 46.0];
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.5, metalness:0.1, ...o})];
+    const stahl = M(0xd3d6d8, {roughness:0.38, metalness:0.5, emissive:0x2a2c2e}), stahlD = M(0xb4b8bb, {roughness:0.35, metalness:0.6, emissive:0x1e2022}), blau = M(0x1f4fb0, {roughness:0.45, metalness:0.2}),
+          schwarz = M(0x1b1d20, {roughness:0.5}), glas = M(0x0d1418, {roughness:0.1, metalness:0.6}), grau = M(0xd5d6d3, {roughness:0.7, metalness:0}),
+          gestell = M(0x5d6266, {roughness:0.5, metalness:0.4}), alu = M(0xc4c8cc, {roughness:0.35, metalness:0.7}), weiss = M(0xf2f2ef, {roughness:0.6, metalness:0}),
+          rot = M(0xb3261e), kabelS = M(0x222222), kabelR = M(0xb3261e), kabelG = M(0x9a9da0);
+    const add = (geo, m, x, y, z, rx = 0, ry = 0, rz = 0) => { const o = new THREE.Mesh(geo, m[1]); o.userData.mats = m; cadMeshes.push(o);
+      o.position.set(x, y, z); o.rotation.set(rx, ry, rz); scene.add(o); return o; };
+    const kiste = (m, w, h, d, x, y, z) => add(new THREE.BoxGeometry(w, h, d), m, x, y, z);
+    const zyl = (r, l, m, x, y, z, achse = 'y', seg = 24) => add(new THREE.CylinderGeometry(r, r, l, seg), m, x, y, z, achse === 'z' ? Math.PI/2 : 0, 0, achse === 'x' ? Math.PI/2 : 0);
+    const kabel = (m, pts, r = 0.012) => add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 40, r, 6), m, 0, 0, 0);
+    const schild = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 128); g.strokeStyle = '#1f3f8f'; g.lineWidth = 4; g.strokeRect(4, 4, 248, 120);
+      g.fillStyle = '#1f3f8f'; g.fillRect(16, 46, 44, 58); g.fillStyle = '#fff'; g.font = 'bold 44px system-ui, sans-serif'; g.fillText('T', 26, 92);
+      g.fillStyle = '#111'; g.font = '20px system-ui, sans-serif'; g.fillText('JUSTUS-LIEBIG-', 12, 32); g.fillText('UNIVERSITÄT', 72, 70); g.fillText('GIESSEN', 72, 100);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    // Punkt auf dem gewölbten Türboden (Abstand dy, dz von der Achse) -> x der Oberfläche
+    const kopfX = (dy, dz) => X0 + 0.4 - 0.4*Math.sqrt(Math.max(0, 1 - (dy*dy + dz*dz)/(R0*R0)));
+    const kf = (x, y, z, r = 0.035) => { zyl(r, 0.1, stahl, x - 0.05, y, z, 'x', 12); zyl(r + 0.018, 0.025, stahlD, x - 0.1, y, z, 'x', 12); };
+
+    KZ.forEach((zc, k) => {
+      const xm = (X0 + X1)/2;
+      add(new THREE.CylinderGeometry(R0, R0, X1 - X0 - 0.8, 48, 1, true), stahl, xm, YC, zc, 0, 0, Math.PI/2);                  // Mantel
+      const kopf = new THREE.SphereGeometry(R0, 40, 14, 0, Math.PI*2, 0, Math.PI/2); kopf.scale(1, 0.5, 1);
+      add(kopf, stahl, X1 - 0.4, YC, zc, 0, 0, -Math.PI/2); add(kopf, stahl, X0 + 0.4, YC, zc, 0, 0, Math.PI/2);                // Böden (hinten, Tür)
+      zyl(R0 + 0.055, 0.12, stahlD, X0 + 0.4, YC, zc, 'x', 48); zyl(R0 + 0.03, 0.06, stahlD, X1 - 0.4, YC, zc, 'x', 48);         // Türflansch, hinterer Flansch
+      zyl(R0 + 0.004, 0.015, stahlD, xm + 0.2, YC, zc, 'x', 48);                                                                // Schweißnaht
+      // Tür: Schauglas, großer Stutzen oben, KF-Stutzen, Griff
+      const sx = kopfX(-0.05, 0.05);
+      zyl(0.17, 0.2, stahl, sx - 0.08, YC - 0.05, zc + 0.05, 'x', 28); zyl(0.21, 0.035, schwarz, sx - 0.19, YC - 0.05, zc + 0.05, 'x', 28);
+      zyl(0.12, 0.01, glas, sx - 0.21, YC - 0.05, zc + 0.05, 'x', 24);
+      for (let i = 0; i < 8; i++) { const w = i*Math.PI/4; zyl(0.012, 0.03, stahlD, sx - 0.215, YC - 0.05 + 0.165*Math.sin(w), zc + 0.05 + 0.165*Math.cos(w), 'x', 6); }
+      const tx = kopfX(0.5, 0.1); zyl(0.14, 0.22, stahl, tx - 0.06, YC + 0.5, zc + 0.1, 'x', 24); zyl(0.155, 0.04, stahlD, tx - 0.18, YC + 0.5, zc + 0.1, 'x', 24);
+      for (const [dy, dz] of [[0.45, 0.38], [-0.32, 0.05], [-0.55, 0.05], [0.0, 0.32]]) kf(kopfX(dy, dz), YC + dy, zc + dz);
+      const gx = kopfX(-0.05, 0.5); zyl(0.014, 0.36, stahlD, gx - 0.09, YC - 0.05, zc + 0.5, 'y', 8);
+      zyl(0.012, 0.08, stahlD, gx - 0.05, YC + 0.12, zc + 0.5, 'x', 6); zyl(0.012, 0.08, stahlD, gx - 0.05, YC - 0.22, zc + 0.5, 'x', 6);
+      // blauer Schwenkarm der Tür (links von vorn gesehen) mit Platten oben und unten, Scharnierlaschen, JLU-Schild
+      kiste(blau, 0.32, 1.25, 0.46, X0 + 0.06, YC, zc - 0.66);
+      for (const s of [1, -1]) { kiste(blau, 0.6, 0.04, 0.62, X0 + 0.16, YC + s*0.645, zc - 0.62); kiste(stahlD, 0.12, 0.1, 0.1, X0 + 0.44, YC + s*0.6, zc - 0.78); }
+      add(new THREE.PlaneGeometry(0.32, 0.16), [new THREE.MeshLambertMaterial({map:schild}), new THREE.MeshStandardMaterial({map:schild, roughness:0.6})], X0 - 0.101, YC + 0.3, zc - 0.66, 0, -Math.PI/2, 0);
+      // Sättel und Fußplatte
+      for (const x of [X0 + 0.9, X1 - 0.9]) { kiste(blau, 0.45, 0.32, 1.1, x, 0.16, zc); kiste(blau, 0.7, 0.03, 1.3, x, 0.015, zc); }
+      // oben: Ventil mit Handrad, schräger Messkopf, Kranösen
+      zyl(0.04, 0.5, stahl, X0 + 0.75, YC + R0 + 0.2, zc + 0.15, 'y', 12); kiste(stahlD, 0.1, 0.1, 0.1, X0 + 0.75, YC + R0 + 0.35, zc + 0.15);
+      zyl(0.05, 0.03, schwarz, X0 + 0.75, YC + R0 + 0.47, zc + 0.15, 'y', 12);
+      const mk = add(new THREE.CylinderGeometry(0.11, 0.11, 0.4, 20), stahl, xm + 0.5, YC + R0 + 0.12, zc - 0.3, 0.5, 0, 0);
+      zyl(0.07, 0.18, schwarz, xm + 0.5, YC + R0 + 0.35, zc - 0.42, 'y', 16);
+      for (const x of [X0 + 0.55, X1 - 0.55]) kiste(stahlD, 0.12, 0.14, 0.02, x, YC + R0 + 0.05, zc);
+      // Seite zum Gang: Durchführungsflansch mit Steckern; hinten ein Stutzen
+      const sz = k === 0 ? zc - R0 : zc + R0, sd = k === 0 ? -1 : 1;
+      zyl(0.22, 0.06, stahlD, xm + 0.6, YC + 0.05, sz + sd*0.03, 'z', 28);
+      for (let i = 0; i < 5; i++) kiste(schwarz, 0.05, 0.04, 0.05, xm + 0.52 + (i % 3)*0.08, YC + 0.0 + Math.floor(i/3)*0.09, sz + sd*0.08);
+      zyl(0.15, 0.3, stahl, X1 + 0.05, YC + 0.25, zc - 0.2, 'x', 24); zyl(0.17, 0.04, stahlD, X1 + 0.2, YC + 0.25, zc - 0.2, 'x', 24);
+      // Kabel vom Messkopf und von der Durchführung
+      kabel(kabelR, [[xm + 0.5, YC + R0 + 0.4, zc - 0.42], [xm - 0.3, YC + R0 + 0.3, zc - 0.7], [X0 + 0.2, 2.2, zc - 1.0], [X0 + 0.9, 2.75, zc - 1.2]]);
+      kabel(kabelS, [[xm + 0.45, YC + R0 + 0.38, zc - 0.4], [xm - 0.5, YC + R0 + 0.2, zc - 0.75], [X0 + 0.3, 2.0, zc - 1.05], [X0 + 0.9, 2.75, zc - 1.25]]);
+      kabel(kabelG, [[xm + 0.6, YC + 0.05, sz + sd*0.1], [xm + 0.3, YC - 0.3, sz + sd*0.35], [xm - 0.4, 0.05, sz + sd*0.5], [X0 - 0.2, 0.03, sz + sd*0.6]], 0.01);
+      cols.push({x0:X0 - 0.12, x1:X1 + 0.25, z0:zc - 0.95, z1:zc + 0.86, y0:-1, y1:2.3});
+    });
+    // vor Kammer 1: schwarzer Geräteschrank mit Monitor und Tastatur, Steckdosensäule bis zur Decke (Tische vorerst weggelassen)
+    const z1 = KZ[0] - 1.35;
+    kiste(schwarz, 0.6, 1.0, 0.6, -4.75, 0.5, z1); kiste(weiss, 0.03, 0.34, 0.52, -4.75, 1.33, z1); kiste(schwarz, 0.005, 0.3, 0.48, -4.77, 1.33, z1);   // Schrank, Monitor
+    kiste(weiss, 0.18, 0.02, 0.12, -4.7, 1.01, z1); kiste(schwarz, 0.16, 0.02, 0.45, -4.95, 1.01, z1);                                      // Fuß, Tastatur
+    for (const s of [-1, 1]) zyl(0.035, 0.02, alu, -4.75 + s*0.24, 1.01, z1 + s*0.24, 'y', 10);                                              // Ösen
+    kiste(schwarz, 0.14, 2.8, 0.14, -4.2, 1.4, z1 + 0.15);
+    for (let i = 0; i < 6; i++) kiste(i % 2 ? M(0x2a62b8) : rot, 0.04, 0.12, 0.1, -4.28, 0.9 + i*0.22, z1 + 0.15);
+    cols.push({x0:-5.1, x1:-4.1, z0:z1 - 0.35, z1:z1 + 0.35, y0:-1, y1:1.6});
+  }
+
+  // Raum 019, Seitenwand gegenüber den großen Kammern (nach Fotos aus dem Labor): kleinere, stehende Edelstahlkammer auf Beinen,
+  // Strahlrohr zu einem Dipolmagneten (graues Joch, rote Spulen) auf einem Rohrgestell, davor ein Sechswege-Kreuz mit schwarzen
+  // Manipulatoren auf einer roten Stange; davor ein dunkelgraues 19-Zoll-Rack, links ein Netzgerät auf Rollen, rechts ein Alu-Wagen.
+  // An der Wand: weißer Schrank, Kupfer-Gasverteilung, grüne Gaswarngeräte. Alles bleibt vor z = 38 (Weg von der Tür frei).
+  { const ZW = 36.41, YB = 1.25;                                   // Wandfläche, Strahlhöhe
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.5, metalness:0.1, ...o})];
+    const stahl = M(0xc9ccce, {roughness:0.4, metalness:0.5, emissive:0x26282a}), stahlD = M(0xaeb2b5, {roughness:0.35, metalness:0.6, emissive:0x1c1e20}), joch = M(0xc9ccc8, {roughness:0.7, metalness:0.1}),
+          rot = M(0xc0281f, {roughness:0.55}), grauR = M(0x9aa3aa, {roughness:0.6, metalness:0.2}), schwarz = M(0x1b1d20, {roughness:0.5}), rack = M(0x3e4247, {roughness:0.6, metalness:0.2}),
+          front = M(0xd9d8d2, {roughness:0.5, metalness:0.2}), alu = M(0xc4c8cc, {roughness:0.35, metalness:0.7}), weiss = M(0xf0f0ec, {roughness:0.7, metalness:0}),
+          kupfer = M(0xc0703e, {roughness:0.35, metalness:0.8}), gruen = M(0x1d8a4a, {roughness:0.5}), schlinge = M(0x2fae55, {roughness:0.8, metalness:0});
+    const add = (geo, m, x, y, z, rx = 0, ry = 0, rz = 0) => { const o = new THREE.Mesh(geo, m[1]); o.userData.mats = m; cadMeshes.push(o);
+      o.position.set(x, y, z); o.rotation.set(rx, ry, rz); scene.add(o); return o; };
+    const kiste = (m, w, h, d, x, y, z) => add(new THREE.BoxGeometry(w, h, d), m, x, y, z);
+    const zyl = (r, l, m, x, y, z, achse = 'y', seg = 20) => add(new THREE.CylinderGeometry(r, r, l, seg), m, x, y, z, achse === 'z' ? Math.PI/2 : 0, 0, achse === 'x' ? Math.PI/2 : 0);
+    const rohr = (a, b, r, m, seg = 12) => { const A = new THREE.Vector3(...a), D = new THREE.Vector3(...b).sub(A), L = D.length();
+      const o = add(new THREE.CylinderGeometry(r, r, L, seg), m, 0, 0, 0); o.position.copy(A).addScaledVector(D, 0.5); o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), D.normalize()); return o; };
+    const flansch = (x, y, z, achse, r) => { zyl(r, 0.035, stahlD, x, y, z, achse, 24); };
+    // stehende Kammer: Ø 0,9 m, Mantel 0,6 m hoch, Flansche oben und unten, Stutzen vorn, Pumpe oben, grüne Hebeschlinge
+    const KX = -2.4, KZc = ZW + 0.75, KY = 1.0;
+    zyl(0.45, 0.6, stahl, KX, KY + 0.3, KZc, 'y', 40); zyl(0.5, 0.04, stahlD, KX, KY + 0.62, KZc, 'y', 40); zyl(0.52, 0.05, stahlD, KX, KY - 0.02, KZc, 'y', 40);
+    add(new THREE.SphereGeometry(0.45, 32, 10, 0, Math.PI*2, Math.PI/2, Math.PI/2).scale(1, 0.4, 1), stahl, KX, KY - 0.04, KZc);
+    for (const [dx, dy, r] of [[-0.12, 0.42, 0.14], [-0.1, 0.12, 0.13], [0.2, 0.2, 0.07]]) {               // Stutzen zum Raum hin (+z)
+      const zz = KZc + Math.sqrt(0.45*0.45 - dx*dx); zyl(r, 0.12, stahl, KX + dx, KY + dy, zz + 0.05, 'z', 24); flansch(KX + dx, KY + dy, zz + 0.12, 'z', r + 0.03); }
+    zyl(0.1, 0.35, stahl, KX - 0.15, KY + 0.82, KZc - 0.1, 'y', 20); zyl(0.12, 0.03, stahlD, KX - 0.15, KY + 0.65, KZc - 0.1, 'y', 20);
+    zyl(0.03, 0.4, stahl, KX + 0.25, KY + 0.84, KZc - 0.2, 'y', 10); zyl(0.04, 0.03, schwarz, KX + 0.25, KY + 1.05, KZc - 0.2, 'y', 10);
+    add(new THREE.TorusGeometry(0.22, 0.06, 8, 20), schlinge, KX + 0.05, KY + 0.68, KZc + 0.05, Math.PI/2, 0, 0);
+    for (const [dx, dz] of [[-0.42, -0.4], [0.42, -0.4], [-0.42, 0.4], [0.42, 0.4]]) {                       // Beine mit Fußplatten, Rahmen unten
+      zyl(0.05, KY - 0.04, alu, KX + dx, (KY - 0.04)/2, KZc + dz, 'y', 12); zyl(0.17, 0.03, alu, KX + dx, 0.015, KZc + dz, 'y', 20); }
+    kiste(alu, 0.9, 0.05, 0.05, KX, 0.18, KZc - 0.4); kiste(alu, 0.9, 0.05, 0.05, KX, 0.18, KZc + 0.4); kiste(alu, 0.05, 0.05, 0.8, KX - 0.42, 0.18, KZc); kiste(alu, 0.05, 0.05, 0.8, KX + 0.42, 0.18, KZc);
+    cols.push({x0:KX - 0.6, x1:KX + 0.6, z0:ZW, z1:KZc + 0.62, y0:-1, y1:2.2});
+    // Dipolmagnet: graues Joch (Rahmen) mit roten Spulen oben und unten, auf zwei grauen Rohrstützen mit Querstreben
+    const MX = -5.0, MZ = ZW + 0.65;
+    kiste(joch, 1.1, 0.14, 0.62, MX, YB + 0.42, MZ); kiste(joch, 1.1, 0.14, 0.62, MX, YB - 0.42, MZ);
+    kiste(joch, 0.14, 0.98, 0.62, MX - 0.48, YB, MZ); kiste(joch, 0.14, 0.98, 0.62, MX + 0.48, YB, MZ);
+    kiste(rot, 0.78, 0.22, 0.7, MX, YB + 0.23, MZ); kiste(rot, 0.78, 0.22, 0.7, MX, YB - 0.23, MZ);
+    for (const dx of [-0.3, 0.3]) { zyl(0.12, YB - 0.49, grauR, MX + dx, (YB - 0.49)/2, MZ, 'y', 16); zyl(0.14, 0.04, grauR, MX + dx, YB - 0.51, MZ, 'y', 16); }
+    kiste(grauR, 0.6, 0.08, 0.08, MX, 0.35, MZ); kiste(grauR, 0.08, 0.08, 0.5, MX, 0.6, MZ);
+    cols.push({x0:MX - 0.6, x1:MX + 0.6, z0:ZW, z1:MZ + 0.38, y0:-1, y1:2.0});
+    // Strahlrohr: Kammer -> Magnet (längs der Wand), im Magneten um 90° abgelenkt zum Kreuz (in den Raum hinein)
+    rohr([KX - 0.45, YB, KZc - 0.1], [MX + 0.55, YB, MZ], 0.05, stahl); flansch(KX - 0.5, YB, KZc - 0.1, 'x', 0.09); flansch(MX + 0.56, YB, MZ, 'x', 0.09);
+    rohr([MX - 0.7, YB, MZ], [MX - 0.55, YB, MZ], 0.05, stahl); flansch(MX - 0.72, YB, MZ, 'x', 0.09);
+    const CX = MX, CZ = MZ + 0.9;
+    rohr([CX, YB, MZ + 0.36], [CX, YB, CZ - 0.12], 0.06, stahl); flansch(CX, YB, MZ + 0.38, 'z', 0.1);
+    // Sechswege-Kreuz mit schwarzen Manipulatoren an den Schrägarmen, auf einer roten Stange
+    zyl(0.11, 0.2, stahl, CX, YB, CZ, 'z', 24); flansch(CX, YB, CZ - 0.11, 'z', 0.15); flansch(CX, YB, CZ + 0.11, 'z', 0.15);
+    rohr([CX, YB, CZ + 0.1], [CX, YB, CZ + 0.42], 0.05, stahl); zyl(0.06, 0.14, schwarz, CX, YB, CZ + 0.5, 'z', 16);
+    for (const w of [0.785, 2.356, 3.927, 5.498]) { const ex = CX + Math.cos(w)*0.36, ey = YB + Math.sin(w)*0.36;
+      rohr([CX, YB, CZ], [ex, ey, CZ], 0.025, stahl); const m = rohr([CX + Math.cos(w)*0.36, YB + Math.sin(w)*0.36, CZ], [CX + Math.cos(w)*0.52, YB + Math.sin(w)*0.52, CZ], 0.065, schwarz, 16); }
+    zyl(0.035, YB - 0.12, rot, CX, (YB - 0.12)/2, CZ + 0.05, 'y', 12); zyl(0.2, 0.025, rot, CX, 0.012, CZ + 0.05, 'y', 24);
+    cols.push({x0:CX - 0.3, x1:CX + 0.3, z0:CZ - 0.25, z1:CZ + 0.3, y0:-1, y1:2.0});
+    // dunkelgraues Rack zwischen Magnet und Kammer, vorn Einschübe (hell), Not-Aus oben
+    const RX = -3.65, RZ = ZW + 1.15;
+    kiste(rack, 0.62, 2.0, 0.62, RX, 1.0, RZ);
+    for (const [y, h] of [[1.78, 0.2], [1.52, 0.2], [1.2, 0.24], [0.94, 0.18], [0.7, 0.14], [0.48, 0.16]]) kiste(front, 0.5, h, 0.02, RX, y, RZ + 0.31);
+    zyl(0.035, 0.03, rot, RX - 0.15, 1.8, RZ + 0.33, 'z', 12); kiste(M(0xf0c000), 0.07, 0.07, 0.01, RX + 0.15, 1.8, RZ + 0.325);
+    cols.push({x0:RX - 0.31, x1:RX + 0.31, z0:RZ - 0.31, z1:RZ + 0.31, y0:-1, y1:2.1});
+    // Netzgerät auf Rollen (Edelstahlgehäuse) mit Kabelrolle obendrauf
+    const NX = -6.25, NZ = ZW + 1.0;
+    kiste(stahl, 0.6, 0.65, 0.55, NX, 0.43, NZ); kiste(front, 0.5, 0.5, 0.01, NX, 0.43, NZ + 0.28);
+    for (const dx of [-0.25, 0.25]) for (const dz of [-0.22, 0.22]) zyl(0.04, 0.03, schwarz, NX + dx, 0.05, NZ + dz, 'x', 10);
+    add(new THREE.TorusGeometry(0.17, 0.03, 8, 20), schwarz, NX, 0.79, NZ, Math.PI/2, 0, 0);
+    cols.push({x0:NX - 0.32, x1:NX + 0.32, z0:NZ - 0.3, z1:NZ + 0.3, y0:-1, y1:1.0});
+    // Alu-Wagen aus Profilen mit Geräten (rechts von der Kammer)
+    const WX = -1.2, WZ = ZW + 0.7;
+    for (const dx of [-0.5, 0.5]) for (const dz of [-0.35, 0.35]) kiste(alu, 0.045, 0.9, 0.045, WX + dx, 0.5, WZ + dz);
+    for (const y of [0.15, 0.55, 0.95]) kiste(alu, 1.05, 0.03, 0.75, WX, y, WZ);
+    kiste(front, 0.45, 0.13, 0.4, WX - 0.2, 0.62, WZ); kiste(schwarz, 0.4, 0.12, 0.35, WX + 0.25, 0.62, WZ); kiste(front, 0.3, 0.1, 0.25, WX, 1.02, WZ - 0.1);
+    for (const dx of [-0.45, 0.45]) for (const dz of [-0.3, 0.3]) zyl(0.05, 0.03, M(0xd2691e), WX + dx, 0.05, WZ + dz, 'x', 12);
+    cols.push({x0:WX - 0.55, x1:WX + 0.55, z0:WZ - 0.4, z1:WZ + 0.4, y0:-1, y1:1.2});
+    // an der Wand: weißer Schrank, Kupfer-Gasverteilung mit Ventilen, drei grüne Gaswarngeräte
+    kiste(weiss, 0.9, 2.0, 0.5, -6.85, 1.0, ZW + 0.25); kiste(M(0xd8d8d4), 0.005, 1.95, 0.005, -6.85, 1.0, ZW + 0.502);
+    cols.push({x0:-7.3, x1:-6.4, z0:ZW, z1:ZW + 0.5, y0:-1, y1:2.1});
+    rohr([-2.0, 1.95, ZW + 0.06], [-0.9, 1.95, ZW + 0.06], 0.015, kupfer, 8);
+    for (let i = 0; i < 5; i++) { const x = -1.9 + i*0.22; rohr([x, 1.95, ZW + 0.06], [x, 1.55, ZW + 0.06], 0.012, kupfer, 8); kiste(stahlD, 0.05, 0.05, 0.05, x, 1.7, ZW + 0.07); }
+    for (let i = 0; i < 3; i++) { kiste(gruen, 0.22, 0.28, 0.1, -0.65 + i*0.27, 1.75, ZW + 0.05); kiste(M(0x90a8a0, {emissive:0x203028}), 0.14, 0.12, 0.01, -0.65 + i*0.27, 1.76, ZW + 0.105); }
+  }
+
   // Ostende von Flur 05 (vor 014): verglaste Tür nach draußen, Textur 'tuer05' aus dem Foto docs/fotos/tuer_flur05 (tools/tuertex.py).
   // Die Tür bleibt zu; die Tueranlage ist 2,7 m breit und sitzt rechts in der Ecke, wie auf dem Foto. Unbeleuchtet, damit das Tageslicht hell bleibt.
   if (window.TEX && window.TEX.tuer05) {
