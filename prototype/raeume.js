@@ -322,7 +322,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // Manipulatoren auf einer roten Stange; davor ein dunkelgraues 19-Zoll-Rack, links ein Netzgerät auf Rollen, rechts ein Alu-Wagen.
   // An der Wand: Kupfer-Gasverteilung, grüne Gaswarngeräte. Gebaut an einer gedachten Wand bei z = 36.41 und dann um 180° gedreht
   // an die Wand z = 49.33 gesetzt (A, B): von vorn gesehen Magnet links, Kammer rechts, wie auf dem Foto.
-  { const ZW = 36.41, YB = 1.25, A = -7.1, B = 36.41 + 49.333, G = new THREE.Group(), colsS = []; scene.add(G);   // Bauwand, Strahlhöhe, Drehung
+  { const ZW = 36.41, YB = 1.25, A = -7.1, B = 36.41 + 49.333 - 0.7, WZ0 = ZW - 0.7, G = new THREE.Group(), colsS = []; scene.add(G);   // Bauwand, Strahlhöhe, Drehung
     const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.5, metalness:0.1, ...o})];
     const stahl = M(0xc9ccce, {roughness:0.4, metalness:0.5, emissive:0x26282a}), stahlD = M(0xaeb2b5, {roughness:0.35, metalness:0.6, emissive:0x1c1e20}), joch = M(0xc9ccc8, {roughness:0.7, metalness:0.1}),
           rot = M(0xc0281f, {roughness:0.55}), grauR = M(0x9aa3aa, {roughness:0.6, metalness:0.2}), schwarz = M(0x1b1d20, {roughness:0.5}), rack = M(0x3e4247, {roughness:0.6, metalness:0.2}),
@@ -388,10 +388,14 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const dx of [-0.45, 0.45]) for (const dz of [-0.3, 0.3]) zyl(0.05, 0.03, M(0xd2691e), WX + dx, 0.05, WZ + dz, 'x', 12);
     colsS.push({x0:WX - 0.55, x1:WX + 0.55, z0:WZ - 0.4, z1:WZ + 0.4, y0:-1, y1:1.2});
     // an der Wand: Kupfer-Gasverteilung mit Ventilen, drei grüne Gaswarngeräte (der weiße Schrank entfällt, er stünde vor dem Fenster)
-    rohr([-2.0, 1.95, ZW + 0.06], [-0.9, 1.95, ZW + 0.06], 0.015, kupfer, 8);
-    for (let i = 0; i < 5; i++) { const x = -1.9 + i*0.22; rohr([x, 1.95, ZW + 0.06], [x, 1.55, ZW + 0.06], 0.012, kupfer, 8); kiste(stahlD, 0.05, 0.05, 0.05, x, 1.7, ZW + 0.07); }
-    for (let i = 0; i < 3; i++) { kiste(gruen, 0.22, 0.28, 0.1, -0.65 + i*0.27, 1.75, ZW + 0.05); kiste(M(0x90a8a0, {emissive:0x203028}), 0.14, 0.12, 0.01, -0.65 + i*0.27, 1.76, ZW + 0.105); }
-      G.rotation.y = Math.PI; G.position.set(A, 0, B);
+    rohr([-2.0, 1.95, WZ0 + 0.06], [-0.9, 1.95, WZ0 + 0.06], 0.015, kupfer, 8);
+    for (let i = 0; i < 5; i++) { const x = -1.9 + i*0.22; rohr([x, 1.95, WZ0 + 0.06], [x, 1.55, WZ0 + 0.06], 0.012, kupfer, 8); kiste(stahlD, 0.05, 0.05, 0.05, x, 1.7, WZ0 + 0.07); }
+    for (let i = 0; i < 3; i++) { kiste(gruen, 0.22, 0.28, 0.1, -0.65 + i*0.27, 1.75, WZ0 + 0.05); kiste(M(0x90a8a0, {emissive:0x203028}), 0.14, 0.12, 0.01, -0.65 + i*0.27, 1.76, WZ0 + 0.105); }
+      // hinter dem Magneten an der Wand: weißer Schrank mit zwei Türen (Foto), 1,0 m breit, 0,6 m tief, 2 m hoch
+    kiste(weiss, 1.0, 2.0, 0.6, MX, 1.0, WZ0 + 0.3); kiste(M(0xd8d8d4), 0.005, 1.95, 0.005, MX, 1.0, WZ0 + 0.602);
+    for (const dx of [-0.06, 0.06]) kiste(M(0x9aa0a6), 0.02, 0.18, 0.02, MX + dx, 1.05, WZ0 + 0.61);
+    colsS.push({x0:MX - 0.5, x1:MX + 0.5, z0:WZ0, z1:WZ0 + 0.6, y0:-1, y1:2.1});
+    G.rotation.y = Math.PI; G.position.set(A, 0, B);
     for (const c of colsS) cols.push({x0:A - c.x1, x1:A - c.x0, z0:B - c.z1, z1:B - c.z0, y0:c.y0, y1:c.y1});
   }
 
