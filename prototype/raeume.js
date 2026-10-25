@@ -46,6 +46,29 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   for (const [x0, x1, z0, z1] of R.walls) wand(x0, x1, 0, HR, z0, z1, true);
   for (const [x0, x1, z0, z1, u] of R.doors) wand(x0, x1, u || 2.1, HR, z0, z1, false);
 
+  // Treppenhaus 020: zweiläufige Podesttreppe nach dem Grundriss (je 10 Stufen à 17 cm, Geschosshöhe 3,4 m). Ohne Foto: graue Betonstufen
+  // mit dunklem Belag, Trennwand zwischen den Läufen, Stahlhandlauf. Lauf 1 (Seite 06) beginnt am Vorplatz vor 09 und steigt nach Westen
+  // zum Podest an der Außenwand, Lauf 2 (Seite 05) steigt zurück nach Osten aufs Obergeschoss, das oben an einer geschlossenen Tür endet.
+  // Über dem Treppenhaus ist die Decke offen; der Treppenraum reicht bis 6,8 m.
+  const T = {xW:-15.54, xP:-13.74, xA:-10.69, xB:-11.01, xO:-10.37, zN:13.231, zT0:14.54, zT1:14.74, zS:16.103, h:1.7, H:3.4, oben:6.8};
+  window.raeumeBoden = (x, z) => {                     // Laufflächen der Treppe für groundAt (Rampen über die Stufenkanten)
+    const v = [];
+    if (z > T.zN && z < T.zS && x >= T.xW && x <= T.xP) v.push(T.h);                                       // Podest
+    if (z > T.zN && z < T.zT0 && x >= T.xP && x <= T.xA) v.push(T.h*(T.xA - x)/(T.xA - T.xP));             // Lauf 1
+    if (z > T.zT1 && z < T.zS && x >= T.xP && x <= T.xB) v.push(T.h + (T.H - T.h)*(x - T.xP)/(T.xB - T.xP)); // Lauf 2
+    if (z > T.zT1 && z < T.zS && x >= T.xB && x <= T.xO) v.push(T.H);                                       // Austritt oben
+    return v;
+  };
+  wand(T.xW - 0.27, T.xW, HR, T.oben, T.zN - 0.41, T.zS + 0.41, false);          // Treppenraum über der Decke: Westen,
+  wand(T.xW, T.xO + 0.17, HR, T.oben, T.zN - 0.41, T.zN, false);                 // Norden (06),
+  wand(T.xW, T.xO + 0.17, HR, T.oben, T.zS, T.zS + 0.41, false);                 // Süden (05)
+  wand(T.xO, T.xO + 0.17, HR, T.oben, T.zN, T.zS, false);                        // und Osten über dem Vorplatz, darin oben die Tür
+  wand(T.xP, T.xA, 0, T.H + 0.95, T.zT0, T.zT1, false);                          // Trennwand zwischen den Läufen
+  cols.push({x0:T.xP, x1:T.xA, z0:T.zT0, z1:T.zT1, y0:-1, y1:99},                // Trennwand
+            {x0:T.xP, x1:T.xB, z0:T.zT1, z1:T.zS, y0:-1, y1:T.h - 0.1},          // unter Lauf 2 kommt man vom Vorplatz aus nicht hinein
+            {x0:T.xO, x1:T.xO + 0.17, z0:T.zN, z1:T.zS, y0:HR, y1:99},           // Wand oben am Austritt (unten geht man darunter durch)
+            {x0:T.xA, x1:T.xO, z0:T.zT0, z1:T.zT1, y0:HR, y1:99});               // Geländer oben am Austritt
+
   const tex = (key, w, h, nahtlos) => { if (!window.TEX || !window.TEX[key]) return null;      // nahtlos: Textur kachelt ohne Spiegeln (fototex.py, nahtlos)
     const t = new THREE.TextureLoader().load(window.TEX[key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
     t.wrapS = t.wrapT = nahtlos ? THREE.RepeatWrapping : THREE.MirroredRepeatWrapping; t.repeat.set(1/w, 1/h); return t; };
@@ -74,7 +97,38 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   { const F = flaechen(), y = 0.004; for (const [x0, x1, z0, z1] of FL) F.add([0,1,0], [[x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0]]);
     const t = tex('flurboden', 1.0, 0.5, true);
     mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x9a9a9a}), new THREE.MeshStandardMaterial({map:t, color:0x8c8c8c, roughness:0.75, metalness:0})]); }
-  const decke = mesh(new THREE.PlaneGeometry(w, d), mats(0xe6e6e2, 0x9a9a96)); decke.rotation.x = Math.PI/2; decke.position.set((bx0+bx1)/2, HR, (bz0+bz1)/2);
+  // Decke: überall auf 3 m, über dem Treppenhaus offen; der Treppenraum hat seine Decke auf 6,8 m
+  { const F = flaechen(), unten = (x0, x1, y, z0, z1) => F.add([0,-1,0], [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]]);
+    unten(bx0, bx1, HR, bz0, T.zN); unten(bx0, bx1, HR, T.zS, bz1); unten(bx0, T.xW, HR, T.zN, T.zS); unten(T.xO, bx1, HR, T.zN, T.zS);
+    unten(T.xW, T.xO, T.oben, T.zN, T.zS);
+    mesh(F.geo(), mats(0xe6e6e2, 0x9a9a96)); }
+  // Stufen, Podest und Austritt: Betonkörper bis zum Boden, darauf ein dunkler Belag
+  { const K = flaechen(), B = flaechen(), n = 10;
+    const stufe = (x0, x1, y, z0, z1) => { kasten(K, x0, x1, 0, y - 0.02, z0, z1); kasten(B, x0, x1, y - 0.02, y, z0, z1); };
+    for (let i = 0; i < n; i++) { const a = T.xA - (T.xA - T.xP)*i/n, b = T.xA - (T.xA - T.xP)*(i+1)/n; stufe(b, a, T.h*(i+1)/n, T.zN, T.zT0); }
+    for (let i = 0; i < n; i++) { const a = T.xP + (T.xB - T.xP)*i/n, b = T.xP + (T.xB - T.xP)*(i+1)/n; stufe(a, b, T.h + (T.H - T.h)*(i+1)/n, T.zT1, T.zS); }
+    stufe(T.xW, T.xP, T.h, T.zN, T.zS);
+    kasten(K, T.xB, T.xO, T.H - 0.27, T.H - 0.02, T.zT1, T.zS); kasten(B, T.xB, T.xO, T.H - 0.02, T.H, T.zT1, T.zS);   // Austritt als Platte
+    mesh(K.geo(), mats(0xb3b2ac, 0x2a2a28)); mesh(B.geo(), mats(0x44474c, 0x101112)); }
+  // Handläufe aus Stahlrohr an beiden Seiten der Trennwand, 0,9 m über den Stufen, und ein Geländer oben am Austritt
+  { const stahl = mats(0x9aa0a6, 0x1a1c1e), R0 = 0.02;
+    const rohr = (a, b) => { const A = new THREE.Vector3(...a), D = new THREE.Vector3(...b).sub(A), L = D.length();
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(R0, R0, L, 8), stahl[1]); m.userData.mats = stahl; cadMeshes.push(m);
+      m.position.copy(A).addScaledVector(D, 0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), D.normalize()); scene.add(m); };
+    const z1 = T.zT0 - 0.06, z2 = T.zT1 + 0.06, hl = 0.9, zm = (T.zT0 + T.zT1)/2;
+    rohr([T.xA, hl, z1], [T.xP, T.h + hl, z1]); rohr([T.xP, T.h + hl, z2], [T.xB, T.H + hl, z2]); rohr([T.xB, T.H + hl, z2], [T.xO, T.H + hl, z2]);
+    for (const x of [T.xA, (T.xA + T.xO)/2, T.xO]) rohr([x, T.H, zm], [x, T.H + 1.0, zm]);
+    rohr([T.xA, T.H + 1.0, zm], [T.xO, T.H + 1.0, zm]); rohr([T.xA, T.H + 0.5, zm], [T.xO, T.H + 0.5, zm]); }
+  // Oben: geschlossene Holztür zum Obergeschoss mit Schild, Leuchte unter der Treppenraumdecke
+  { const cv = document.createElement('canvas'); cv.width = 256; cv.height = 512; const g = cv.getContext('2d');
+    g.fillStyle = '#3a3d42'; g.fillRect(0, 0, 256, 512); g.fillStyle = '#b7895a'; g.fillRect(14, 14, 228, 498);
+    for (let i = 0; i < 40; i++) { g.strokeStyle = 'rgba(90,55,25,' + (0.08 + (i % 5)*0.03) + ')'; g.lineWidth = 1 + (i % 3); g.beginPath(); g.moveTo(14 + i*5.7, 14); g.lineTo(18 + i*5.7, 512); g.stroke(); }
+    g.fillStyle = '#c9ccce'; g.fillRect(196, 250, 34, 10); g.fillRect(212, 245, 10, 26);
+    g.fillStyle = '#f4f4f0'; g.fillRect(78, 90, 100, 44); g.fillStyle = '#2b2e33'; g.font = 'bold 28px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('1. OG', 128, 113);
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+    const tuer = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 2.1), new THREE.MeshLambertMaterial({map:t})); tuer.rotation.y = -Math.PI/2;
+    tuer.position.set(T.xO - 0.006, T.H + 1.05, (T.zT1 + T.zS)/2); scene.add(tuer);
+    const lampe = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.3), new THREE.MeshBasicMaterial({color:0xffffff})); lampe.position.set((T.xW + T.xO)/2, T.oben - 0.03, (T.zN + T.zS)/2); scene.add(lampe); }
 
   // Ostende von Flur 05 (vor 014): verglaste Tür nach draußen, Textur 'tuer05' aus dem Foto docs/fotos/tuer_flur05 (tools/tuertex.py).
   // Die Tür bleibt zu; die Tueranlage ist 2,7 m breit und sitzt rechts in der Ecke, wie auf dem Foto. Unbeleuchtet, damit das Tageslicht hell bleibt.
