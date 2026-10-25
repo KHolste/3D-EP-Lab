@@ -145,6 +145,35 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     schild.position.set(XW - 0.03, 2.42, Z1 - 0.45); scene.add(schild);
   }
 
+  // Flur 08b: Die ersten fünf Eingänge rechts (Westwand, aus 05 kommend: 04, 03, 02, 01a, 01) gehören nicht zur Arbeitsgruppe
+  // und sind mit geschlossenen, rötlichen Türen verschlossen. Öffnungen aus raeume_data.js: Türstürze, deren Flurseite bei x -10.105
+  // liegt, zwischen Flur 05 und der Durchgangstür nach 08. Breite Öffnungen bekommen zwei Flügel, schmale einen.
+  { const XF = -10.105, XR = -10.424, D = 0.045, HT = 2.1;
+    const zu = R.doors.filter(([x0, x1, z0, z1]) => Math.abs(x1 - XF) < 0.01 && z0 > 19.8 && z1 < 36.15).sort((a, b) => a[2] - b[2]).slice(0, 5);
+    const blatt = (B) => { const cv = document.createElement('canvas'), s = 160; cv.width = Math.round(B*s); cv.height = Math.round(HT*s); const g = cv.getContext('2d');
+      const W = cv.width, H = cv.height, f = 0.05*s, zwei = B > 1.5;
+      g.fillStyle = '#5b5f63'; g.fillRect(0, 0, W, H);                                         // Stahlzarge
+      const fl = zwei ? [[f, W/2 - 2], [W/2 + 2, W - f]] : [[f, W - f]];
+      fl.forEach(([a, b], i) => {
+        g.fillStyle = '#a5453a'; g.fillRect(a, f, b - a, H - f);                               // rötlicher Lack
+        for (let k = 0; k < 18; k++) { g.fillStyle = 'rgba(' + (k % 2 ? '255,230,220' : '60,10,5') + ',0.035)'; g.fillRect(a, f + k*(H - f)/18, b - a, (H - f)/36); }
+        g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(a, H - 0.25*s, b - a, 0.25*s);            // Trittschutz unten
+        const links = zwei ? i === 1 : false, hx = links ? a + 0.09*s : b - 0.09*s, hy = H - 1.05*s;
+        if (!zwei || i === 1) { g.fillStyle = '#cfd3d6'; g.fillRect(hx - 5, hy - 0.12*s, 10, 0.27*s);                // Langschild
+          g.fillRect(links ? hx : hx - 0.14*s, hy - 4, 0.14*s, 8); g.fillStyle = '#2c2f33'; g.fillRect(hx - 2, hy + 0.06*s, 4, 9); }   // Drücker, Schloss
+      });
+      g.fillStyle = 'rgba(0,0,0,0.35)'; if (zwei) g.fillRect(W/2 - 2, f, 4, H - f);           // Mittelfuge
+      const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+    for (const [, , z0, z1] of zu) {
+      const B = z1 - z0, t = blatt(B), rot = 0x8f3a31;
+      const flur = [new THREE.MeshLambertMaterial({map:t, emissive:0x2a2a2a, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x2a2a2a, emissiveMap:t, roughness:0.55, metalness:0})];
+      const sonst = mats(rot, 0x1c0b09);
+      const m = [0,1,2,3,4,5].map(i => i === 0 ? flur : sonst);                               // +x zeigt in den Flur
+      const o = mesh(new THREE.BoxGeometry(D, HT, B), [m.map(p => p[0]), m.map(p => p[1])]);   // [einfach, hoch] wie mats()
+      o.position.set(XF - 0.012 - D/2, HT/2, (z0 + z1)/2);
+      cols.push({x0:XR, x1:XF, z0, z1, y0:-1, y1:HR});
+    } }
+
   // Raumnummern auf dem Boden, lesbar beim Blick von der Halle aus (nach +z, im Plan: nach links)
   for (const [nr, [x, z]] of Object.entries(R.labels)) {
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128; const g = cv.getContext('2d');

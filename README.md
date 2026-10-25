@@ -43,7 +43,8 @@ Anna (oben auf der Bühne) und Kalle (unten in der Halle) helfen weiter, wenn ma
 Neben der Halle (Raum 07) ist das übrige Gebäude nach dem Grundriss begehbar: Durch die Tür an der Längswand
 neben der EMV-Kabine geht es nach Raum 09 und von dort in die Flure und Räume. Die Räume sind noch leer und
 werden nach und nach anhand von Fotos eingerichtet (`prototype/raeume.js`). Im Treppenhaus 020 kann man bis zur (geschlossenen)
-Tür ins 1. Obergeschoss hinaufgehen.
+Tür ins 1. Obergeschoss hinaufgehen. Im Flur 08b sind die ersten fünf Räume auf der rechten Seite (04, 03, 02, 01a, 01) mit
+roten Türen verschlossen; sie gehören nicht zur Arbeitsgruppe.
 
 ### Testmodi
 
