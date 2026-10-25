@@ -15,21 +15,31 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
 
   // alle Quader in ein gemeinsames Netz (wenige Zeichenaufrufe)
   function quader(list){
-    const pos = [], nor = [], idx = [];
+    const pos = [], nor = [], uv = [], idx = [];
     for (const [x0, x1, y0, y1, z0, z1] of list) {
       const F = [[[1,0,0],[[x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1]]], [[-1,0,0],[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]]],
                  [[0,1,0],[[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]]], [[0,-1,0],[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]]],
                  [[0,0,1],[[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]]], [[0,0,-1],[[x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0]]]];
-      for (const [n, v] of F) { const b = pos.length/3; for (const p of v) { pos.push(...p); nor.push(...n); } idx.push(b, b+1, b+2, b, b+2, b+3); }
+      for (const [n, v] of F) { const b = pos.length/3;
+        for (const p of v) { pos.push(...p); nor.push(...n); uv.push(n[0] ? p[2] : p[0], n[1] ? p[2] : p[1]); }   // UV in Metern, je nach Flächenrichtung projiziert
+        idx.push(b, b+1, b+2, b, b+2, b+3); }
     }
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); g.setIndex(idx);
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx);
     return g;
   }
-  // Hell gestrichene Wände; leicht selbstleuchtend, weil die Räume keine eigenen Lampen haben und die Decke kein Licht wirft
+  // Leicht selbstleuchtende Flächen, weil die Räume keine eigenen Lampen haben und die Decke kein Licht wirft
   const mats = (color, emissive) => [new THREE.MeshLambertMaterial({color, emissive}), new THREE.MeshStandardMaterial({color, emissive, roughness:0.95, metalness:0})];
   const mesh = (geo, m) => { const o = new THREE.Mesh(geo, m[1]); o.userData.mats = m; cadMeshes.push(o); scene.add(o); return o; };   // castShadow/receiveShadow bleiben aus
-  const wandM = mats(0xefeee9, 0x2e2e2c);
+  // Wände wie in der Halle: weiß gestrichener, brettgeschalter Beton (Textur 'wand' aus cad/tex_lite.js, eine Kachel 1,3 m)
+  let wandM = mats(0xefeee9, 0x2e2e2c);
+  if (window.TEX && window.TEX.wand) {
+    const t = new THREE.TextureLoader().load(window.TEX.wand); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping; t.repeat.set(1/1.3, 1/1.3);
+    wandM = [new THREE.MeshLambertMaterial({color:0xf4f4f0, map:t, emissive:0x2e2e2c, emissiveMap:t}),
+             new THREE.MeshStandardMaterial({color:0xf4f4f0, map:t, emissive:0x2e2e2c, emissiveMap:t, roughness:0.92, metalness:0})];
+  }
   mesh(quader(R.walls.map(([x0, x1, z0, z1]) => [x0, x1, 0, HR, z0, z1])), wandM);
   mesh(quader(R.doors.map(([x0, x1, z0, z1, u]) => [x0, x1, u || 2.1, HR, z0, z1])), wandM);
   for (const [x0, x1, z0, z1] of R.walls) cols.push({x0, x1, z0, z1, y0:-1, y1:HR});
