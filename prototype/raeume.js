@@ -92,9 +92,10 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
                                           new THREE.MeshStandardMaterial({color, emissive, map, emissiveMap:map, roughness:0.92, metalness:0})];
   const mesh = (geo, m) => { const o = new THREE.Mesh(geo, m[1]); o.userData.mats = m; cadMeshes.push(o); scene.add(o); return o; };   // castShadow/receiveShadow bleiben aus
   // Räume: Wände wie in der Halle, weiß gestrichener, brettgeschalter Beton (Textur 'wand', Kachel 1,3 m)
-  mesh(beton.geo(), mats(0xf4f4f0, 0x2e2e2c, tex('wand', 1.3, 1.3)));
+  // Räume: auf allen Fotos glatt weiß gestrichen wie die Flure (früher Beton wie in der Halle), nur ohne schwarze Leiste
+  mesh(beton.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)));   // hell wie auf den Fotos, auch auf der Schattenseite
   // Flure: glatter, weißer Anstrich mit leichter Struktur (Textur 'flurwand' nach dem Foto am Ende von Flur 05), schwarze Sockelleiste
-  mesh(flurW.geo(), mats(0xf6f7f7, 0x303131, tex('flurwand', 0.8, 1.2, true)));
+  mesh(flurW.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)));
   mesh(leiste.geo(), [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5, metalness:0})]);
   for (const [x0, x1, z0, z1] of R.walls) cols.push({x0, x1, z0, z1, y0:-1, y1:HR});
 
@@ -128,6 +129,26 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     unten(bx0, bx1, HR, bz0, T.zN); unten(bx0, bx1, HR, T.zS, bz1); unten(bx0, T.xW, HR, T.zN, T.zS); unten(T.xO, bx1, HR, T.zN, T.zS);
     unten(T.xW, T.xO, T.oben, T.zN, T.zS);
     mesh(F.geo(), mats(0xe6e6e2, 0x9a9a96)); }
+  // Deckenverkleidung nach den Fotos: in den Fluren weiße Paneele quer zur Laufrichtung, in 09 eine Rasterdecke (62,5 cm) mit Leuchtpaneel
+  { const R09 = [-10.15, -7.44, 6.513, 12.82], innen = (r, q) => (r[0] + r[1])/2 > q[0] && (r[0] + r[1])/2 < q[1] && (r[2] + r[3])/2 > q[2] && (r[2] + r[3])/2 < q[3];
+    const loch = [T.xW, T.xO, T.zN, T.zS];
+    const clip = ([x0, x1, z0, z1], [a, b, c, e]) => (x1 <= a || x0 >= b || z1 <= c || z0 >= e) ? [[x0, x1, z0, z1]] :
+      [[x0, x1, z0, Math.max(z0, c)], [x0, x1, Math.min(z1, e), z1], [x0, Math.max(x0, a), Math.max(z0, c), Math.min(z1, e)], [Math.min(x1, b), x1, Math.max(z0, c), Math.min(z1, e)]]
+        .filter(([p, q, r, t]) => q - p > 0.001 && t - r > 0.001);
+    const linien = (quer) => { const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
+      g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, 64, 64); g.fillStyle = 'rgba(120,122,124,0.55)'; if (quer) g.fillRect(0, 0, 2, 64); else g.fillRect(0, 0, 64, 2);
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(quer ? 1/0.15 : 1, quer ? 1 : 1/0.15); return t; };
+    const raster = (() => { const c = document.createElement('canvas'); c.width = 128; c.height = 128; const g = c.getContext('2d');
+      g.fillStyle = '#f2f2ef'; g.fillRect(0, 0, 128, 128); g.fillStyle = '#c9cbcc'; g.fillRect(0, 0, 128, 3); g.fillRect(0, 0, 3, 128);
+      for (let i = 0; i < 300; i++) { g.fillStyle = 'rgba(0,0,0,0.05)'; g.fillRect(Math.random()*128, Math.random()*128, 1, 1); }
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/0.625, 1/0.625); return t; })();
+    const Fx = flaechen(), Fz = flaechen(), F9 = flaechen(), y = HR - 0.004;
+    const unten = (F, [x0, x1, z0, z1]) => F.add([0,-1,0], [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]]);
+    for (const r of FL) for (const q of clip(r, loch)) { if (innen(q, R09)) unten(F9, q); else unten(q[1] - q[0] > q[3] - q[2] ? Fx : Fz, q); }
+    const mm = t => [new THREE.MeshLambertMaterial({map:t, emissive:0x8a8a88, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x8a8a88, emissiveMap:t, roughness:0.9, metalness:0})];
+    mesh(Fx.geo(), mm(linien(true))); mesh(Fz.geo(), mm(linien(false))); mesh(F9.geo(), mm(raster));
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.01, 0.6), new THREE.MeshBasicMaterial({color:0xffffff})); panel.position.set(-8.8, HR - 0.01, 8.7); scene.add(panel);
+    const panel2 = panel.clone(); panel2.position.z = 11.2; scene.add(panel2); }
   // Stufen und Podeste: Beton mit dunklem Belag. Nach oben frei liegende Stufen (30 cm stark), in den Keller massiv bis zur Kellersohle
   { const K = flaechen(), B = flaechen(), n = 10;
     const stufe = (x0, x1, y, z0, z1, y0) => { kasten(K, x0, x1, y0, y - 0.02, z0, z1); kasten(B, x0, x1, y - 0.02, y, z0, z1); };
@@ -462,9 +483,9 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     zyl(M(0xc9ccce, {roughness:0.4, metalness:0.6}), 0.05, 3.0, XO - 0.08, 1.5, Z0 + 0.08);
     const kistenFarben = [0x1d6a3a, 0x1b2f6e, 0x1f3d8f, 0x1b2f6e];
     for (let k = 0; k < 4; k++) { const y = k*0.3 + 0.15, m = M(kistenFarben[k], {roughness:0.6});
-      kiste(m, 0.42, 0.3, 0.32, XO - 0.23, y, 7.45); kiste(M(0x10141c), 0.36, 0.01, 0.26, XO - 0.23, y + 0.145, 7.45);
-      for (let b = 0; b < 6; b++) zyl(M(b % 2 ? 0x6b3a12 : 0x2e6b2a, {roughness:0.2, metalness:0.1}), 0.028, 0.08, XO - 0.36 + (b % 3)*0.13, y + 0.19, 7.37 + Math.floor(b/3)*0.16, 8); }
-    cols.push({x0:XO - 0.46, x1:XO, z0:7.27, z1:7.63, y0:-1, y1:1.3}, {x0:XO - 0.12, x1:XO, z0:Z0, z1:7.25, y0:-1, y1:1.4});
+      kiste(m, 0.42, 0.3, 0.32, XO - 0.55, y, Z0 + 0.2); kiste(M(0x10141c), 0.36, 0.01, 0.26, XO - 0.55, y + 0.145, Z0 + 0.2);
+      for (let b = 0; b < 6; b++) zyl(M(b % 2 ? 0x6b3a12 : 0x2e6b2a, {roughness:0.2, metalness:0.1}), 0.028, 0.08, XO - 0.68 + (b % 3)*0.13, y + 0.19, Z0 + 0.12 + Math.floor(b/3)*0.16, 8); }
+    cols.push({x0:XO - 0.78, x1:XO - 0.32, z0:Z0, z1:Z0 + 0.38, y0:-1, y1:1.3}, {x0:XO - 0.12, x1:XO, z0:Z0, z1:7.25, y0:-1, y1:1.4});
     // Laminatboden graubraun in Dielen, über Raum und Vorraum
     { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const g = c.getContext('2d');
       for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const v = 108 + ((r*7 + k*13) % 5)*5; g.fillStyle = 'rgb(' + v + ',' + (v - 6) + ',' + (v - 12) + ')';
@@ -475,6 +496,82 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const L = 10.462 - Z0, B = XO - XW; t.repeat.set(B/1.6, L/1.6);
       const m = new THREE.Mesh(new THREE.PlaneGeometry(B, L), new THREE.MeshLambertMaterial({map:t, color:0xb0aaa4})); m.rotation.x = -Math.PI/2;
       m.position.set((XW + XO)/2, 0.007, (Z0 + 10.462)/2); scene.add(m); }
+  }
+
+  // Raum 09 (Vorraum zwischen Flur 05 und der Halle) nach den Fotos: rote Doppeltür zur Halle mit Fluchtwegschildern darüber.
+  // Rechts (Blick zur Halle, Wand x = -7.44): rote Zarge der Tür in den Übergangsraum nach 017, daneben ein Ahorn-Sideboard mit
+  // Schiebetüren (darauf das PRIS-10-Ionentriebwerk in einer Acrylhaube, Ordner, Gehörschutzspender), Türschild, zwei Mondbilder,
+  // Garderobe mit Laborkittel und blauer Jacke, Uhr. Links (Wand x = -10.15): rote Tür (zu), Erste-Hilfe- und Feuerlöscherschild,
+  // Druckknopfmelder, Verbandkasten, Feuerlöscher, großes Whiteboard mit Jahreskalender und Aushängen.
+  { const XR = -7.44, XL = -10.15, ZH = 6.513;
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1}),
+      new THREE.MeshStandardMaterial({color, roughness:0.55, metalness:0.1, ...o})];
+    const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const zyl = (m, r, h, x, y, z, rz = 0, rx = 0, seg = 18) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); o.rotation.set(rx, 0, rz); scene.add(o); return o; };
+    const bildTex = (w, h, f) => { const c = document.createElement('canvas'); c.width = w; c.height = h; f(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
+    const flach = (t, w, h, x, y, z, ry, basic) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), basic ? new THREE.MeshBasicMaterial({map:t, toneMapped:false}) : new THREE.MeshBasicMaterial({map:t, color:0xe4e4e4})); m.rotation.y = ry; m.position.set(x, y, z); scene.add(m); return m; };
+    const rot = M(0x8e1c1c, {roughness:0.45}), ahorn = M(0xe2cfa6, {roughness:0.6, metalness:0}), dunkel = M(0x2a2d31), edel = M(0xc4c8cc, {roughness:0.3, metalness:0.75}),
+          weiss = M(0xf4f4f1, {roughness:0.6, metalness:0}), blau = M(0x23366e), grau = M(0xb9bcbf);
+    const zarge = (x, z0, z1, h, sx) => { kiste(rot, 0.06, 0.06, z1 - z0 + 0.12, x + sx*0.03, h + 0.03, (z0 + z1)/2); for (const z of [z0 - 0.03, z1 + 0.03]) kiste(rot, 0.06, h, 0.06, x + sx*0.03, h/2, z); };
+    // Halle: rote Zarge, die beiden Flügel stehen offen an der Wand; Fluchtwegschilder (leuchtend und als Folie)
+    { const x0 = -10.15, x1 = -8.2, h = 2.1; kiste(rot, x1 - x0 + 0.12, 0.06, 0.06, (x0 + x1)/2, h + 0.03, ZH + 0.03);
+      for (const x of [x0 - 0.03, x1 + 0.03]) kiste(rot, 0.06, h, 0.06, x, h/2, ZH + 0.03);
+      kiste(rot, 0.04, 2.05, 0.96, x0 + 0.03, 1.03, ZH + 0.55); kiste(rot, 0.04, 2.05, 0.96, x1 + 0.2, 1.03, ZH + 0.55);
+      const exit = bildTex(256, 96, (g, w, hh) => { g.fillStyle = '#18a558'; g.fillRect(0, 0, w, hh); g.fillStyle = '#fff'; g.font = 'bold 60px system-ui'; g.fillText('↓', 30, 70);
+        g.fillRect(120, 20, 60, 56); g.fillStyle = '#18a558'; g.fillRect(128, 26, 44, 44); g.fillStyle = '#fff'; g.beginPath(); g.arc(200, 34, 8, 0, 7); g.fill(); g.fillRect(190, 46, 16, 26); });
+      flach(exit, 0.36, 0.14, -9.4, 2.35, ZH + 0.02, 0, true); flach(exit, 0.3, 0.11, -8.85, 2.3, ZH + 0.006, 0, false);
+      cols.push({x0:x0, x1:x0 + 0.06, z0:ZH, z1:ZH + 1.05, y0:-1, y1:2.1}, {x0:x1 + 0.18, x1:x1 + 0.24, z0:ZH, z1:ZH + 1.05, y0:-1, y1:2.1}); }
+    // rechte Wand: Zarge der offenen Tür in den Übergangsraum, Türschild
+    zarge(XR, 9.436, 10.462, 2.05, -1);
+    const schild = bildTex(128, 80, (g, w, h) => { g.fillStyle = '#f2f2f0'; g.fillRect(0, 0, w, h); g.fillStyle = '#2d4a7a'; g.fillRect(0, 0, w, 14);
+      g.fillStyle = '#222'; g.font = '12px system-ui'; g.fillText('015-017', 8, 30); g.fillStyle = '#1d8a4a'; g.beginPath(); g.arc(22, 56, 14, 0, 7); g.fill();
+      g.fillStyle = '#fff'; g.fillRect(19, 46, 6, 20); g.fillRect(12, 53, 20, 6); g.fillStyle = 'rgba(0,0,0,0.55)'; for (let i = 0; i < 3; i++) g.fillRect(44, 42 + i*11, 66, 5); });
+    flach(schild, 0.16, 0.1, XR - 0.006, 1.45, 10.62, -Math.PI/2, false);
+    // Sideboard aus Ahorn mit zwei Schiebetüren, schwarzer Sockel; darauf Triebwerk in Acrylhaube, Ordner, Gehörschutzspender
+    const sz0 = 10.6, sz1 = 11.6, sd = 0.45, sx = XR - sd/2;
+    kiste(ahorn, sd, 0.72, sz1 - sz0, sx, 0.42, (sz0 + sz1)/2); kiste(M(0x2b2c2e), sd - 0.04, 0.06, sz1 - sz0 - 0.04, sx, 0.03, (sz0 + sz1)/2);
+    kiste(M(0xd8c497), 0.005, 0.6, 0.004, XR - sd - 0.003, 0.43, (sz0 + sz1)/2);
+    for (const z of [sz0 + 0.1, sz1 - 0.1]) kiste(dunkel, 0.02, 0.14, 0.015, XR - sd - 0.012, 0.45, z);
+    kiste(M(0xe8f0f4, {transparent:true, opacity:0.3, roughness:0.1}), 0.3, 0.3, 0.3, sx, 0.93, sz0 + 0.2); kiste(M(0x5a6068), 0.28, 0.02, 0.28, sx, 0.79, sz0 + 0.2);
+    zyl(edel, 0.08, 0.14, sx, 0.92, sz0 + 0.2, 0, Math.PI/2); zyl(M(0x8f9599, {roughness:0.4, metalness:0.6}), 0.065, 0.12, sx, 0.92, sz0 + 0.32, 0, Math.PI/2);
+    for (let i = 0; i < 5; i++) { const z = sz0 + 0.42 + i*0.075; kiste(i === 3 ? grau : blau, 0.28, 0.3, 0.07, sx, 0.93, z); kiste(weiss, 0.005, 0.12, 0.05, sx - 0.141, 0.97, z); }
+    kiste(dunkel, 0.2, 0.05, 0.2, sx, 0.805, sz1 - 0.15); kiste(M(0xf2e9b0, {transparent:true, opacity:0.75}), 0.16, 0.18, 0.16, sx, 1.0, sz1 - 0.15); kiste(M(0xc4201c), 0.06, 0.08, 0.06, sx, 0.87, sz1 - 0.15);
+    cols.push({x0:XR - sd, x1:XR, z0:sz0, z1:sz1, y0:-1, y1:1.2});
+    // zwei Mondbilder in weißen Rahmen über dem Sideboard
+    const mond = (astronaut) => bildTex(128, 160, (g, w, h) => { g.fillStyle = '#f6f6f4'; g.fillRect(0, 0, w, h); g.fillStyle = '#0c0c0e'; g.fillRect(16, 22, 96, 96);
+      if (astronaut) { g.fillStyle = '#7a7a76'; g.fillRect(16, 92, 96, 26); g.fillStyle = '#d8d8d4'; g.fillRect(56, 62, 14, 30); g.fillRect(74, 70, 26, 20); }
+      else { g.fillStyle = '#8f9396'; g.beginPath(); g.arc(64, 70, 34, 0, 7); g.fill(); g.fillStyle = '#0c0c0e'; g.beginPath(); g.arc(46, 64, 32, 0, 7); g.fill(); } });
+    for (const [z, a] of [[10.85, true], [11.35, false]]) { kiste(weiss, 0.03, 0.52, 0.42, XR - 0.015, 1.6, z); flach(mond(a), 0.38, 0.48, XR - 0.031, 1.6, z, -Math.PI/2, false); }
+    // Garderobe (Edelstahlleiste mit vier Haken), Laborkittel und blaue Steppjacke; Wanduhr darüber
+    kiste(edel, 0.03, 0.06, 0.62, XR - 0.015, 1.72, 12.25); for (let i = 0; i < 4; i++) kiste(edel, 0.07, 0.08, 0.015, XR - 0.05, 1.78, 11.98 + i*0.18);
+    kiste(M(0xf4f4f2, {roughness:0.9}), 0.12, 1.05, 0.3, XR - 0.1, 1.15, 12.34); kiste(M(0x2f8fd8, {roughness:0.8}), 0.18, 0.75, 0.42, XR - 0.14, 1.3, 12.5);
+    kiste(M(0xc4201c), 0.181, 0.05, 0.1, XR - 0.14, 1.62, 12.5);
+    const uhr = bildTex(128, 128, (g) => { g.fillStyle = '#b8bcbf'; g.beginPath(); g.arc(64, 64, 63, 0, 7); g.fill(); g.fillStyle = '#16181b'; g.beginPath(); g.arc(64, 64, 56, 0, 7); g.fill();
+      g.fillStyle = '#eee'; g.font = 'bold 12px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      for (let i = 1; i <= 12; i++) { const a = i*Math.PI/6; g.fillText(String(i), 64 + Math.sin(a)*44, 64 - Math.cos(a)*44); }
+      g.strokeStyle = '#eee'; g.lineWidth = 4; g.beginPath(); g.moveTo(64, 64); g.lineTo(40, 72); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(64, 64); g.lineTo(36, 44); g.stroke(); });
+    const u = new THREE.Mesh(new THREE.CircleGeometry(0.15, 32), new THREE.MeshLambertMaterial({map:uhr})); u.rotation.y = -Math.PI/2; u.position.set(XR - 0.01, 2.25, 12.2); scene.add(u);
+    cols.push({x0:XR - 0.25, x1:XR, z0:12.0, z1:12.75, y0:-1, y1:2.0});
+    // linke Wand: rote Tür (zu) mit Türschließer, darüber Erste-Hilfe- und Feuerlöscherschild, Melder, Verbandkasten, Feuerlöscher
+    const tz0 = 10.359, tz1 = 11.436;
+    zarge(XL, tz0, tz1, 2.05, 1); kiste(rot, 0.04, 2.0, tz1 - tz0 - 0.02, XL + 0.02, 1.0, (tz0 + tz1)/2);
+    kiste(edel, 0.03, 0.05, 0.03, XL + 0.05, 1.05, tz1 - 0.12); kiste(edel, 0.12, 0.02, 0.02, XL + 0.09, 1.05, tz1 - 0.12); kiste(grau, 0.05, 0.06, 0.32, XL + 0.05, 2.0, (tz0 + tz1)/2 + 0.2);
+    cols.push({x0:XL, x1:XL + 0.06, z0:tz0, z1:tz1, y0:-1, y1:2.1});
+    const zeichen = (gruen) => bildTex(128, 128, (g, w, h) => { g.fillStyle = gruen ? '#18a558' : '#c4201c'; g.fillRect(0, 0, w, h); g.fillStyle = '#f4f4f0';
+      if (gruen) { g.fillRect(50, 18, 28, 92); g.fillRect(18, 50, 92, 28); } else { g.lineWidth = 7; g.strokeStyle = '#f4f4f0'; g.strokeRect(46, 34, 30, 70); g.beginPath(); g.arc(80, 40, 20, -1.5, 1.2); g.stroke(); } });
+    flach(zeichen(true), 0.24, 0.24, XL + 0.006, 2.45, 11.62, Math.PI/2, true); flach(zeichen(false), 0.24, 0.24, XL + 0.006, 2.18, 11.62, Math.PI/2, false);
+    kiste(M(0xe8621e), 0.07, 0.13, 0.14, XL + 0.035, 1.7, 11.66);                                                         // Druckknopfmelder
+    kiste(weiss, 0.12, 0.22, 0.28, XL + 0.06, 1.35, 11.66); kiste(M(0x1d8a4a), 0.122, 0.22, 0.04, XL + 0.06, 1.35, 11.79); // Verbandkasten
+    zyl(M(0xc4201c, {roughness:0.35}), 0.065, 0.42, XL + 0.08, 0.55, 11.66); zyl(dunkel, 0.03, 0.12, XL + 0.08, 0.82, 11.66);
+    // großes Whiteboard: Jahreskalender oben, Aushänge und Montageanleitung darunter
+    const wbz0 = 11.86, wbz1 = 12.78;
+    const wb = bildTex(256, 384, (g, w, h) => { g.fillStyle = '#f7f7f5'; g.fillRect(0, 0, w, h);
+      for (let k = 0; k < 6; k++) { g.fillStyle = '#2d4a8a'; g.fillRect(8 + k*41, 8, 38, 10); for (let r = 0; r < 31; r++) { g.fillStyle = (r % 7 > 4) ? '#2d4a8a' : (r % 2 ? '#e9edf5' : '#ffffff'); g.fillRect(8 + k*41, 20 + r*5.4, 38, 5); } }
+      const papier = (x, y, w2, h2, rand) => { g.fillStyle = rand || '#ffffff'; g.fillRect(x, y, w2, h2); if (rand) { g.fillStyle = '#fff'; g.fillRect(x + 4, y + 4, w2 - 8, h2 - 8); }
+        g.fillStyle = 'rgba(40,40,40,0.5)'; for (let i = 0; i < h2/9 - 2; i++) g.fillRect(x + 8, y + 12 + i*9, w2 - 16, 3); };
+      papier(10, 196, 60, 90, '#e8621e'); papier(74, 196, 60, 90, '#e8621e'); papier(140, 196, 50, 110); papier(196, 196, 52, 90);
+      g.fillStyle = '#2f8fd8'; g.fillRect(198, 220, 48, 60); papier(10, 292, 60, 80); papier(80, 312, 50, 66); });
+    kiste(grau, 0.025, 1.25, wbz1 - wbz0 + 0.04, XL + 0.012, 1.55, (wbz0 + wbz1)/2); flach(wb, wbz1 - wbz0, 1.2, XL + 0.026, 1.55, (wbz0 + wbz1)/2, Math.PI/2, false);
   }
 
   // Ostende von Flur 05 (vor 014), nach den Fotos docs/fotos/tuer_flur05 und poster_*: dunkle Türanlage über die ganze Flurbreite mit

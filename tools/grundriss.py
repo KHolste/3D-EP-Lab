@@ -91,7 +91,7 @@ ZW = round(gz(HALLE_PX), 3)                                 # Wand zur Halle: im
 walls += [[HD[0] - 0.6, HD[0], Z_MIN, ZW], [HD[1], HD[1] + 0.6, Z_MIN, ZW]]
 doors = [p for d in doors for p in cut(d)] + [[HD[0], HD[1], Z_MIN, ZW, 2.1]]   # 5. Wert: Unterkante des Sturzes
 # Flure: freie Flaeche um die Beschriftung von 05, 08 und 08b (Tueroeffnungen gelten als Grenze); 05 schliesst das offene Treppenhaus 020 ein
-FLURE = ['05', '08', '08b']
+FLURE = ['05', '08', '08b', '09']                 # 09 ist ein Vorraum mit demselben Boden und derselben Sockelleiste (Foto)
 frei, _ = ndimage.label(~(wall | door))
 flur = np.zeros_like(wall)
 for k in FLURE:
