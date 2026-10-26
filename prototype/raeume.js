@@ -741,6 +741,50 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const m = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.15), new THREE.MeshBasicMaterial({map:t, color:0xe8e8e8})); m.rotation.y = -Math.PI/2; m.position.set(XO - 0.01, 2.35, 10.9); scene.add(m); }
   }
 
+  // EMV-Kabine in der Halle, innen (Video IMG_0944): Wände und Decke voller weißer Absorberpyramiden, weißer Doppelboden mit Bodenklappen,
+  // ein schwarzes Triebwerk auf schwarzem Gestell vor einer Flanschplatte in der Wand, Messantenne auf einem Stativ aus Glasfaser.
+  // Die Wand mit der Tür (x1) bleibt im Türbereich frei, weil die Tür in den beiden Varianten an verschiedenen Stellen sitzt.
+  { const X0 = -15.0, X1 = -10.05, Z0 = 0.3, Z1 = 5.82, Y0 = 0.24, Y1 = 3.38, D = 0.45, P = 0.3;
+    const pos = [];
+    const feld = (n, a0, a1, b0, b1, f) => { for (let a = a0 + P/2; a < a1 - P/4; a += P) for (let b = b0 + P/2; b < b1 - P/4; b += P) f(a, b); };
+    feld('x0', Z0, Z1, Y0, Y1, (z, y) => pos.push([X0 + D/2, y, z, 0, 0, -Math.PI/2]));
+    feld('x1', Z0, Z1, Y0, Y1, (z, y) => { if (z < 1.4 || z > 5.3) pos.push([X1 - D/2, y, z, 0, 0, Math.PI/2]); });
+    feld('z0', X0, X1, Y0, Y1, (x, y) => pos.push([x, y, Z0 + D/2, Math.PI/2, 0, 0]));
+    feld('z1', X0, X1, Y0, Y1, (x, y) => pos.push([x, y, Z1 - D/2, -Math.PI/2, 0, 0]));
+    feld('y1', X0, X1, Z0, Z1, (x, z) => pos.push([x, Y1 - D/2, z, Math.PI, 0, 0]));
+    const geo = new THREE.ConeGeometry(P*0.7, D, 4); geo.rotateY(Math.PI/4);
+    const inst = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({color:0xf1ecdc, emissive:0x2c2a24}), pos.length);
+    const o = new THREE.Object3D(); pos.forEach(([x, y, z, rx, ry, rz], i) => { o.position.set(x, y, z); o.rotation.set(rx, ry, rz); o.updateMatrix(); inst.setMatrixAt(i, o.matrix); });
+    scene.add(inst);
+    cols.push({x0:X0, x1:X0 + D, z0:Z0, z1:Z1, y0:-1, y1:4}, {x0:X0, x1:X1, z0:Z0, z1:Z0 + D, y0:-1, y1:4}, {x0:X0, x1:X1, z0:Z1 - D, z1:Z1, y0:-1, y1:4},
+              {x0:X1 - D, x1:X1, z0:Z0, z1:1.4, y0:-1, y1:4}, {x0:X1 - D, x1:X1, z0:5.3, z1:Z1, y0:-1, y1:4});
+    // Doppelboden: weiße Platten 60 cm mit Fugen, zwei Bodenklappen aus Metall
+    { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#ecedea'; g.fillRect(0, 0, 128, 128);
+      for (let i = 0; i < 500; i++) { g.fillStyle = 'rgba(120,120,120,0.12)'; g.fillRect(Math.random()*128, Math.random()*128, 1, 1); }
+      g.fillStyle = '#9a9c9e'; g.fillRect(0, 0, 128, 2); g.fillRect(0, 0, 2, 128);
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set((X1 - X0)/0.6, (Z1 - Z0)/0.6);
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(X1 - X0, Z1 - Z0), new THREE.MeshLambertMaterial({map:t})); m.rotation.x = -Math.PI/2; m.position.set((X0 + X1)/2, Y0, (Z0 + Z1)/2); scene.add(m);
+      for (const [x, z] of [[-12.4, 1.6], [-13.3, 4.4]]) { const k = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.01, 0.55), new THREE.MeshLambertMaterial({color:0x9ea2a5})); k.position.set(x, Y0 + 0.004, z); scene.add(k); } }
+    const M = c => [new THREE.MeshLambertMaterial({color:c}), new THREE.MeshStandardMaterial({color:c, roughness:0.5, metalness:0.2})];
+    const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); };
+    const zyl = (m, r, h, x, y, z, rz = 0) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 24), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); o.rotation.z = rz; scene.add(o); };
+    const schwarz = M(0x17181a), stahl = M(0xc6c9cb), beige = M(0xe7dcc2), grauM = M(0x7d8186);
+    // Triebwerk: schwarzes Gefäß mit weißem Flansch auf einem Gitterturm, dahinter eine Flanschplatte in der Absorberwand
+    const tz = 3.2, tx = -13.75;
+    for (const dx of [-0.2, 0.2]) for (const dz of [-0.2, 0.2]) kiste(schwarz, 0.05, 0.75, 0.05, tx + dx, Y0 + 0.375, tz + dz);
+    for (const y of [0.15, 0.45, 0.75]) kiste(schwarz, 0.45, 0.04, 0.45, tx, Y0 + y, tz);
+    zyl(schwarz, 0.3, 0.7, tx, Y0 + 1.08, tz, Math.PI/2); zyl(beige, 0.36, 0.06, tx + 0.37, Y0 + 1.08, tz, Math.PI/2); zyl(stahl, 0.22, 0.07, tx + 0.39, Y0 + 1.08, tz, Math.PI/2);
+    zyl(stahl, 0.34, 0.04, tx - 0.36, Y0 + 1.08, tz, Math.PI/2); kiste(grauM, 0.04, 0.95, 0.95, X0 + D + 0.02, Y0 + 1.1, tz);
+    cols.push({x0:tx - 0.45, x1:tx + 0.45, z0:tz - 0.4, z1:tz + 0.4, y0:-1, y1:1.6});
+    // Messantenne (logarithmisch-periodisch) auf Glasfaserstativ, Kabel am Boden
+    const ax = -11.5, az = 3.0;
+    zyl(beige, 0.018, 1.45, ax, Y0 + 0.72, az); for (let k = 0; k < 3; k++) { const a = k*2.094, o = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.75, 6), beige[1]);
+      o.position.set(ax + Math.sin(a)*0.22, Y0 + 0.32, az + Math.cos(a)*0.22); o.rotation.set(Math.cos(a)*0.55, 0, -Math.sin(a)*0.55); scene.add(o); }
+    kiste(stahl, 0.7, 0.025, 0.025, ax - 0.2, Y0 + 1.5, az); for (let k = 0; k < 7; k++) kiste(stahl, 0.012, 0.012, 0.6 - k*0.07, ax - 0.5 + k*0.09, Y0 + 1.5, az);
+    cols.push({x0:ax - 0.3, x1:ax + 0.3, z0:az - 0.3, z1:az + 0.3, y0:-1, y1:1.8});
+    { const k = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[ax, Y0 + 1.4, az], [ax + 0.1, Y0 + 0.05, az + 0.3], [-12.6, Y0 + 0.01, 1.8], [-12.4, Y0 + 0.01, 1.6]].map(p => new THREE.Vector3(...p))), 30, 0.008, 5), new THREE.MeshLambertMaterial({color:0x2d4fa3})); scene.add(k); }
+  }
+
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
   { window.raeumeTueren = [];
@@ -766,7 +810,14 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
           fl[0].rotation.y = -s*1.55*this.a; fl[1].rotation.y = s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } };
       window.raeumeTueren.push(t); };
     // vorn = Seite +z, hinten = Seite -z
-    tuer('raumtuer_halle', 'Tür zur Jumbo-Halle', -10.15, -8.2, 6.42, 1, foto || schlicht, schlicht, 2.08);
+    const blau = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 512; const g = c.getContext('2d');
+      g.fillStyle = '#1f3fae'; g.fillRect(0, 0, 256, 512); g.strokeStyle = 'rgba(10,20,60,0.5)'; g.lineWidth = 3; g.strokeRect(2, 2, 252, 508);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    tuer('raumtuer_halle', 'Tür aus der Jumbo-Halle', -10.15, -8.2, 6.42, 1, foto || schlicht, blau, 2.08);     // zur Halle hin blau lackiert (Video)
+    { const c = document.createElement('canvas'); c.width = 256; c.height = 96; const g = c.getContext('2d'); g.fillStyle = '#18a558'; g.fillRect(0, 0, 256, 96); g.fillStyle = '#fff';
+      g.font = 'bold 60px system-ui'; g.fillText('↓', 30, 70); g.fillRect(150, 22, 56, 54); g.fillStyle = '#18a558'; g.fillRect(158, 28, 40, 42);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.15), new THREE.MeshBasicMaterial({map:t, toneMapped:false}));
+      m.rotation.y = Math.PI; m.position.set(-9.2, 2.5, 5.99); scene.add(m); }
     tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht);
     tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, schlicht, schlicht);
     // einflügelige Tür in der linken Wand von 09 (nach 06): Scharnier auf der Hallenseite, öffnet nach 06 hinein
