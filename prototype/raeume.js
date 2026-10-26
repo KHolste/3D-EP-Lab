@@ -5,8 +5,8 @@
    Spielkoordinaten: x nach Osten (Hallentor), z nach Süden zu den Räumen hin, y nach oben; Meter. */
 window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const R = window.RAEUME; if (!R) return;
-  // Rote Labortür wie im Flur 08b/08 (Video IMG_0948): dunkelrot, Zarge, Edelstahlklinke, je nach Tür Prüffeld-Schild, Warnaufkleber,
-  // Gebotszeichen und Aushänge. Liefert eine Textur für die Flurseite; breit = Doppeltür. Mit „seed“ sieht jede Tür etwas anders aus.
+  // Rote Labortür wie im Flur 08b/08 (Video IMG_0948): dunkelrot, Zarge, Edelstahlklinke, ohne Schilder.
+  // Liefert eine Textur für die Flurseite; breit = Doppeltür.
   const laborTuerTex = (seed, breit, griffLinks) => { let r = seed*9301 + 49297; const rnd = () => (r = (r*9301 + 49297) % 233280)/233280;
     const W = breit ? 512 : 256, c = document.createElement('canvas'); c.width = W; c.height = 512; const g = c.getContext('2d');
     g.fillStyle = '#8e1c1c'; g.fillRect(0, 0, W, 512); g.strokeStyle = 'rgba(40,0,0,0.55)'; g.lineWidth = 3;
@@ -17,13 +17,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const verbot = (cx, cy) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(cx, cy, 17, 0, 7); g.fill(); g.strokeStyle = '#c4201c'; g.lineWidth = 5; g.stroke();
       g.beginPath(); g.moveTo(cx - 11, cy - 11); g.lineTo(cx + 11, cy + 11); g.stroke(); };
     const gebot = (cx, cy) => { g.fillStyle = '#1f5fbf'; g.beginPath(); g.arc(cx, cy, 17, 0, 7); g.fill(); g.fillStyle = '#fff'; g.fillRect(cx - 8, cy - 3, 16, 6); };
-    const flaechen = breit ? [[0, 256], [256, 256]] : [[0, 256]];
-    flaechen.forEach(([x0], k) => { const m = x0 + 128;
-      if (rnd() < 0.6) { g.fillStyle = '#f6f6f2'; g.fillRect(m - 38, 60, 76, 62); dreieck(m, 84, 18); g.fillStyle = '#222'; g.font = 'bold 12px system-ui'; g.fillText('Prüffeld', m - 24, 116); }
-      if (rnd() < 0.7) { g.fillStyle = '#f6f6f2'; g.fillRect(m - 50, 140, 100, 48); verbot(m - 25, 164); verbot(m + 25, 164); }
-      if (rnd() < 0.6) { g.fillStyle = '#f6f6f2'; g.fillRect(m - 45, 200, 90, 70); for (let q = 0; q < 3; q++) { dreieck(m - 30, 216 + q*20, 7); g.fillStyle = '#f2c200'; g.fillRect(m - 18, 211 + q*20, 56, 10); } }
-      if (rnd() < 0.5) gebot(m + 50, 90);
-      if (rnd() < 0.7) blatt(m - 36, 290 + (rnd()*40|0), 72, 70 + (rnd()*40|0)); });
+    // wie in den Videos: die meisten Türen sind schlicht, nur mit Klinke (Schilder nur dort, wo sie im Video zu sehen sind, z. B. 018)
     g.fillStyle = '#c4c8cc'; const gx = breit ? [232, 262] : [griffLinks ? 26 : 214]; for (const x of gx) { g.fillRect(x, 300, 18, 6); g.fillRect(x + 6, 296, 6, 14); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
   const HR = 3.0;                                     // Raumhöhe (angenommen, bis Fotos etwas anderes zeigen)
