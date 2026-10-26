@@ -14,3 +14,4 @@ Screenshot*.png
 # Originalfotos (teils mit Personen) und lokale Einstellungen von Claude Code
 pics/
 .claude/
+iCloud*/

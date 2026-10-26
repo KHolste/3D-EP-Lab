@@ -76,7 +76,8 @@ Alle Aufrufe gehen vom Repo-Wurzelordner aus.
 | `tools/step_tess.py` | liest die tessellierten Bauteile (z. B. EMV-Kabine) direkt aus der STEP-Datei |
 | `tools/glb_opt.py` | verschlankt die GLB zu `halle_data.js` bzw. mit `lite` zu `halle_lite.js` |
 | `tools/fototex.py` | schneidet aus `docs/fotos` kachelbare Texturen für `tex_lite.js` |
-| `tools/tuertex.py` | entzerrt das Foto der Glastür am Ende von Flur 05 zur Textur `tuer05` |
+| `tools/tuertex.py` | entzerrt das Foto der Türanlage am Ende von Flur 05 zur Textur `tuer05` |
+| `tools/postertex.py` | entzerrt die Poster am Ende von Flur 05 zu den Texturen `poster_*` |
 | `tools/fenstertex.py` | baut aus dem Foto von Raum 019 die Fenstertextur `fenster019` |
 | `tools/grundriss.py` | liest die Wände der Nachbarräume aus `docs/grundriss.png` und schreibt `raeume_data.js` |
 | `tools/midi2musik.py` | rendert die MIDI-Musik des Originals mit einem SoundFont und schreibt `musik.js` |
