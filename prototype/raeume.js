@@ -259,21 +259,21 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   { const X0 = -10.43, X1 = -10.1, Z0 = 19.6, Z1 = 36.1, oeff = [];
     for (const [x0, x1, z0, z1] of R.doors) if (x0 >= X0 && x1 <= X1 && z0 >= Z0 && z1 <= Z1 && z1 - z0 > 0.5) {
       const o = oeff.find(o => z0 < o[1] && z1 > o[0]); if (o) { o[0] = Math.min(o[0], z0); o[1] = Math.max(o[1], z1); } else oeff.push([z0, z1]); }
-    const rot = new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1});
+    const rot = new THREE.MeshLambertMaterial({color:0x8e1c1c});                 // wie die übrigen dunkelroten Labortüren
     for (const [z0, z1] of oeff) {
       const B = z1 - z0, zwei = B > 1.5;
       const t = laborTuerTex(Math.round(z0*7), zwei);
-      const vorn = new THREE.MeshStandardMaterial({map:t, roughness:0.45, metalness:0.1});
+      const vorn = new THREE.MeshLambertMaterial({map:t});
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.1, B), [vorn, rot, rot, rot, rot, rot]);   // +x zeigt in den Flur
-      m.position.set(X1 - 0.03, 1.05, (z0 + z1)/2); scene.add(m);
-      const zg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, B + 0.12), rot); zg.position.set(X1 - 0.02, 2.13, (z0 + z1)/2); scene.add(zg);
-      for (const z of [z0 - 0.03, z1 + 0.03]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.1, 0.06), rot); p.position.set(X1 - 0.02, 1.05, z); scene.add(p); }
+      m.scale.z = (B + 0.02)/B; m.position.set(X1 + 0.02, 1.05, (z0 + z1)/2); scene.add(m);                        // bündig, ohne Spalt
+      const zg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, B + 0.12), rot); zg.position.set(X1 + 0.04, 2.13, (z0 + z1)/2); scene.add(zg);
+      for (const z of [z0 - 0.03, z1 + 0.03]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.1, 0.06), rot); p.position.set(X1 + 0.04, 1.05, z); scene.add(p); }
       cols.push({x0:X0, x1:X1, z0, z1, y0:-1, y1:2.1});
     }
   }
 
   // Raum 019 nach dem Foto docs/fotos/raum019.JPEG (Blick zur Außenwand): zwischen den Wandpfeilern je ein liegendes Fenster
-  // (Textur 'fenster019', tools/fenstertex.py), darunter ein Arbeitstisch mit Buchenplatte auf grauem Gestell, rote Schubladen,
+  // (Textur 'fenster019', tools/fenstertex.py), darunter Werkbänke mit Holzplatte und roten Schubladenblöcken (Panoramafotos),
   // ein Elektrokanal mit Steckdosen, Heizkörper am Pfeiler; an der Decke Kabelpritschen und lange Leuchten. Ohne Personen und Kran.
   { const XW = 0.446, Z0 = 36.41, Z1 = 49.333, pf = [];
     for (const [x0, x1, z0, z1] of R.walls) if (x1 > 0.4 && x1 < 0.5 && x0 > -0.2 && z0 > Z0 && z1 < Z1) pf.push([z0, z1]);   // Wandpfeiler
@@ -292,17 +292,23 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       if (ft) { const f = new THREE.Mesh(new THREE.PlaneGeometry(L - 0.5, 1.0), new THREE.MeshBasicMaterial({map:ft, toneMapped:false}));
         f.rotation.y = -Math.PI/2; f.position.set(XW - 0.004, 2.05, zm); scene.add(f); }
       box(weiss, 0.16, 0.03, L - 0.4, XW - 0.08, 1.535, zm);
-      // Arbeitstisch nur in den beiden mittleren Feldern: Platte 0,9 m hoch, 0,75 m tief; links ein Schubladenblock (rot), rechts ein grauer Unterschrank
-      if (i > 0 && i < felder.length - 1) {
-      const tl = L - 0.9, tz = za + 0.15 + tl/2, tx = XW - 0.375;
-      box(buche, 0.75, 0.04, tl, tx, 0.88, tz);
-      box(grau, 0.68, 0.84, 0.55, tx, 0.43, za + 0.15 + 0.3); for (let k = 0; k < 3; k++) box(rot, 0.02, k ? 0.24 : 0.16, 0.5, tx - 0.345, k ? 0.2 + (k-1)*0.27 : 0.73, za + 0.45);
-      box(grau, 0.68, 0.84, 0.5, tx, 0.43, za + 0.15 + tl - 0.27); box(rot, 0.02, 0.7, 0.45, tx - 0.345, 0.42, za + 0.15 + tl - 0.27);
-      cols.push({x0:XW - 0.76, x1:XW, z0:za + 0.15, z1:za + 0.15 + tl, y0:-1, y1:0.9});
-      // auf dem Tisch: Kisten, Werkzeugkoffer, Gerät
-      box(holz, 0.35, 0.14, 0.45, tx + 0.05, 0.97, tz - tl*0.3); box(dunkel, 0.4, 0.05, 0.6, tx - 0.05, 0.925, tz); box(holz, 0.3, 0.2, 0.3, tx + 0.1, 1.0, tz + tl*0.3);
-      if (i === 1) { box(alu, 0.3, 0.22, 0.35, tx + 0.15, 1.01, za + 0.5); box(weiss, 0.06, 0.18, 0.06, tx + 0.18, 0.99, za + 0.8); }
-      }
+      // Werkbänke wie auf den Panoramen: Holzplatte, Gestell grau, rote Schubladenblöcke links und rechts; im zweiten Feld steht die Glovebox davor
+      { const z0 = za + 0.1, z1 = (i === felder.length - 1) ? zb - 0.75 : zb - 0.1, tl = z1 - z0, tz = (z0 + z1)/2, tx = XW - 0.4;
+        box(holz, 0.8, 0.04, tl, tx, 0.88, tz);
+        for (const zz of [z0 + 0.3, z1 - 0.3]) { box(grau, 0.7, 0.84, 0.5, tx, 0.43, zz); for (let k = 0; k < 3; k++) box(rot, 0.02, 0.24, 0.46, tx - 0.36, 0.17 + k*0.27, zz);
+          for (let k = 0; k < 3; k++) box(dunkel, 0.02, 0.02, 0.2, tx - 0.375, 0.24 + k*0.27, zz); }
+        cols.push({x0:XW - 0.82, x1:XW, z0, z1, y0:-1, y1:0.95});
+        // Geräte auf der Werkbank
+        box(dunkel, 0.04, 0.34, 0.55, tx + 0.2, 1.08, tz - 0.3); box(mat(0x1e3a66, {emissive:0x0a1830}), 0.005, 0.3, 0.5, tx + 0.175, 1.08, tz - 0.3);
+        box(mat(0xe6e4dd), 0.4, 0.15, 0.4, tx, 0.98, tz + 0.5); if (i % 2) box(mat(0x2f6fd0), 0.3, 0.12, 0.25, tx + 0.05, 0.96, z0 + 0.4);
+        box(dunkel, 0.18, 0.4, 0.4, tx + 0.15, 1.1, z1 - 0.35); box(holz, 0.3, 0.1, 0.25, tx - 0.1, 0.95, tz);
+        // Bürostuhl (schwarz) bzw. Hocker davor
+        if (i !== 1) { const g = new THREE.Group(); g.position.set(XW - 1.15, 0, tz - 0.2); g.rotation.y = Math.PI/2 + 0.3; scene.add(g);
+          const k2 = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.position.set(x, y, z); g.add(o); };
+          k2(dunkel, 0.5, 0.08, 0.5, 0, 0.5, 0); k2(dunkel, 0.48, 0.6, 0.08, 0, 0.85, -0.24); k2(dunkel, 0.05, 0.45, 0.05, 0, 0.24, 0); k2(dunkel, 0.6, 0.03, 0.06, 0, 0.04, 0); k2(dunkel, 0.06, 0.03, 0.6, 0, 0.04, 0);
+          cols.push({x0:XW - 1.45, x1:XW - 0.85, z0:tz - 0.5, z1:tz + 0.1, y0:-1, y1:1.1}); }
+        else { for (const dz of [-0.6, 0.0]) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.04, 16), holz[1]); st.position.set(XW - 1.0, 0.62, tz + dz); scene.add(st);
+          const b = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6, 8), alu[1]); b.position.set(XW - 1.0, 0.31, tz + dz); scene.add(b); } } }
       // Elektrokanal mit Steckdosen und (im zweiten Feld) Not-Aus
       box(weiss, 0.07, 0.14, L - 0.1, XW - 0.035, 1.2, zm);
       for (let k = 0; k < Math.floor((L - 0.4)/0.7); k++) box(dunkel, 0.01, 0.07, 0.07, XW - 0.075, 1.2, za + 0.4 + k*0.7);
@@ -313,6 +319,55 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     // Decke: zwei Kabelpritschen längs, quer dazu Leuchten (lange Lichtbänder)
     for (const x of [-1.2, -4.6]) { box(alu, 0.4, 0.04, Z1 - Z0 - 0.2, x, 2.78, (Z0 + Z1)/2); box(alu, 0.02, 0.08, Z1 - Z0 - 0.2, x - 0.2, 2.8, (Z0 + Z1)/2); box(alu, 0.02, 0.08, Z1 - Z0 - 0.2, x + 0.2, 2.8, (Z0 + Z1)/2); }
     for (const zz of [38.4, 41.6, 44.6, 47.6]) for (const x of [-1.9, -5.3]) { box(weiss, 1.5, 0.08, 0.2, x, 2.86, zz); box(licht, 1.4, 0.01, 0.12, x, 2.815, zz); }
+  }
+
+  // Raum 019 (Alte Schreinerei) nach den Panoramafotos: Glovebox vor dem Fenster, Ecke beim Eingang mit Metallregal, grauem Schaltschrank,
+  // Edelstahl-Kühlgerät mit roten Schläuchen, rotem Schrank, CEE-Steckdosen und blauem Rack; zwei Klimakassetten unter der Decke
+  { const M = (c, o = {}) => [new THREE.MeshLambertMaterial({color:c, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1}),
+                              new THREE.MeshStandardMaterial({color:c, roughness:o.r ?? 0.55, metalness:o.m ?? 0.15, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1})];
+    const box = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const zyl = (m, r, h, x, y, z, achse) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 20), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z);
+      if (achse === 'x') o.rotation.z = Math.PI/2; if (achse === 'z') o.rotation.x = Math.PI/2; scene.add(o); return o; };
+    const rohr = (pts, r, m) => { const o = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 40, r, 8), m[1]); scene.add(o); };
+    const edel = M(0xc6c9cb, {r:0.3, m:0.7, emissive:0x2a2c2e}), grauG = M(0x9a9c99, {r:0.5, m:0.3}), dunkel = M(0x1b1d20), weiss = M(0xf2f2ef), rotS = M(0xb01e1a, {r:0.4}),
+          blau = M(0x2d62b5, {r:0.4}), schlauch = M(0xd2401e, {r:0.6, m:0}), kupfer = M(0xc0703e, {r:0.35, m:0.8});
+    // Glovebox: Edelstahlwanne mit schräger Scheibe und zwei schwarzen Handschuhen, auf Edelstahlgestell, Handschuhe zum Raum (-x)
+    { const gx = -1.55, gz = 41.2;
+      for (const dx of [-0.35, 0.35]) for (const dz of [-0.6, 0.6]) box(edel, 0.04, 0.9, 0.04, gx + dx, 0.45, gz + dz);
+      box(edel, 0.75, 0.04, 1.25, gx, 0.2, gz); box(grauG, 0.8, 0.55, 1.3, gx, 1.2, gz);
+      const sch = box(M(0xd8c79a, {transparent:true, opacity:0.55, r:0.1}), 0.02, 0.6, 1.2, gx - 0.33, 1.52, gz); sch.rotation.z = -0.35;
+      box(grauG, 0.6, 0.06, 1.3, gx + 0.05, 1.82, gz);
+      for (const dz of [-0.28, 0.28]) { zyl(dunkel, 0.08, 0.04, gx - 0.41, 1.15, gz + dz, 'x'); const h = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.05, 0.75, 12), dunkel[1]); h.position.set(gx - 0.43, 0.78, gz + dz); scene.add(h); }
+      zyl(edel, 0.12, 0.4, gx, 1.2, gz + 0.85, 'z'); cols.push({x0:gx - 0.5, x1:gx + 0.4, z0:gz - 0.7, z1:gz + 1.0, y0:-1, y1:1.9}); }
+    // Ecke am Eingang (Gangwand x = -7.44, Nordwand z = 36.41)
+    const XG = -7.44, ZN = 36.41;
+    box(M(0x3a3c3f, {r:0.95, m:0}), 1.0, 0.012, 0.8, XG + 0.75, 0.006, 38.8);                                         // Fußmatte innen vor der Tür
+    { const st = M(0xa7acb0, {r:0.45, m:0.5}), x0 = XG + 0.05, z0 = ZN + 0.15;                                      // Metallregal an der Gangwand
+      for (const z of [z0, z0 + 1.2]) for (const x of [x0, x0 + 0.5]) box(st, 0.03, 1.9, 0.03, x, 0.95, z);
+      for (const y of [0.1, 0.55, 1.0, 1.45, 1.88]) box(st, 0.5, 0.025, 1.2, x0 + 0.25, y, z0 + 0.6);
+      box(M(0xd2b48a), 0.4, 0.3, 0.45, x0 + 0.25, 0.27, z0 + 0.3); box(dunkel, 0.35, 0.25, 0.35, x0 + 0.25, 1.15, z0 + 0.8); box(M(0xc4201c), 0.3, 0.12, 0.3, x0 + 0.25, 1.53, z0 + 0.3);
+      cols.push({x0:XG, x1:x0 + 0.55, z0:ZN, z1:z0 + 1.25, y0:-1, y1:2.0}); }
+    box(M(0xd3d5d3, {r:0.5}), 0.6, 1.9, 0.4, -6.2, 0.95, ZN + 0.2); cols.push({x0:-6.5, x1:-5.9, z0:ZN, z1:ZN + 0.4, y0:-1, y1:2.0});   // grauer Schaltschrank
+    // Edelstahl-Kühlgerät auf Rollen mit Bedienteil oben und zwei roten Schläuchen, die über den Boden zum Tank laufen
+    { const kx = -5.35, kz = ZN + 0.45; box(edel, 0.65, 1.55, 0.65, kx, 0.85, kz); box(dunkel, 0.4, 0.25, 0.02, kx, 1.45, kz + 0.33); box(M(0x2d6fd0, {emissive:0x0a2040}), 0.12, 0.06, 0.01, kx - 0.08, 1.48, kz + 0.345);
+      for (const dx of [-0.25, 0.25]) for (const dz of [-0.25, 0.25]) zyl(dunkel, 0.04, 0.03, kx + dx, 0.04, kz + dz, 'x');
+      for (const dz of [-0.1, 0.1]) rohr([[kx + 0.25, 1.0, kz + 0.33], [kx + 0.3, 0.3, kz + 0.6 + dz], [kx + 0.6, 0.04, kz + 1.4 + dz], [-3.2, 0.04, 39.4 + dz], [-2.6, 0.5, 40.4 + dz]], 0.035, schlauch);
+      cols.push({x0:kx - 0.35, x1:kx + 0.35, z0:ZN, z1:kz + 0.35, y0:-1, y1:1.7}); }
+    // roter Schrank, CEE-Steckdosenverteiler, Kupferring auf dem Boden
+    box(M(0xc9cbcc), 1.0, 1.95, 0.55, -4.3, 0.975, ZN + 0.3); box(rotS, 0.96, 1.85, 0.02, -4.3, 0.975, ZN + 0.585); box(dunkel, 0.04, 0.06, 0.02, -4.2, 1.0, ZN + 0.6);
+    cols.push({x0:-4.8, x1:-3.8, z0:ZN, z1:ZN + 0.6, y0:-1, y1:2.0});
+    box(M(0xe8e8e4), 0.35, 0.5, 0.12, -3.3, 1.5, ZN + 0.06); for (let k = 0; k < 4; k++) zyl(M(0xc4201c), 0.04, 0.06, -3.42 + (k % 2)*0.24, 1.38 + Math.floor(k/2)*0.18, ZN + 0.14, 'z');
+    { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.3, 24, 1, true), kupfer[1]); r.rotation.z = Math.PI/2; r.position.set(-3.4, 0.22, ZN + 1.0); scene.add(r);
+      box(weiss, 0.6, 0.01, 0.5, -3.4, 0.005, ZN + 1.0); }
+    // Messwagen mit Geräten
+    box(blau, 0.8, 2.0, 0.8, -2.55, 1.0, ZN + 0.42); box(M(0x8fa6c4), 0.4, 0.15, 0.02, -2.55, 1.8, ZN + 0.83); cols.push({x0:-2.95, x1:-2.15, z0:ZN, z1:ZN + 0.84, y0:-1, y1:2.1});   // blaues Rack an der Nordwand
+    { const wx = -5.9, wz = 40.6, st = M(0x9da3a8, {r:0.45, m:0.6});
+      for (const dx of [-0.3, 0.3]) for (const dz of [-0.3, 0.3]) box(st, 0.03, 0.8, 0.03, wx + dx, 0.4, wz + dz);
+      box(M(0x8a6a48, {r:0.8, m:0}), 0.7, 0.03, 0.7, wx, 0.8, wz); box(st, 0.65, 0.02, 0.65, wx, 0.2, wz);
+      box(M(0xe6e4dd), 0.45, 0.12, 0.35, wx, 0.88, wz); box(M(0xb3261e), 0.4, 0.08, 0.3, wx, 0.98, wz);
+      cols.push({x0:wx - 0.35, x1:wx + 0.35, z0:wz - 0.35, z1:wz + 0.35, y0:-1, y1:1.1}); }
+    // zwei Klimakassetten unter der Decke
+    for (const [x, z] of [[-2.6, 39.0], [-2.6, 46.0]]) { box(weiss, 1.3, 0.25, 0.6, x, HR - 0.2, z); box(dunkel, 1.1, 0.02, 0.08, x, HR - 0.33, z - 0.15); box(dunkel, 1.1, 0.02, 0.08, x, HR - 0.33, z + 0.15); }
   }
 
   // Raum 019: zwei liegende Vakuumkammern (nach Fotos aus dem Labor): Edelstahl, 1,6 m Durchmesser, 3,2 m lang mit gewölbten Böden.
@@ -959,7 +1014,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // Flur 05 vor der Flügeltür nach 08b: links und rechts ein Wandvorsprung (verkleideter Installationsschacht), weiß mit schwarzer Leiste
   { const w = [new THREE.MeshLambertMaterial({color:0xf3f3f1, emissive:0x5a5a58}), new THREE.MeshStandardMaterial({color:0xf3f3f1, emissive:0x5a5a58, roughness:0.9, metalness:0})];
     const sw = [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5})];
-    for (const [x0, x1] of [[-10.05, -9.72], [-8.04, -7.65]]) { const z0 = 18.25, z1 = 19.5;
+    for (const [x0, x1, z0] of [[-10.05, -9.95, 16.2], [-7.77, -7.65, 15.75]]) { const z1 = 19.18;     // flach (30 % der früheren Tiefe), dreimal so breit, 20 cm vor der Tür
       const o = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, HR, z1 - z0), w[1]); o.userData.mats = w; cadMeshes.push(o); o.position.set((x0 + x1)/2, HR/2, (z0 + z1)/2); scene.add(o);
       const l = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.02, 0.07, z1 - z0 + 0.02), sw[1]); l.userData.mats = sw; cadMeshes.push(l); l.position.set((x0 + x1)/2, 0.035, (z0 + z1)/2); scene.add(l);
       cols.push({x0, x1, z0, z1, y0:-1, y1:HR}); } }
