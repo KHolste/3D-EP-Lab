@@ -5,6 +5,27 @@
    Spielkoordinaten: x nach Osten (Hallentor), z nach Süden zu den Räumen hin, y nach oben; Meter. */
 window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const R = window.RAEUME; if (!R) return;
+  // Rote Labortür wie im Flur 08b/08 (Video IMG_0948): dunkelrot, Zarge, Edelstahlklinke, je nach Tür Prüffeld-Schild, Warnaufkleber,
+  // Gebotszeichen und Aushänge. Liefert eine Textur für die Flurseite; breit = Doppeltür. Mit „seed“ sieht jede Tür etwas anders aus.
+  const laborTuerTex = (seed, breit, griffLinks) => { let r = seed*9301 + 49297; const rnd = () => (r = (r*9301 + 49297) % 233280)/233280;
+    const W = breit ? 512 : 256, c = document.createElement('canvas'); c.width = W; c.height = 512; const g = c.getContext('2d');
+    g.fillStyle = '#8e1c1c'; g.fillRect(0, 0, W, 512); g.strokeStyle = 'rgba(40,0,0,0.55)'; g.lineWidth = 3;
+    if (breit) { g.strokeRect(2, 2, 252, 508); g.strokeRect(258, 2, 252, 508); } else g.strokeRect(2, 2, 252, 508);
+    const blatt = (x, y, w, h) => { g.fillStyle = '#f6f6f2'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(40,40,40,0.5)'; for (let i = 0; i < (h - 14)/9; i++) g.fillRect(x + 6, y + 10 + i*9, w - 12, 3); };
+    const dreieck = (cx, cy, rr) => { g.fillStyle = '#f2c200'; g.beginPath(); g.moveTo(cx, cy - rr); g.lineTo(cx + rr, cy + rr*0.8); g.lineTo(cx - rr, cy + rr*0.8); g.closePath(); g.fill();
+      g.strokeStyle = '#111'; g.lineWidth = 2; g.stroke(); g.fillStyle = '#111'; g.fillRect(cx - 2, cy - rr*0.35, 4, rr*0.6); };
+    const verbot = (cx, cy) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(cx, cy, 17, 0, 7); g.fill(); g.strokeStyle = '#c4201c'; g.lineWidth = 5; g.stroke();
+      g.beginPath(); g.moveTo(cx - 11, cy - 11); g.lineTo(cx + 11, cy + 11); g.stroke(); };
+    const gebot = (cx, cy) => { g.fillStyle = '#1f5fbf'; g.beginPath(); g.arc(cx, cy, 17, 0, 7); g.fill(); g.fillStyle = '#fff'; g.fillRect(cx - 8, cy - 3, 16, 6); };
+    const flaechen = breit ? [[0, 256], [256, 256]] : [[0, 256]];
+    flaechen.forEach(([x0], k) => { const m = x0 + 128;
+      if (rnd() < 0.6) { g.fillStyle = '#f6f6f2'; g.fillRect(m - 38, 60, 76, 62); dreieck(m, 84, 18); g.fillStyle = '#222'; g.font = 'bold 12px system-ui'; g.fillText('Prüffeld', m - 24, 116); }
+      if (rnd() < 0.7) { g.fillStyle = '#f6f6f2'; g.fillRect(m - 50, 140, 100, 48); verbot(m - 25, 164); verbot(m + 25, 164); }
+      if (rnd() < 0.6) { g.fillStyle = '#f6f6f2'; g.fillRect(m - 45, 200, 90, 70); for (let q = 0; q < 3; q++) { dreieck(m - 30, 216 + q*20, 7); g.fillStyle = '#f2c200'; g.fillRect(m - 18, 211 + q*20, 56, 10); } }
+      if (rnd() < 0.5) gebot(m + 50, 90);
+      if (rnd() < 0.7) blatt(m - 36, 290 + (rnd()*40|0), 72, 70 + (rnd()*40|0)); });
+    g.fillStyle = '#c4c8cc'; const gx = breit ? [232, 262] : [griffLinks ? 26 : 214]; for (const x of gx) { g.fillRect(x, 300, 18, 6); g.fillRect(x + 6, 296, 6, 14); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
   const HR = 3.0;                                     // Raumhöhe (angenommen, bis Fotos etwas anderes zeigen)
 
   // Halle: Außenwände als Kollision (ersetzt die frühere feste Begrenzung); in der Wand zu den Räumen bleibt die Tür nach 09 offen
@@ -244,18 +265,15 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   { const X0 = -10.43, X1 = -10.1, Z0 = 19.6, Z1 = 36.1, oeff = [];
     for (const [x0, x1, z0, z1] of R.doors) if (x0 >= X0 && x1 <= X1 && z0 >= Z0 && z1 <= Z1 && z1 - z0 > 0.5) {
       const o = oeff.find(o => z0 < o[1] && z1 > o[0]); if (o) { o[0] = Math.min(o[0], z0); o[1] = Math.max(o[1], z1); } else oeff.push([z0, z1]); }
-    const rot = new THREE.MeshStandardMaterial({color:0xb02a22, roughness:0.45, metalness:0.1});
+    const rot = new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1});
     for (const [z0, z1] of oeff) {
-      const B = z1 - z0, zwei = B > 1.5, c = document.createElement('canvas'); c.width = zwei ? 512 : 256; c.height = 512; const g = c.getContext('2d');
-      g.fillStyle = '#b02a22'; g.fillRect(0, 0, c.width, 512);
-      const blatt = (x, w, griff) => { const gr = g.createLinearGradient(x, 0, x + w, 0); gr.addColorStop(0, 'rgba(255,255,255,0.06)'); gr.addColorStop(1, 'rgba(0,0,0,0.08)');
-        g.fillStyle = gr; g.fillRect(x, 0, w, 512); g.strokeStyle = 'rgba(60,10,8,0.55)'; g.lineWidth = 4; g.strokeRect(x + 2, 2, w - 4, 508);
-        g.fillStyle = '#c9ccce'; g.fillRect(griff - 18, 248, 36, 9); g.fillRect(griff - 5, 240, 10, 26); };
-      if (zwei) { blatt(0, 256, 230); blatt(256, 256, 282); } else blatt(0, 256, 220);
-      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+      const B = z1 - z0, zwei = B > 1.5;
+      const t = laborTuerTex(Math.round(z0*7), zwei);
       const vorn = new THREE.MeshStandardMaterial({map:t, roughness:0.45, metalness:0.1});
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.1, B), [vorn, rot, rot, rot, rot, rot]);   // +x zeigt in den Flur
       m.position.set(X1 - 0.03, 1.05, (z0 + z1)/2); scene.add(m);
+      const zg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, B + 0.12), rot); zg.position.set(X1 - 0.02, 2.13, (z0 + z1)/2); scene.add(zg);
+      for (const z of [z0 - 0.03, z1 + 0.03]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.1, 0.06), rot); p.position.set(X1 - 0.02, 1.05, z); scene.add(p); }
       cols.push({x0:X0, x1:X1, z0, z1, y0:-1, y1:2.1});
     }
   }
@@ -912,14 +930,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const x of [x0 - 0.03, x1 + 0.03]) box(rotM, 0.06, h, 0.08, x, h/2, zw);
     box(edelM, 0.14, 0.02, 0.06, x1 - 0.18, 1.05, zw + 0.04); cols.push({x0, x1, z0:zw - 0.1, z1:zw + 0.1, y0:-1, y1:h}); }
 
-  // Raum 010: rote Türen vom Flur 08 aus, geschlossen und nicht zu öffnen
+  // Räume 010, 011 und 013: rote Labortüren vom Flur aus, geschlossen und nicht zu öffnen
   { const rotM = [new THREE.MeshLambertMaterial({color:0x8e1c1c}), new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1})];
     const edelM = [new THREE.MeshLambertMaterial({color:0xc4c8cc}), new THREE.MeshStandardMaterial({color:0xc4c8cc, roughness:0.3, metalness:0.8})];
     const h = 2.05, box = (m, dx, dy, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, dy, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(px, py, pz); scene.add(o); };
-    for (const [xw, z0, z1] of [[-7.5, 59.282, 60.359], [-7.62, 57.897, 58.974], [-7.5, 53.179, 55.333]]) {     // alle drei Öffnungen vom Flur zu 010
-      box(rotM, 0.05, h, z1 - z0 - 0.02, xw, h/2, (z0 + z1)/2); box(rotM, 0.08, 0.06, z1 - z0 + 0.12, xw, h + 0.03, (z0 + z1)/2);
+    for (const [xw, z0, z1] of [[-7.5, 59.282, 60.359], [-7.62, 57.897, 58.974], [-7.5, 53.179, 55.333],      // alle drei Öffnungen vom Flur zu 010,
+                                [-7.5, 23.282, 24.462], [-7.5, 29.846, 32.0]]) {                               // dazu 013 und 011 (Flur 08b)
+      { const t = laborTuerTex(Math.round(z0*11), z1 - z0 > 1.5), fm = new THREE.MeshLambertMaterial({map:t});
+        const o = new THREE.Mesh(new THREE.BoxGeometry(0.05, h, z1 - z0 - 0.02), [rotM[0], fm, rotM[0], rotM[0], rotM[0], rotM[0]]); o.position.set(xw, h/2, (z0 + z1)/2); scene.add(o); }   // -x zeigt in den Flur
+      box(rotM, 0.08, 0.06, z1 - z0 + 0.12, xw, h + 0.03, (z0 + z1)/2);
       for (const z of [z0 - 0.03, z1 + 0.03]) box(rotM, 0.08, h, 0.06, xw, h/2, z);
-      if (z1 - z0 > 1.5) box(rotM, 0.06, h - 0.05, 0.01, xw - 0.03, h/2, (z0 + z1)/2);                        // Mittelfuge der Doppeltür
       box(edelM, 0.06, 0.02, 0.14, xw - 0.04, 1.05, (z1 - z0 > 1.5 ? (z0 + z1)/2 - 0.1 : z1 - 0.18)); cols.push({x0:xw - 0.12, x1:xw + 0.12, z0, z1, y0:-1, y1:h}); } }
 
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
@@ -956,15 +976,15 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.15), new THREE.MeshBasicMaterial({map:t, toneMapped:false}));
       m.rotation.y = Math.PI; m.position.set(-9.2, 2.5, 5.99); scene.add(m); }
     tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht);
-    tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, schlicht, schlicht);
+    tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, laborTuerTex(5, true), schlicht);
     // Labor 018: Türen in der Wand zum Flur 08 (Wand entlang z): links und rechts je ein Flügel, in der Mitte die Doppeltür mit den
     // Warnschildern wie an der Hallentür; alle öffnen ins Labor
     const tuerZ = (id, name, xw, z0, z1, mitFoto, h = 2.08) => {
       const zwei = z1 - z0 > 1.5, n = zwei ? 2 : 1, w = (z1 - z0)/n, fl = [];
       for (let k = 0; k < n; k++) {
         const g = new THREE.Group(), s = k === 0 ? 1 : -1; g.position.set(xw, 0, k === 0 ? z0 : z1); scene.add(g);
-        let vorn = rotM[0];
-        if (mitFoto && foto) { const c = foto.clone(); c.repeat.set(zwei ? 0.5 : 1, 1); c.offset.set(zwei ? (k === 0 ? 0.5 : 0) : 0, 0); c.needsUpdate = true; vorn = new THREE.MeshLambertMaterial({map:c}); }
+        let vorn = rotM[0]; const ft = mitFoto === true ? foto : mitFoto;
+        if (ft) { const c = ft.clone(); c.repeat.set(zwei ? 0.5 : 1, 1); c.offset.set(zwei ? (k === 0 ? 0.5 : 0) : 0, 0); c.needsUpdate = true; vorn = new THREE.MeshLambertMaterial({map:c}); }
         else vorn = new THREE.MeshLambertMaterial({map:schlicht});
         const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, h, w - 0.01), [vorn, new THREE.MeshLambertMaterial({map:schlicht}), rotM[0], rotM[0], rotM[0], rotM[0]]);
         m.position.set(0, h/2, s*w/2); g.add(m);
@@ -976,9 +996,30 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       window.raeumeTueren.push({id, name, x0:xw - 0.1, x1:xw + 0.1, z:(z0 + z1)/2, offen:false, a:0, hit:[xw, 1.05, (z0 + z1)/2, 0.4, 2.0, z1 - z0],
         schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
           for (const [g, s] of fl) g.rotation.y = -s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); };
-    tuerZ('raumtuer_018a', 'Tür zum Labor 018', -10.29, 38.256, 39.385, false);
-    tuerZ('raumtuer_018b', 'Doppeltür zum Labor 018', -10.29, 47.077, 49.179, false);   // Schilder folgen nach weiteren Videos
-    tuerZ('raumtuer_018c', 'Tür zum Labor 018', -10.29, 59.282, 60.359, false);
+    tuerZ('raumtuer_018a', 'Tür zum Labor 018', -10.29, 38.256, 39.385, laborTuerTex(3, false));
+    // Doppeltür 018 nach Video IMG_0948 (ca. 1:55): links Schild „Prüffeld“, Aushänge und EU-Projektposter, rechts Warnaufkleber und Zettel
+    const tuer018 = (() => { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const g = c.getContext('2d');
+      g.fillStyle = '#8e1c1c'; g.fillRect(0, 0, 512, 512); g.strokeStyle = 'rgba(40,0,0,0.55)'; g.lineWidth = 3; g.strokeRect(2, 2, 252, 508); g.strokeRect(258, 2, 252, 508);
+      const blatt = (x, y, w, h, f) => { g.fillStyle = '#f6f6f2'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(40,40,40,0.5)'; for (let i = 0; i < (h - 14)/9; i++) g.fillRect(x + 6, y + 10 + i*9, w - 12, 3); if (f) f(x, y, w, h); };
+      const dreieck = (cx, cy, r) => { g.fillStyle = '#f2c200'; g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx + r, cy + r*0.8); g.lineTo(cx - r, cy + r*0.8); g.closePath(); g.fill();
+        g.strokeStyle = '#111'; g.lineWidth = 2; g.stroke(); g.fillStyle = '#111'; g.fillRect(cx - 2, cy - r*0.35, 4, r*0.6); };
+      blatt(150, 40, 70, 120, (x, y, w) => { g.fillStyle = '#f6f6f2'; g.fillRect(x, y, w, 60); dreieck(x + w/2, y + 28, 22); g.fillStyle = '#222'; g.font = 'bold 13px system-ui'; g.fillText('Prüffeld', x + 8, y + 76); });
+      blatt(40, 90, 85, 190, (x, y, w) => { g.fillStyle = '#1f3f8f'; g.fillRect(x + 6, y + 160, 20, 14); g.fillStyle = '#f2c200'; g.fillRect(x + 50, y + 160, 26, 14); });
+      blatt(40, 290, 85, 100, (x, y) => { g.fillStyle = '#1f3f8f'; g.fillRect(x + 6, y + 80, 20, 14); });
+      blatt(290, 130, 100, 110, (x, y) => { for (let k = 0; k < 4; k++) { dreieck(x + 16, y + 18 + k*25, 9); g.fillStyle = '#f2c200'; g.fillRect(x + 30, y + 12 + k*25, 64, 12); } });
+      blatt(310, 300, 75, 80);
+      g.fillStyle = '#c4c8cc'; g.fillRect(232, 300, 18, 6); g.fillRect(262, 300, 18, 6);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    tuerZ('raumtuer_018b', 'Doppeltür zum Labor 018', -10.29, 47.077, 49.179, tuer018);
+    // daneben an der Wand: Gasalarm-Leuchte mit gelbem Schild, gelber Not-Taster
+    { const k = (c, dx, h, dz, x, y, z, e) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), new THREE.MeshLambertMaterial({color:c, emissive:e || 0})); o.position.set(x, y, z); scene.add(o); };
+      k(0x1b1d20, 0.1, 0.18, 0.1, -10.15, 2.35, 46.75); k(0xc4201c, 0.08, 0.08, 0.08, -10.12, 2.47, 46.75, 0x400000);
+      const c = document.createElement('canvas'); c.width = 128; c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#f2e000'; g.fillRect(0, 0, 128, 64); g.fillStyle = '#b3261e';
+      g.font = 'bold 14px system-ui'; g.fillText('GASALARM', 22, 20); g.font = '11px system-ui'; g.fillText('Physiklabor', 30, 36); g.fillText('Raum nicht betreten', 10, 52);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.15), new THREE.MeshBasicMaterial({map:t, color:0xe8e8e8}));
+      m.rotation.y = Math.PI/2; m.position.set(-10.2, 2.35, 46.4); scene.add(m);
+      k(0xf2c200, 0.08, 0.12, 0.1, -10.16, 1.3, 46.6); k(0xc4201c, 0.05, 0.05, 0.05, -10.1, 1.3, 46.6); }
+    tuerZ('raumtuer_018c', 'Tür zum Labor 018', -10.29, 59.282, 60.359, laborTuerTex(8, false));
     // einflügelige Tür in der linken Wand von 09 (nach 06): Scharnier auf der Hallenseite, öffnet nach 06 hinein
     { const xw = -10.13, z0 = 10.359, z1 = 11.436, h = 2.0, g = new THREE.Group(); g.position.set(xw, 0, z0 + 0.01); scene.add(g);
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.045, h, z1 - z0 - 0.02), rotM[1]); m.position.set(0, h/2, (z1 - z0 - 0.02)/2); g.add(m);
