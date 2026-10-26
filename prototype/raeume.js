@@ -367,7 +367,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // nah an der Gangwand (zwischen Wandpfeilern und hinterem Stutzen kommt man gerade noch durch). Oben Ventil und Messkopf, an der Seite
   // eine Durchführung mit Kabeln, daneben ein Geräteschrank mit Monitor; jeder Tank hat zwischen den Tanks seine eigene Unterverteilung.
   // Gebaut wird in einer Gruppe (Tür nach -x) und die Gruppe dann um 180° gedreht an ihren Platz gesetzt (A, B), samt Kollision.
-  { const X0 = -4.8, X1 = -1.6, R0 = 0.8, YC = 1.0, KZ = [43.6, 46.0], A = -7.75, B = 87.6, G = new THREE.Group(), colsK = []; scene.add(G);
+  { const X0g = -4.8, X1 = -1.6, KZ = [43.6, 46.0], A = -7.75, B = 87.6, G = new THREE.Group(), colsK = []; scene.add(G);
     const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.5, metalness:0.1, ...o})];
     const stahl = M(0xd3d6d8, {roughness:0.38, metalness:0.5, emissive:0x2a2c2e}), stahlD = M(0xb4b8bb, {roughness:0.35, metalness:0.6, emissive:0x1e2022}), blau = M(0x1f4fb0, {roughness:0.45, metalness:0.2}),
           schwarz = M(0x1b1d20, {roughness:0.5}), glas = M(0x0d1418, {roughness:0.1, metalness:0.6}), grau = M(0xd5d6d3, {roughness:0.7, metalness:0}),
@@ -384,31 +384,46 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       g.fillStyle = '#111'; g.font = '20px system-ui, sans-serif'; g.fillText('JUSTUS-LIEBIG-', 12, 32); g.fillText('UNIVERSITÄT', 72, 70); g.fillText('GIESSEN', 72, 100);
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
     // Punkt auf dem gewölbten Türboden (Abstand dy, dz von der Achse) -> x der Oberfläche
-    const kopfX = (dy, dz) => X0 + 0.4 - 0.4*Math.sqrt(Math.max(0, 1 - (dy*dy + dz*dz)/(R0*R0)));
     const kf = (x, y, z, r = 0.035) => { zyl(r, 0.1, stahl, x - 0.05, y, z, 'x', 12); zyl(r + 0.018, 0.025, stahlD, x - 0.1, y, z, 'x', 12); };
 
+    // Tank A (k = 0, südlich): großer Durchmesser, kurz, stark gewölbte Tür mit blauem Schwenkarm und Schauglas in der Tür, auf blauem Sockel.
+    // Tank B (k = 1, nördlich): kleiner und länger, flache Tür mit breitem Flansch und Alu-Profilrahmen, Schauglas seitlich, steht auf Füßen.
     KZ.forEach((zc, k) => {
+      const A_ = k === 0, R0 = A_ ? 0.95 : 0.72, X0 = A_ ? X0g + 0.3 : X0g - 0.45, YC = A_ ? 1.0 : 1.1, wb = A_ ? 0.5 : 0.25;
+      const kopfX = (dy, dz) => X0 + wb*0.8 - wb*0.8*Math.sqrt(Math.max(0, 1 - (dy*dy + dz*dz)/(R0*R0)));
       const xm = (X0 + X1)/2;
       add(new THREE.CylinderGeometry(R0, R0, X1 - X0 - 0.8, 48, 1, true), stahl, xm, YC, zc, 0, 0, Math.PI/2);                  // Mantel
-      const kopf = new THREE.SphereGeometry(R0, 40, 14, 0, Math.PI*2, 0, Math.PI/2); kopf.scale(1, 0.5, 1);
+      const kopf = new THREE.SphereGeometry(R0, 40, 14, 0, Math.PI*2, 0, Math.PI/2); kopf.scale(1, wb, 1);
       add(kopf, stahl, X1 - 0.4, YC, zc, 0, 0, -Math.PI/2); add(kopf, stahl, X0 + 0.4, YC, zc, 0, 0, Math.PI/2);                // Böden (hinten, Tür)
-      zyl(R0 + 0.055, 0.12, stahlD, X0 + 0.4, YC, zc, 'x', 48); zyl(R0 + 0.03, 0.06, stahlD, X1 - 0.4, YC, zc, 'x', 48);         // Türflansch, hinterer Flansch
+      zyl(R0 + (A_ ? 0.055 : 0.12), A_ ? 0.12 : 0.16, stahlD, X0 + 0.4, YC, zc, 'x', 48); zyl(R0 + 0.03, 0.06, stahlD, X1 - 0.4, YC, zc, 'x', 48);         // Türflansch, hinterer Flansch
       zyl(R0 + 0.004, 0.015, stahlD, xm + 0.2, YC, zc, 'x', 48);                                                                // Schweißnaht
       // Tür: Schauglas, großer Stutzen oben, KF-Stutzen, Griff
       const sx = kopfX(-0.05, 0.05);
+      if (A_) {
       zyl(0.17, 0.2, stahl, sx - 0.08, YC - 0.05, zc + 0.05, 'x', 28); zyl(0.21, 0.035, schwarz, sx - 0.19, YC - 0.05, zc + 0.05, 'x', 28);
       zyl(0.12, 0.01, glas, sx - 0.21, YC - 0.05, zc + 0.05, 'x', 24);
       for (let i = 0; i < 8; i++) { const w = i*Math.PI/4; zyl(0.012, 0.03, stahlD, sx - 0.215, YC - 0.05 + 0.165*Math.sin(w), zc + 0.05 + 0.165*Math.cos(w), 'x', 6); }
+      } else {                                                                              // B: Griff mittig, Schnellspanner am Rand, Schauglas seitlich am Mantel
+        zyl(0.014, 0.4, stahlD, kopfX(0, 0) - 0.12, YC, zc, 'y', 8); for (const dy of [0.18, -0.18]) zyl(0.012, 0.1, stahlD, kopfX(dy, 0) - 0.06, YC + dy, zc, 'x', 6);
+        for (let i = 0; i < 6; i++) { const w = i*Math.PI/3 + 0.3; kiste(M(0xc4201c), 0.08, 0.04, 0.04, X0 + 0.32, YC + (R0 + 0.1)*Math.sin(w), zc + (R0 + 0.1)*Math.cos(w)); }
+        const vz = zc - R0; zyl(0.16, 0.1, stahl, X0 + 1.1, YC + 0.05, vz - 0.03, 'z', 24); zyl(0.11, 0.02, glas, X0 + 1.1, YC + 0.05, vz - 0.09, 'z', 20);
+      }
       const tx = kopfX(0.5, 0.1); zyl(0.14, 0.22, stahl, tx - 0.06, YC + 0.5, zc + 0.1, 'x', 24); zyl(0.155, 0.04, stahlD, tx - 0.18, YC + 0.5, zc + 0.1, 'x', 24);
-      for (const [dy, dz] of [[0.45, 0.38], [-0.32, 0.05], [-0.55, 0.05], [0.0, 0.32]]) kf(kopfX(dy, dz), YC + dy, zc + dz);
-      const gx = kopfX(-0.05, 0.5); zyl(0.014, 0.36, stahlD, gx - 0.09, YC - 0.05, zc + 0.5, 'y', 8);
-      zyl(0.012, 0.08, stahlD, gx - 0.05, YC + 0.12, zc + 0.5, 'x', 6); zyl(0.012, 0.08, stahlD, gx - 0.05, YC - 0.22, zc + 0.5, 'x', 6);
+      for (const [dy, dz] of (A_ ? [[0.45, 0.38], [-0.32, 0.05], [-0.55, 0.05], [0.0, 0.32]] : [[0.4, 0.3], [-0.35, -0.3]])) kf(kopfX(dy, dz), YC + dy, zc + dz);
+      if (A_) { const gx = kopfX(-0.05, 0.6); zyl(0.014, 0.36, stahlD, gx - 0.09, YC - 0.05, zc + 0.6, 'y', 8);
+      zyl(0.012, 0.08, stahlD, gx - 0.05, YC + 0.12, zc + 0.6, 'x', 6); zyl(0.012, 0.08, stahlD, gx - 0.05, YC - 0.22, zc + 0.6, 'x', 6); }
       // blauer Schwenkarm der Tür (links von vorn gesehen) mit Platten oben und unten, Scharnierlaschen, JLU-Schild
-      kiste(blau, 0.32, 1.25, 0.46, X0 + 0.06, YC, zc - 0.66);
-      for (const s of [1, -1]) { kiste(blau, 0.6, 0.04, 0.62, X0 + 0.16, YC + s*0.645, zc - 0.62); kiste(stahlD, 0.12, 0.1, 0.1, X0 + 0.44, YC + s*0.6, zc - 0.78); }
-      add(new THREE.PlaneGeometry(0.32, 0.16), [new THREE.MeshLambertMaterial({map:schild}), new THREE.MeshStandardMaterial({map:schild, roughness:0.6})], X0 - 0.101, YC + 0.3, zc - 0.66, 0, -Math.PI/2, 0);
+      if (A_) { const az = zc - R0*0.82;                                                     // A: kräftiger blauer Schwenkarm vom Boden bis über die Mitte
+        kiste(blau, 0.34, 1.5, 0.5, X0 + 0.06, YC - 0.15, az);
+        for (const s of [1, -1]) { kiste(blau, 0.7, 0.04, 0.66, X0 + 0.2, YC - 0.15 + s*0.77, az + 0.04); kiste(stahlD, 0.12, 0.1, 0.1, X0 + 0.5, YC + s*0.7, az - 0.12); }
+        add(new THREE.PlaneGeometry(0.32, 0.16), [new THREE.MeshLambertMaterial({map:schild}), new THREE.MeshStandardMaterial({map:schild, roughness:0.6})], X0 - 0.111, YC + 0.3, az, 0, -Math.PI/2, 0); }
+      else {                                                                                // B: Rahmen aus Alu-Profil, an dem die Tür hängt
+        for (const s of [1, -1]) kiste(alu, 0.06, R0*2 + 0.3, 0.06, X0 + 0.25, YC, zc + s*(R0 + 0.15));
+        kiste(alu, 0.06, 0.06, R0*2 + 0.36, X0 + 0.25, YC + R0 + 0.15, zc); kiste(alu, 0.5, 0.06, 0.06, X0 + 0.5, YC + R0 + 0.15, zc + R0 + 0.15); }
       // Sättel und Fußplatte
-      for (const x of [X0 + 0.9, X1 - 0.9]) { kiste(blau, 0.45, 0.32, 1.1, x, 0.16, zc); kiste(blau, 0.7, 0.03, 1.3, x, 0.015, zc); }
+      if (A_) { kiste(blau, X1 - X0 - 0.4, 0.05, R0*1.8, (X0 + X1)/2, 0.025, zc); for (const x of [X0 + 0.7, X1 - 0.7]) kiste(blau, 0.45, YC - R0 + 0.15, 1.1, x, (YC - R0 + 0.15)/2, zc); }
+      else for (const x of [X0 + 0.7, X1 - 0.7]) for (const s of [1, -1]) { kiste(stahlD, 0.08, YC - 0.2, 0.08, x, (YC - 0.2)/2, zc + s*R0*0.6); zyl(0.05, 0.04, schwarz, x, 0.05, zc + s*R0*0.6, 'z', 12); }
+      if (!A_) kiste(M(0x2b5fc4), 0.12, 0.03, 0.9, X0 - 0.3, 0.015, zc + R0*0.5); 
       // oben: Ventil mit Handrad, schräger Messkopf, Kranösen
       zyl(0.04, 0.5, stahl, X0 + 0.75, YC + R0 + 0.2, zc + 0.15, 'y', 12); kiste(stahlD, 0.1, 0.1, 0.1, X0 + 0.75, YC + R0 + 0.35, zc + 0.15);
       zyl(0.05, 0.03, schwarz, X0 + 0.75, YC + R0 + 0.47, zc + 0.15, 'y', 12);
@@ -424,25 +439,25 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       kabel(kabelR, [[xm + 0.5, YC + R0 + 0.4, zc - 0.42], [xm - 0.3, YC + R0 + 0.3, zc - 0.7], [X0 + 0.2, 2.2, zc - 1.0], [X0 + 0.9, 2.75, zc - 1.2]]);
       kabel(kabelS, [[xm + 0.45, YC + R0 + 0.38, zc - 0.4], [xm - 0.5, YC + R0 + 0.2, zc - 0.75], [X0 + 0.3, 2.0, zc - 1.05], [X0 + 0.9, 2.75, zc - 1.25]]);
       kabel(kabelG, [[xm + 0.6, YC + 0.05, sz + sd*0.1], [xm + 0.3, YC - 0.3, sz + sd*0.35], [xm - 0.4, 0.05, sz + sd*0.5], [X0 - 0.2, 0.03, sz + sd*0.6]], 0.01);
-      colsK.push({x0:X0 - 0.12, x1:X1 + 0.25, z0:zc - 0.95, z1:zc + 0.86, y0:-1, y1:2.3});
+      colsK.push({x0:X0 - 0.15, x1:X1 + 0.25, z0:zc - R0 - 0.15, z1:zc + R0 + 0.2, y0:-1, y1:2.3});
     });
     // neben Kammer 1: schwarzer Geräteschrank mit Monitor und Tastatur (Tische vorerst weggelassen)
     const z1 = KZ[0] - 1.35;
-    kiste(schwarz, 0.6, 1.0, 0.6, (X0 + 0.85), 0.5, z1); kiste(weiss, 0.03, 0.34, 0.52, (X0 + 0.85), 1.33, z1); kiste(schwarz, 0.005, 0.3, 0.48, (X0 + 0.83), 1.33, z1);   // Schrank, Monitor
-    kiste(weiss, 0.18, 0.02, 0.12, (X0 + 0.9), 1.01, z1); kiste(schwarz, 0.16, 0.02, 0.45, (X0 + 0.65), 1.01, z1);                                      // Fuß, Tastatur
-    for (const s of [-1, 1]) zyl(0.035, 0.02, alu, (X0 + 0.85) + s*0.24, 1.01, z1 + s*0.24, 'y', 10);                                              // Ösen
-    colsK.push({x0:X0 + 0.5, x1:X0 + 1.2, z0:z1 - 0.35, z1:z1 + 0.35, y0:-1, y1:1.6});
+    kiste(schwarz, 0.6, 1.0, 0.6, (X0g + 0.85), 0.5, z1); kiste(weiss, 0.03, 0.34, 0.52, (X0g + 0.85), 1.33, z1); kiste(schwarz, 0.005, 0.3, 0.48, (X0g + 0.83), 1.33, z1);   // Schrank, Monitor
+    kiste(weiss, 0.18, 0.02, 0.12, (X0g + 0.9), 1.01, z1); kiste(schwarz, 0.16, 0.02, 0.45, (X0g + 0.65), 1.01, z1);                                      // Fuß, Tastatur
+    for (const s of [-1, 1]) zyl(0.035, 0.02, alu, (X0g + 0.85) + s*0.24, 1.01, z1 + s*0.24, 'y', 10);                                              // Ösen
+    colsK.push({x0:X0g + 0.5, x1:X0g + 1.2, z0:z1 - 0.35, z1:z1 + 0.35, y0:-1, y1:1.6});
       G.rotation.y = Math.PI; G.position.set(A, 0, B);                     // Tür zur Fensterseite: (x, z) -> (A - x, B - z)
     for (const c of colsK) cols.push({x0:A - c.x1, x1:A - c.x0, z0:B - c.z1, z1:B - c.z0, y0:c.y0, y1:c.y1});
     // Unterverteilungen: je Tank eine schwarze Säule bis zur Decke im Zwischenraum, Steckdosen (rot 400 V, blau 230 V) zur Fensterseite
     const zs = KZ.map(z => B - z).sort((a, b) => a - b);                  // Achsen nach dem Drehen
-    [[-4.9, zs[0] + R0 + 0.2], [-3.4, zs[1] - R0 - 0.2]].forEach(([x, z]) => {
+    [[-4.9, zs[0] + 0.72 + 0.17], [-3.4, zs[1] - 0.95 - 0.17]].forEach(([x, z]) => {
       const o = new THREE.Mesh(new THREE.BoxGeometry(0.16, 2.8, 0.16), schwarz[1]); o.userData.mats = schwarz; cadMeshes.push(o); o.position.set(x, 1.4, z); scene.add(o);
       for (let i = 0; i < 6; i++) { const m = i % 2 ? M(0x2a62b8) : rot, d = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.1), m[1]); d.userData.mats = m; cadMeshes.push(d);
         d.position.set(x + 0.09, 0.9 + i*0.22, z); scene.add(d); }
       cols.push({x0:x - 0.1, x1:x + 0.12, z0:z - 0.1, z1:z + 0.1, y0:-1, y1:3}); });
     // zwischen den Tanktüren: Alugestell mit grauem Gerät oben und Kunststoffkiste unten (Foto von der Fensterseite)
-    { const ax = A - X0 + 0.35, az = (zs[0] + zs[1])/2, part = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); };
+    { const ax = A - X0g + 0.35, az = (zs[0] + zs[1])/2, part = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); };
       for (const dx of [-0.27, 0.27]) for (const dz of [-0.22, 0.22]) part(alu, 0.04, 0.9, 0.04, ax + dx, 0.45, az + dz);
       for (const y of [0.1, 0.9]) part(alu, 0.58, 0.04, 0.48, ax, y, az);
       part(grau, 0.45, 0.2, 0.38, ax, 1.02, az); part(M(0xe8eef2, {transparent:true, opacity:0.55, roughness:0.2}), 0.4, 0.25, 0.34, ax, 0.25, az);
@@ -1048,14 +1063,15 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, laborTuerTex(5, true), schlicht);
     // Labor 018: Türen in der Wand zum Flur 08 (Wand entlang z): links und rechts je ein Flügel, in der Mitte die Doppeltür mit den
     // Warnschildern wie an der Hallentür; alle öffnen ins Labor
-    const tuerZ = (id, name, xw, z0, z1, mitFoto, h = 2.08) => {
+    const tuerZ = (id, name, xw, z0, z1, mitFoto, h = 2.08, seite = -1, innen = null) => {   // seite: Raum bei -x (018) oder +x (019)
       const zwei = z1 - z0 > 1.5, n = zwei ? 2 : 1, w = (z1 - z0)/n, fl = [];
       for (let k = 0; k < n; k++) {
         const g = new THREE.Group(), s = k === 0 ? 1 : -1; g.position.set(xw, 0, k === 0 ? z0 : z1); scene.add(g);
         let vorn = rotM[0]; const ft = mitFoto === true ? foto : mitFoto;
         if (ft) { const c = ft.clone(); c.repeat.set(zwei ? 0.5 : 1, 1); c.offset.set(zwei ? (k === 0 ? 0.5 : 0) : 0, 0); c.needsUpdate = true; vorn = new THREE.MeshLambertMaterial({map:c}); }
         else vorn = new THREE.MeshLambertMaterial({map:schlicht});
-        const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, h, w - 0.01), [vorn, new THREE.MeshLambertMaterial({map:schlicht}), rotM[0], rotM[0], rotM[0], rotM[0]]);
+        const hinten = new THREE.MeshLambertMaterial({map:innen || schlicht});
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, h, w - 0.01), seite < 0 ? [vorn, hinten, rotM[0], rotM[0], rotM[0], rotM[0]] : [hinten, vorn, rotM[0], rotM[0], rotM[0], rotM[0]]);
         m.position.set(0, h/2, s*w/2); g.add(m);
         for (const sx of [-1, 1]) { const kl = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.14), edelM[1]); kl.position.set(sx*0.045, 1.05, s*(w - 0.12)); g.add(kl); }
         fl.push([g, s]); }
@@ -1064,7 +1080,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const col = {x0:xw - 0.1, x1:xw + 0.1, z0, z1, y0:-1, y1:h}; cols.push(col);
       window.raeumeTueren.push({id, name, x0:xw - 0.1, x1:xw + 0.1, z:(z0 + z1)/2, offen:false, a:0, hit:[xw, 1.05, (z0 + z1)/2, 0.4, 2.0, z1 - z0],
         schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
-          for (const [g, s] of fl) g.rotation.y = -s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); };
+          for (const [g, s] of fl) g.rotation.y = seite*s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); };
     tuerZ('raumtuer_018a', 'Tür zum Labor 018', -10.29, 38.256, 39.385, laborTuerTex(3, false));
     // Doppeltür 018 nach Video IMG_0948 (ca. 1:55): links Schild „Prüffeld“, Aushänge und EU-Projektposter, rechts Warnaufkleber und Zettel
     const tuer018 = (() => { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const g = c.getContext('2d');
@@ -1089,6 +1105,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       m.rotation.y = Math.PI/2; m.position.set(-10.2, 2.35, 46.4); scene.add(m);
       k(0xf2c200, 0.08, 0.12, 0.1, -10.16, 1.3, 46.6); k(0xc4201c, 0.05, 0.05, 0.05, -10.1, 1.3, 46.6); }
     tuerZ('raumtuer_018c', 'Tür zum Labor 018', -10.29, 59.282, 60.359, laborTuerTex(8, false));
+    // Alte Schreinerei (019): Einzeltür (vom Startpunkt aus) mit Aushang auf der Raumseite, Doppeltür weiter Richtung 018; öffnen in den Raum
+    const aushang = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 512; const g = c.getContext('2d');
+      g.fillStyle = '#8e1c1c'; g.fillRect(0, 0, 256, 512); g.strokeStyle = 'rgba(40,0,0,0.55)'; g.lineWidth = 3; g.strokeRect(2, 2, 252, 508);
+      g.fillStyle = '#f4f4f2'; g.fillRect(48, 70, 160, 220); g.fillStyle = '#1f3f8f'; g.fillRect(48, 70, 160, 26);
+      g.fillStyle = 'rgba(40,40,40,0.5)'; for (let i = 0; i < 9; i++) g.fillRect(58, 110 + i*14, 140 - (i % 3)*20, 4);
+      g.fillStyle = '#9fb7d6'; g.fillRect(60, 240, 60, 40); g.fillStyle = '#c9a06a'; g.fillRect(132, 240, 64, 40);
+      g.fillStyle = '#c4c8cc'; g.fillRect(26, 300, 18, 6); g.fillRect(32, 296, 6, 14);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    tuerZ('raumtuer_019a', 'Tür zur Alten Schreinerei', -7.52, 38.256, 39.385, laborTuerTex(21, false), 2.08, 1, aushang);
+    tuerZ('raumtuer_019b', 'Doppeltür zur Alten Schreinerei', -7.52, 47.077, 49.179, laborTuerTex(22, true), 2.08, 1);
     // einflügelige Tür in der linken Wand von 09 (nach 06): Scharnier auf der Hallenseite, öffnet nach 06 hinein
     { const xw = -10.13, z0 = 10.359, z1 = 11.436, h = 2.0, g = new THREE.Group(); g.position.set(xw, 0, z0 + 0.01); scene.add(g);
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.045, h, z1 - z0 - 0.02), rotM[1]); m.position.set(0, h/2, (z1 - z0 - 0.02)/2); g.add(m);
