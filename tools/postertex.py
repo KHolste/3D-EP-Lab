@@ -18,6 +18,8 @@ POSTER = {
     'hallentuer': ('hallentuer_09.jpg', [(171, 92), (457, 91), (452, 352), (199, 357)], (480, 520)),   # Hallentür von 09 aus (Foto 640 x 480)
     'whiteboard09': ('whiteboard_09.jpg', [(20, 48), (557, 62), (553, 401), (32, 418)], (720, 480)),   # Whiteboard in 09
     'fenster020': ('fenster_020.jpg', [(45, 188), (502, 188), (502, 292), (45, 292)], (600, 136)),     # Fenster im Treppenhaus 020
+    'fenster06a': ('raum06_fenster_a.jpg', [(125, 90), (1075, 90), (1075, 1560), (125, 1560)], (380, 590)),   # Blick aus Raum 06 (Einzelbild aus videos/IMG_0946.MOV)
+    'fenster06b': ('raum06_fenster_b.jpg', [(330, 200), (1075, 200), (1075, 1130), (330, 1130)], (380, 470)),
     'pinnwand': ('pinnwand.JPEG', [(287, 252), (1645, 366), (1650, 1112), (338, 1312)], (840, 560)),   # Meme-Whiteboard im Übergangsraum (Foto 2048 x 1536)
 }
 RAND = 0.025                      # Anteil, der an jeder Seite wegfaellt (Alurahmen)

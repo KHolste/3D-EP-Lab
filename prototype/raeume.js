@@ -647,6 +647,100 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     box(edel, 0.03, 0.05, 0.03, x + 0.01, 1.05, z0 + 0.12); box(edel, 0.02, 0.02, 0.13, x - 0.01, 1.05, z0 + 0.17);
     cols.push({x0:x - 0.1, x1:x + 0.1, z0, z1, y0:-1, y1:h}); }
 
+  // Raum 06, Doktorandenzimmer (hinter der roten Tür links in 09), nach dem Video videos/IMG_0946.MOV: große Fenster mit dunklen Rahmen
+  // an der Außenwand (Blick auf Hof und Nachbargebäude, Einzelbilder aus dem Video), Heizkörper darunter, Schreibtische in Buche mit
+  // grauen Containern, blaue und schwarze Bürostühle, Monitore, zwei Whiteboards, Regale mit Ordnern, Schränke, Ventilator,
+  // Infrarot-Heizpaneele unter der Decke, Rasterdecke und hellgrauer Vinylboden.
+  { const XW = -15.54, XO = -10.371, ZN = 6.513, ZS = 12.821, HR6 = 3.0;
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color, roughness:0.6, metalness:0.1, ...o})];
+    const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const zyl = (m, r, h, x, y, z, seg = 14) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const buche = M(0xd6b98a, {roughness:0.7, metalness:0}), grau = M(0x8f9396, {roughness:0.6}), dunkel = M(0x1d1f22), weiss = M(0xf3f3f0, {roughness:0.7, metalness:0}),
+          blau = M(0x23379a, {roughness:0.8, metalness:0}), schwarz = M(0x161719, {roughness:0.8, metalness:0}), alu = M(0xb9bdc0, {roughness:0.35, metalness:0.7});
+    const fotoTex = key => { if (!window.TEX || !window.TEX[key]) return null; const t = new THREE.TextureLoader().load(window.TEX[key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+    // Boden: hellgraue Vinyldielen
+    { const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+      for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const v = 172 + ((r*5 + k*11) % 5)*5; g.fillStyle = 'rgb(' + v + ',' + v + ',' + (v - 2) + ')'; const x = (k*170 + (r % 2)*85) % 512;
+        g.fillRect(x, r*64, 170, 64); if (x + 170 > 512) g.fillRect(0, r*64, x + 170 - 512, 64); }
+      for (let i = 0; i < 4000; i++) { g.fillStyle = 'rgba(90,90,90,0.08)'; g.fillRect(Math.random()*512, Math.random()*512, 6 + Math.random()*20, 1); }
+      g.strokeStyle = 'rgba(80,80,80,0.35)'; g.lineWidth = 1.5; for (let r = 0; r <= 8; r++) { g.beginPath(); g.moveTo(0, r*64); g.lineTo(512, r*64); g.stroke(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.repeat.set((XO - XW)/2.4, (ZS - ZN)/2.4);
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(XO - XW, ZS - ZN), new THREE.MeshLambertMaterial({map:t})); m.rotation.x = -Math.PI/2; m.position.set((XW + XO)/2, 0.006, (ZN + ZS)/2); scene.add(m); }
+    // Rasterdecke 62,5 cm mit zwei Leuchtpaneelen
+    { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#f2f2ef'; g.fillRect(0, 0, 128, 128);
+      g.fillStyle = '#c9cbcc'; g.fillRect(0, 0, 128, 3); g.fillRect(0, 0, 3, 128); for (let i = 0; i < 400; i++) { g.fillStyle = 'rgba(0,0,0,0.06)'; g.fillRect(Math.random()*128, Math.random()*128, 1, 1); }
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set((XO - XW)/0.625, (ZS - ZN)/0.625);
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(XO - XW, ZS - ZN), new THREE.MeshLambertMaterial({map:t, emissive:0x8a8a88, emissiveMap:t})); m.rotation.x = Math.PI/2; m.position.set((XW + XO)/2, HR6 - 0.006, (ZN + ZS)/2); scene.add(m);
+      for (const [x, z] of [[-13.9, 8.4], [-13.9, 11.0], [-11.9, 8.4], [-11.9, 11.0]]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.01, 0.6), new THREE.MeshBasicMaterial({color:0xffffff})); l.position.set(x, HR6 - 0.012, z); scene.add(l); } }
+    // Fenster an der Außenwand: zwei große Elemente mit je zwei Flügeln, dunkle Rahmen, weiße Fensterbank mit Steckdosenkanal, Heizkörper darunter
+    const ta = fotoTex('poster_fenster06a'), tb = fotoTex('poster_fenster06b');
+    [[6.85, 9.45], [10.05, 12.65]].forEach(([z0, z1], i) => {
+      const y0 = 0.95, y1 = 2.75, zm = (z0 + z1)/2;
+      [[z0, zm, i ? ta : tb], [zm, z1, ta]].forEach(([a, b, t]) => { if (!t) return; const m = new THREE.Mesh(new THREE.PlaneGeometry(b - a - 0.06, y1 - y0 - 0.06), new THREE.MeshBasicMaterial({map:t, toneMapped:false}));
+        m.rotation.y = Math.PI/2; m.position.set(XW + 0.01, (y0 + y1)/2, (a + b)/2); scene.add(m); });
+      for (const z of [z0, zm, z1]) kiste(dunkel, 0.08, y1 - y0, 0.07, XW + 0.04, (y0 + y1)/2, z);
+      for (const y of [y0, y1]) kiste(dunkel, 0.08, 0.07, z1 - z0, XW + 0.04, y, zm);
+      kiste(weiss, 0.22, 0.03, z1 - z0 + 0.1, XW + 0.11, y0 - 0.03, zm); kiste(weiss, 0.06, 0.12, z1 - z0, XW + 0.03, y0 - 0.12, zm);
+      for (let k = 0; k < Math.floor((z1 - z0)/0.075); k++) kiste(weiss, 0.08, 0.55, 0.025, XW + 0.1, 0.42, z0 + 0.05 + k*0.075);
+      cols.push({x0:XW, x1:XW + 0.16, z0, z1, y0:-1, y1:0.8}); });
+    // durchsichtige Kunststoffboxen auf der Fensterbank (Video)
+    for (let k = 0; k < 5; k++) kiste(M(0xe6edf2, {transparent:true, opacity:0.6, roughness:0.2}), 0.3, 0.1, 0.4, XW + 0.17, 0.98 + k*0.105, 11.9);
+    // Schreibtische: Platte Buche, graue Wangen und Container
+    const tisch = (x0, x1, z0, z1, cont = true) => { const h = 0.74; kiste(buche, x1 - x0, 0.03, z1 - z0, (x0 + x1)/2, h, (z0 + z1)/2);
+      const lang = (x1 - x0) > (z1 - z0);
+      for (const s of [0, 1]) { if (lang) kiste(grau, 0.04, h - 0.02, z1 - z0 - 0.1, s ? x1 - 0.06 : x0 + 0.06, (h - 0.02)/2, (z0 + z1)/2); else kiste(grau, x1 - x0 - 0.1, h - 0.02, 0.04, (x0 + x1)/2, (h - 0.02)/2, s ? z1 - 0.06 : z0 + 0.06); }
+      if (cont) { if (lang) kiste(grau, 0.42, 0.6, 0.55, x1 - 0.35, 0.3, (z0 + z1)/2); else kiste(grau, 0.55, 0.6, 0.42, (x0 + x1)/2, 0.3, z1 - 0.35); }
+      cols.push({x0, x1, z0, z1, y0:-1, y1:0.9}); };
+    const monitor = (x, z, ry, w = 0.55) => { const g = new THREE.Group(); g.position.set(x, 0.755, z); g.rotation.y = ry; scene.add(g);
+      const add = (m, dx, h, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.position.set(px, py, pz); g.add(o); };
+      add(dunkel, w, 0.34, 0.03, 0, 0.3, 0); add(M(0x2b3a58, {emissive:0x0c1426}), w - 0.03, 0.3, 0.005, 0, 0.3, 0.017); add(alu, 0.04, 0.22, 0.04, 0, 0.11, -0.04); add(alu, 0.2, 0.015, 0.16, 0, 0.008, -0.04);
+      add(dunkel, 0.42, 0.015, 0.14, 0, 0.008, 0.22); };
+    const stuhl = (x, z, ry, m) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g);
+      const add = (mm, dx, h, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), mm[1]); o.position.set(px, py, pz); g.add(o); };
+      add(m, 0.48, 0.08, 0.46, 0, 0.48, 0); add(m, 0.46, 0.55, 0.07, 0, 0.82, -0.22); add(dunkel, 0.05, 0.4, 0.05, 0, 0.25, 0);
+      for (let k = 0; k < 5; k++) { const o = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.03, 0.04), dunkel[1]); o.position.set(Math.cos(k*1.2566)*0.16, 0.05, Math.sin(k*1.2566)*0.16); o.rotation.y = -k*1.2566; g.add(o); }
+      add(dunkel, 0.04, 0.2, 0.3, 0.26, 0.62, 0); add(dunkel, 0.04, 0.2, 0.3, -0.26, 0.62, 0);
+      cols.push({x0:x - 0.25, x1:x + 0.25, z0:z - 0.2, z1:z + 0.2, y0:-1, y1:1.0}); };
+    // am Fenster: Eckarbeitsplatz zur Hallenseite und zwei Plätze mit Blick nach draußen
+    tisch(XW + 0.25, XW + 1.05, ZN + 0.05, ZN + 1.65); tisch(XW + 1.05, XW + 2.5, ZN + 0.05, ZN + 0.85);
+    monitor(XW + 0.55, ZN + 0.9, Math.PI/2); monitor(XW + 1.8, ZN + 0.32, 0); kiste(dunkel, 0.18, 0.4, 0.4, XW + 2.25, 0.95, ZN + 0.45);
+    stuhl(XW + 1.55, ZN + 1.45, -2.3, schwarz);
+    tisch(XW + 0.25, XW + 1.05, 9.1, 10.7); monitor(XW + 0.55, 9.6, Math.PI/2); monitor(XW + 0.55, 10.2, Math.PI/2); stuhl(XW + 1.5, 9.9, -Math.PI/2, blau);
+    tisch(XW + 0.25, XW + 1.05, 11.0, 12.3); monitor(XW + 0.55, 11.6, Math.PI/2); stuhl(XW + 1.5, 11.55, -Math.PI/2, blau);
+    // Mitte: zwei Tische Rücken an Rücken mit Monitoren, Stühle davor
+    tisch(-13.6, -11.9, 8.5, 9.3); tisch(-13.6, -11.9, 9.3, 10.1);
+    monitor(-13.1, 9.15, Math.PI); monitor(-12.4, 9.15, Math.PI); monitor(-13.1, 9.45, 0); monitor(-12.4, 9.45, 0);
+    kiste(M(0xc4201c), 0.3, 0.12, 0.2, -12.2, 0.82, 8.75); stuhl(-12.75, 8.0, Math.PI, blau); stuhl(-12.75, 10.35, 0, blau);
+    // Rollhocker
+    zyl(alu, 0.2, 0.04, -11.6, 0.62, 11.7, 18); zyl(alu, 0.025, 0.55, -11.6, 0.33, 11.7); zyl(dunkel, 0.24, 0.02, -11.6, 0.05, 11.7, 18); cols.push({x0:-11.85, x1:-11.35, z0:11.45, z1:11.95, y0:-1, y1:0.7});
+    // Wand zum Treppenhaus (z = ZS): Whiteboard, Ventilator mit Papierkorb, Schrank (Buche/grau) neben der Tür
+    const wb = (x0, x1, z, ry) => { const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d'); g.fillStyle = '#fbfbf9'; g.fillRect(0, 0, 512, 256);
+      g.lineWidth = 2; for (let i = 0; i < 40; i++) { g.strokeStyle = ['#1f3f8f', '#202020', '#b3261e', '#1d6a3a'][i % 4]; g.beginPath(); let x = 30 + Math.random()*440, y = 25 + Math.random()*200; g.moveTo(x, y);
+        for (let k = 0; k < 4; k++) { x += (Math.random() - 0.4)*50; y += (Math.random() - 0.5)*20; g.lineTo(x, y); } g.stroke(); }
+      for (let i = 0; i < 6; i++) { g.strokeStyle = '#1f3f8f'; g.strokeRect(40 + i*75, 40 + (i % 3)*55, 40, 25); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const xm = (x0 + x1)/2, w = x1 - x0;
+      kiste(alu, w + 0.04, 1.24, 0.025, xm, 1.6, z); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.2), new THREE.MeshBasicMaterial({map:t, color:0xe6e6e6})); m.rotation.y = ry; m.position.set(xm, 1.6, z + (ry ? -0.015 : 0.015)); scene.add(m);
+      kiste(alu, w*0.5, 0.03, 0.08, xm, 0.98, z + (ry ? -0.04 : 0.04)); };
+    wb(-14.8, -12.6, ZS, Math.PI);
+    zyl(dunkel, 0.015, 1.1, -12.2, 0.55, 12.45); const fan = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.08, 20), dunkel[1]); fan.rotation.x = Math.PI/2; fan.position.set(-12.2, 1.15, 12.45); scene.add(fan);
+    zyl(M(0x9aa2b5), 0.15, 0.32, -12.5, 0.16, 12.55); cols.push({x0:-12.7, x1:-12.0, z0:12.25, z1:ZS, y0:-1, y1:1.3});
+    kiste(buche, 0.9, 0.95, 0.42, -11.0, 0.475, ZS - 0.21); kiste(grau, 0.9, 1.05, 0.42, -11.0, 1.475, ZS - 0.21);
+    for (const dx of [-0.05, 0.05]) kiste(alu, 0.015, 0.12, 0.02, -11.0 + dx, 1.0, ZS - 0.43);
+    cols.push({x0:-11.45, x1:-10.55, z0:ZS - 0.42, z1:ZS, y0:-1, y1:2.1});
+    // Hallenwand (z = ZN): zweites Whiteboard, Regal mit Ordnern, grauer Schrank
+    wb(-13.0, -11.4, ZN, 0);
+    { const x0 = -11.3, x1 = -10.45, d = 0.4; for (const x of [x0, x1]) kiste(buche, 0.025, 2.0, d, x, 1.0, ZN + d/2);
+      for (const y of [0.02, 0.42, 0.82, 1.22, 1.62, 1.99]) kiste(buche, x1 - x0, 0.025, d, (x0 + x1)/2, y, ZN + d/2);
+      for (let r = 0; r < 3; r++) for (let k = 0; k < 9; k++) kiste(k % 4 === 3 ? weiss : blau, 0.07, 0.31, 0.28, x0 + 0.08 + k*0.085, 0.6 + r*0.4, ZN + 0.18);
+      cols.push({x0, x1, z0:ZN, z1:ZN + d, y0:-1, y1:2.1}); }
+    // Ostwand (zu 09): Infrarot-Heizpaneele unter der Decke, Brandmelder, Schild über der Tür
+    for (const z of [7.6, 9.2]) { kiste(weiss, 0.05, 0.5, 1.0, XO - 0.03, 2.4, z); kiste(dunkel, 0.08, 0.06, 0.06, XO - 0.05, 2.4, z - 0.55); }
+    zyl(M(0xc4201c), 0.06, 0.04, -12.5, HR6 - 0.03, 11.6);
+    { const c = document.createElement('canvas'); c.width = 128; c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#f6f6f2'; g.fillRect(0, 0, 128, 64); g.fillStyle = '#333'; g.font = '13px system-ui';
+      g.fillText('Doktorandenzimmer', 6, 36); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.15), new THREE.MeshBasicMaterial({map:t, color:0xe8e8e8})); m.rotation.y = -Math.PI/2; m.position.set(XO - 0.01, 2.35, 10.9); scene.add(m); }
+  }
+
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
   { window.raeumeTueren = [];
