@@ -428,7 +428,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
 
   // Raum 016 (Zugang von 09 durch einen schmalen Vorraum, Tür nach 017): Teeküche nach den Fotos IMG_0934/0935. Küchenzeile in Anthrazit
   // an der Wand zu 09: Hochschrank mit Mini-Kühlschrank obendrauf, Unterschränke mit heller Holz-Arbeitsplatte und Spüle, Rückwand in
-  // Holzoptik, Oberschränke mit Mikrowelle. Gegenüber an der Wand zu 017 Getränkekisten und ein Röhrenheizkörper, Boden Laminat.
+  // Holzoptik, Oberschränke mit Mikrowelle. An der Wand zu 017 ein Röhrenheizkörper, Boden Laminat.
   { const XW = -6.961, XO = -4.776, Z0 = 6.513, ZT = 9.026;               // Wand zu 09, Wand zu 017, Hallenwand, Wandstück am Vorraum
     const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, map:o.map || null}), new THREE.MeshStandardMaterial({color, roughness:0.55, metalness:0.05, ...o})];
     const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
@@ -481,11 +481,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (let k = 0; k < 9; k++) zyl(weiss, 0.022, 1.0, XO - 0.07, 0.75, 6.78 + k*0.05, 10);
     kiste(weiss, 0.06, 0.06, 0.48, XO - 0.07, 1.27, 6.98); kiste(weiss, 0.06, 0.06, 0.48, XO - 0.07, 0.23, 6.98); zyl(weiss, 0.025, 0.08, XO - 0.07, 1.34, 6.74);
     zyl(M(0xc9ccce, {roughness:0.4, metalness:0.6}), 0.05, 3.0, XO - 0.08, 1.5, Z0 + 0.08);
-    const kistenFarben = [0x1d6a3a, 0x1b2f6e, 0x1f3d8f, 0x1b2f6e];
-    for (let k = 0; k < 4; k++) { const y = k*0.3 + 0.15, m = M(kistenFarben[k], {roughness:0.6});
-      kiste(m, 0.42, 0.3, 0.32, XO - 0.55, y, Z0 + 0.2); kiste(M(0x10141c), 0.36, 0.01, 0.26, XO - 0.55, y + 0.145, Z0 + 0.2);
-      for (let b = 0; b < 6; b++) zyl(M(b % 2 ? 0x6b3a12 : 0x2e6b2a, {roughness:0.2, metalness:0.1}), 0.028, 0.08, XO - 0.68 + (b % 3)*0.13, y + 0.19, Z0 + 0.12 + Math.floor(b/3)*0.16, 8); }
-    cols.push({x0:XO - 0.78, x1:XO - 0.32, z0:Z0, z1:Z0 + 0.38, y0:-1, y1:1.3}, {x0:XO - 0.12, x1:XO, z0:Z0, z1:7.25, y0:-1, y1:1.4});
+    cols.push({x0:XO - 0.12, x1:XO, z0:Z0, z1:7.25, y0:-1, y1:1.4});
     // Laminatboden graubraun in Dielen, über Raum und Vorraum
     { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const g = c.getContext('2d');
       for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const v = 108 + ((r*7 + k*13) % 5)*5; g.fillStyle = 'rgb(' + v + ',' + (v - 6) + ',' + (v - 12) + ')';
