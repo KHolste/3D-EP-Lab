@@ -570,6 +570,17 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     kiste(grau, 0.025, 1.25, wbz1 - wbz0 + 0.04, XL + 0.012, 1.55, (wbz0 + wbz1)/2); flach(wb, wbz1 - wbz0, 1.2, XL + 0.026, 1.55, (wbz0 + wbz1)/2, Math.PI/2, false);
   }
 
+  // Übergangsraum zwischen 09 und 017: Meme-Whiteboard (Foto docs/fotos/pinnwand, Textur 'poster_pinnwand', tools/postertex.py) an der
+  // rechten Wand mit Holzleiste unten, an der Stirnwand oben eine USV mit Steckdosenleiste
+  { const ZW = 10.462, x0 = -6.35, x1 = -4.85, y0 = 1.0, y1 = 2.0;
+    const M = c => [new THREE.MeshLambertMaterial({color:c}), new THREE.MeshStandardMaterial({color:c, roughness:0.5, metalness:0.2})];
+    const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    if (window.TEX && window.TEX.poster_pinnwand) { const t = new THREE.TextureLoader().load(window.TEX.poster_pinnwand); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, y1 - y0), new THREE.MeshBasicMaterial({map:t, color:0xe8e8e8})); m.rotation.y = Math.PI; m.position.set((x0 + x1)/2, (y0 + y1)/2, ZW - 0.022); scene.add(m); }
+    const alu = M(0xc3c7ca); kiste(alu, x1 - x0 + 0.04, 0.02, 0.02, (x0 + x1)/2, y1 + 0.01, ZW - 0.012); kiste(alu, 0.02, y1 - y0, 0.02, x0 - 0.01, (y0 + y1)/2, ZW - 0.012); kiste(alu, 0.02, y1 - y0, 0.02, x1 + 0.01, (y0 + y1)/2, ZW - 0.012);
+    kiste(M(0xc8a46e), x1 - x0 + 0.06, 0.04, 0.07, (x0 + x1)/2, y0 - 0.02, ZW - 0.035);
+    kiste(M(0x1f2124), 0.18, 0.32, 0.42, -4.776 - 0.09, 2.6, 10.1); kiste(M(0x1f2124), 0.06, 0.05, 0.5, -4.776 - 0.03, 2.35, 10.1); }
+
   // Ostende von Flur 05 (vor 014), nach den Fotos docs/fotos/tuer_flur05 und poster_*: dunkle Türanlage über die ganze Flurbreite mit
   // verglaster Doppeltür nach draußen und Notausgangsschild (Textur 'tuer05', tools/tuertex.py), davor eine Fußmatte. Rechts (Wand zu 06)
   // drei Poster, links (Wand zu 014) ein Poster, der Desinfektionsspender und ein hoher cremefarbener Heizkörper. Die Tür bleibt zu.
