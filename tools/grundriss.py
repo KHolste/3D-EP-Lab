@@ -99,7 +99,7 @@ for k in FLURE:
 flur = ndimage.binary_dilation(flur, np.ones((3, 3))) & ~door      # Boden ein Pixel unter die Wand schieben, keine Fuge
 flure = [f for f in (to_game(r, 0.02) for r in rects(flur)) if f]
 # Raeume, die nach Fotos eingerichtet sind: weiss gestrichen, eigener Boden (Lage wie bei den Fluren aus der Beschriftung)
-WEISS = ['019']
+WEISS = ['019', '016']
 weiss = np.zeros_like(wall)
 for k in WEISS:
     px, py = LABELS[k]; weiss |= frei == frei[py + 4, px + 4]

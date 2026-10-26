@@ -405,6 +405,78 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const c of colsS) cols.push({x0:A - c.x1, x1:A - c.x0, z0:B - c.z1, z1:B - c.z0, y0:c.y0, y1:c.y1});
   }
 
+  // Raum 016 (Zugang von 09 durch einen schmalen Vorraum, Tür nach 017): Teeküche nach den Fotos IMG_0934/0935. Küchenzeile in Anthrazit
+  // an der Wand zu 09: Hochschrank mit Mini-Kühlschrank obendrauf, Unterschränke mit heller Holz-Arbeitsplatte und Spüle, Rückwand in
+  // Holzoptik, Oberschränke mit Mikrowelle. Gegenüber an der Wand zu 017 Getränkekisten und ein Röhrenheizkörper, Boden Laminat.
+  { const XW = -6.961, XO = -4.776, Z0 = 6.513, ZT = 9.026;               // Wand zu 09, Wand zu 017, Hallenwand, Wandstück am Vorraum
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, map:o.map || null}), new THREE.MeshStandardMaterial({color, roughness:0.55, metalness:0.05, ...o})];
+    const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const zyl = (m, r, h, x, y, z, seg = 16) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const anth = M(0x3b3d41, {roughness:0.6}), sockel = M(0x2a2b2e), griff = M(0xc4c8cc, {roughness:0.3, metalness:0.8}), edel = M(0xc0c4c7, {roughness:0.3, metalness:0.75}),
+          platte = M(0xd9d0c1, {roughness:0.7, metalness:0}), weiss = M(0xf2f2ef, {roughness:0.6}), schwarz = M(0x1b1c1f), blau = M(0x1f3d8f, {roughness:0.6});
+    const holz = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d');
+      g.fillStyle = '#cdbfa7'; g.fillRect(0, 0, 256, 128); for (let i = 0; i < 60; i++) { g.strokeStyle = 'rgba(120,95,65,' + (0.05 + (i % 7)*0.015) + ')'; g.lineWidth = 1 + (i % 3);
+        g.beginPath(); const y = (i*37) % 128; g.moveTo(0, y); g.bezierCurveTo(80, y + 6, 170, y - 6, 256, y + 2); g.stroke(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    const F = XW + 0.6;                                                  // Vorderkante der Unterschränke
+    const front = (z0, z1, y0, y1, xf = F, gr = null) => { kiste(anth, 0.02, y1 - y0 - 0.006, z1 - z0 - 0.006, xf + 0.01, (y0 + y1)/2, (z0 + z1)/2);
+      if (gr === 'h') kiste(griff, 0.025, 0.015, Math.min(0.32, (z1 - z0)*0.6), xf + 0.035, y1 - 0.07, (z0 + z1)/2);
+      if (gr === 'hm') kiste(griff, 0.025, 0.015, Math.min(0.32, (z1 - z0)*0.6), xf + 0.035, (y0 + y1)/2, (z0 + z1)/2);
+      if (gr && gr[0] === 'v') kiste(griff, 0.025, 0.3, 0.015, xf + 0.035, gr[1], gr[2]); };
+    // Unterschränke z 6.62 .. 8.42: Schubladenblock, zwei Türen; Sockel, Arbeitsplatte, Spüle
+    const Za = Z0 + 0.1, Zh = 8.42;
+    kiste(anth, 0.58, 0.76, Zh - Za, XW + 0.29, 0.48, (Za + Zh)/2); kiste(sockel, 0.54, 0.1, Zh - Za, XW + 0.27, 0.05, (Za + Zh)/2);
+    front(7.82, Zh, 0.68, 0.86, F, 'hm'); front(7.82, Zh, 0.4, 0.68, F, 'hm'); front(7.82, Zh, 0.1, 0.4, F, 'hm');
+    front(7.22, 7.82, 0.1, 0.86, F, 'h'); front(Za, 7.22, 0.1, 0.86, F, ['v', 0.68, 7.27]);
+    kiste(M(0xd9d0c1, {map:holz, roughness:0.7, metalness:0}), 0.63, 0.04, Zh - Za, XW + 0.315, 0.88, (Za + Zh)/2);
+    kiste(edel, 0.42, 0.01, 0.5, XW + 0.33, 0.903, 6.98); kiste(M(0x8a8e92, {roughness:0.3, metalness:0.7}), 0.34, 0.005, 0.36, XW + 0.33, 0.909, 6.98);
+    zyl(edel, 0.02, 0.22, XW + 0.08, 1.01, 7.15); kiste(edel, 0.2, 0.025, 0.025, XW + 0.17, 1.12, 7.15);
+    kiste(M(0xd9d0c1, {map:holz, roughness:0.8, metalness:0}), 0.015, 0.6, Zh - Za, XW + 0.008, 1.2, (Za + Zh)/2);     // Rückwand
+    // Hochschrank z 8.42 .. 9.0 mit Lüftungsgitter unten, darauf ein weißer Mini-Kühlschrank; Zettel an der Tür
+    kiste(anth, 0.58, 1.9, 9.0 - Zh, XW + 0.29, 1.05, (Zh + 9.0)/2); kiste(sockel, 0.54, 0.1, 9.0 - Zh, XW + 0.27, 0.05, (Zh + 9.0)/2);
+    front(Zh, 9.0, 0.45, 2.0, F, ['v', 1.05, Zh + 0.05]); front(Zh, 9.0, 0.1, 0.45, F, 'hm');
+    kiste(M(0x9a9da0), 0.01, 0.05, 0.4, F + 0.005, 0.12, (Zh + 9.0)/2);
+    kiste(weiss, 0.5, 0.5, 0.5, XW + 0.27, 2.25, 8.72);
+    const zettel = (farbe, x, y, z, w, h) => { const c = document.createElement('canvas'); c.width = 128; c.height = 160; const g = c.getContext('2d');
+      g.fillStyle = '#f6f6f2'; g.fillRect(0, 0, 128, 160); g.fillStyle = farbe; g.fillRect(0, 0, 128, 26);
+      g.fillStyle = 'rgba(40,40,40,0.55)'; for (let i = 0; i < 12; i++) g.fillRect(10 + (i % 2)*58, 36 + Math.floor(i/2)*20, 48, 6);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshLambertMaterial({map:t})); m.rotation.y = Math.PI/2; m.position.set(x, y, z); scene.add(m); };
+    zettel('#2a62b8', F + 0.022, 1.45, 8.74, 0.2, 0.28);
+    // Oberschränke (0,35 tief): Schrank, Mikrowelle mit Klappe darüber, höherer Schrank am Hochschrank; Betriebsanweisung am Schrank
+    const FO = XW + 0.35;
+    kiste(anth, 0.33, 0.78, 7.17 - Za, XW + 0.165, 1.92, (Za + 7.17)/2); front(Za, 7.17, 1.53, 2.31, FO, ['v', 1.65, 7.12]);
+    kiste(anth, 0.33, 0.35, 0.65, XW + 0.165, 2.135, 7.495); front(7.17, 7.82, 1.96, 2.31, FO, 'h');
+    kiste(edel, 0.34, 0.42, 0.63, XW + 0.17, 1.74, 7.495); kiste(schwarz, 0.005, 0.24, 0.36, FO + 0.002, 1.76, 7.45); zyl(schwarz, 0.02, 0.01, FO + 0.004, 1.8, 7.7).rotation.z = Math.PI/2;
+    kiste(anth, 0.33, 0.88, Zh - 7.82, XW + 0.165, 1.97, (7.82 + Zh)/2); front(7.82, Zh, 1.53, 2.41, FO, ['v', 1.65, 7.87]);
+    zettel('#1d8a4a', FO + 0.022, 1.92, 6.86, 0.18, 0.24);
+    // auf der Arbeitsplatte: Siebträgermaschine, Wasserkocher, Dosen; auf den Oberschränken: Kaffeemaschine, Küchenrollen
+    kiste(edel, 0.35, 0.36, 0.38, XW + 0.25, 1.08, 7.62); zyl(schwarz, 0.06, 0.14, XW + 0.22, 1.33, 7.7);
+    zyl(edel, 0.08, 0.22, XW + 0.3, 1.01, 8.05); zyl(M(0xe8eef2, {roughness:0.3}), 0.1, 0.12, XW + 0.42, 0.96, 8.28, 4); zyl(M(0xf0c800), 0.1, 0.03, XW + 0.42, 1.035, 8.28, 4);
+    kiste(schwarz, 0.22, 0.3, 0.2, XW + 0.18, 2.46, 7.5); zyl(edel, 0.07, 0.18, XW + 0.22, 2.4, 7.25);
+    for (let i = 0; i < 4; i++) zyl(weiss, 0.06, 0.24, XW + 0.12 + (i % 2)*0.14, 2.43, 6.75 + Math.floor(i/2)*0.14);
+    cols.push({x0:XW, x1:F + 0.05, z0:Z0, z1:9.0, y0:-1, y1:2.6});
+    // Wand zu 017: Röhrenheizkörper in der Ecke zur Halle, Steigrohr, gestapelte Getränkekisten
+    for (let k = 0; k < 9; k++) zyl(weiss, 0.022, 1.0, XO - 0.07, 0.75, 6.78 + k*0.05, 10);
+    kiste(weiss, 0.06, 0.06, 0.48, XO - 0.07, 1.27, 6.98); kiste(weiss, 0.06, 0.06, 0.48, XO - 0.07, 0.23, 6.98); zyl(weiss, 0.025, 0.08, XO - 0.07, 1.34, 6.74);
+    zyl(M(0xc9ccce, {roughness:0.4, metalness:0.6}), 0.05, 3.0, XO - 0.08, 1.5, Z0 + 0.08);
+    const kistenFarben = [0x1d6a3a, 0x1b2f6e, 0x1f3d8f, 0x1b2f6e];
+    for (let k = 0; k < 4; k++) { const y = k*0.3 + 0.15, m = M(kistenFarben[k], {roughness:0.6});
+      kiste(m, 0.42, 0.3, 0.32, XO - 0.23, y, 7.45); kiste(M(0x10141c), 0.36, 0.01, 0.26, XO - 0.23, y + 0.145, 7.45);
+      for (let b = 0; b < 6; b++) zyl(M(b % 2 ? 0x6b3a12 : 0x2e6b2a, {roughness:0.2, metalness:0.1}), 0.028, 0.08, XO - 0.36 + (b % 3)*0.13, y + 0.19, 7.37 + Math.floor(b/3)*0.16, 8); }
+    cols.push({x0:XO - 0.46, x1:XO, z0:7.27, z1:7.63, y0:-1, y1:1.3}, {x0:XO - 0.12, x1:XO, z0:Z0, z1:7.25, y0:-1, y1:1.4});
+    // Laminatboden graubraun in Dielen, über Raum und Vorraum
+    { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const g = c.getContext('2d');
+      for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const v = 108 + ((r*7 + k*13) % 5)*5; g.fillStyle = 'rgb(' + v + ',' + (v - 6) + ',' + (v - 12) + ')';
+        const off = (r % 2)*85; g.fillRect((k*170 + off) % 512, r*64, 170, 64); if ((k*170 + off) % 512 + 170 > 512) g.fillRect(0, r*64, (k*170 + off + 170) % 512, 64); }
+      g.strokeStyle = 'rgba(40,34,30,0.35)'; g.lineWidth = 2; for (let r = 0; r <= 8; r++) { g.beginPath(); g.moveTo(0, r*64); g.lineTo(512, r*64); g.stroke(); }
+      for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const x = (k*170 + (r % 2)*85) % 512; g.beginPath(); g.moveTo(x, r*64); g.lineTo(x, r*64 + 64); g.stroke(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;
+      const L = 10.462 - Z0, B = XO - XW; t.repeat.set(B/1.6, L/1.6);
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(B, L), new THREE.MeshLambertMaterial({map:t, color:0xb0aaa4})); m.rotation.x = -Math.PI/2;
+      m.position.set((XW + XO)/2, 0.007, (Z0 + 10.462)/2); scene.add(m); }
+  }
+
   // Ostende von Flur 05 (vor 014), nach den Fotos docs/fotos/tuer_flur05 und poster_*: dunkle Türanlage über die ganze Flurbreite mit
   // verglaster Doppeltür nach draußen und Notausgangsschild (Textur 'tuer05', tools/tuertex.py), davor eine Fußmatte. Rechts (Wand zu 06)
   // drei Poster, links (Wand zu 014) ein Poster, der Desinfektionsspender und ein hoher cremefarbener Heizkörper. Die Tür bleibt zu.
