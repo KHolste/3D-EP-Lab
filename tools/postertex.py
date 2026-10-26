@@ -15,6 +15,9 @@ POSTER = {
     'ptra':  ('poster_ptra.JPEG',  [(307, 359), (1398, 329), (1361, 1751), (353, 1742)], (400, 560)),
     'inlab': ('poster_inlab.JPEG', [(169, 261), (1146, 301), (1137, 1582), (215, 1644)], (400, 560)),
     'gonzalez': ('pinnwand.JPEG', [(1129, 812), (1253, 807), (1251, 942), (1131, 953)], (480, 520)),   # Schnitzel Gonzalez vom Whiteboard, groß als Poster in der Küche
+    'hallentuer': ('hallentuer_09.jpg', [(171, 92), (457, 91), (452, 352), (199, 357)], (480, 520)),   # Hallentür von 09 aus (Foto 640 x 480)
+    'whiteboard09': ('whiteboard_09.jpg', [(20, 48), (557, 62), (553, 401), (32, 418)], (720, 480)),   # Whiteboard in 09
+    'fenster020': ('fenster_020.jpg', [(45, 188), (502, 188), (502, 292), (45, 292)], (600, 136)),     # Fenster im Treppenhaus 020
     'pinnwand': ('pinnwand.JPEG', [(287, 252), (1645, 366), (1650, 1112), (338, 1312)], (840, 560)),   # Meme-Whiteboard im Übergangsraum (Foto 2048 x 1536)
 }
 RAND = 0.025                      # Anteil, der an jeder Seite wegfaellt (Alurahmen)
@@ -37,6 +40,9 @@ for name, (foto, ecken, (w, h)) in POSTER.items():
     hell = ndimage.gaussian_filter(a.mean(2), min(w, h)/4)                       # grober Helligkeitsverlauf (Spiegelung, Fensterlicht)
     a = a * np.clip(hell.mean()/np.maximum(hell, 1), 0.75, 1.25)[..., None]
     img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+    if name == 'hallentuer':                                                     # unten rechts steht im Foto ein Transportwagen vor der Tür
+        u0 = int(w*0.69); a[int(h*0.58):, u0:] = a[int(h*0.58):, int(w*0.05):int(w*0.05) + (w - u0)]   # mit einem glatten Stück der linken Türhälfte füllen
+        img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
     if name == 'gonzalez': img = img.filter(ImageFilter.UnsharpMask(3, 120, 2))          # stark vergrößert: etwas nachschärfen
     buf = io.BytesIO(); img.save(buf, 'JPEG', quality=80, optimize=True)
     tex['poster_' + name] = 'data:image/jpeg;base64,' + base64.b64encode(buf.getvalue()).decode()

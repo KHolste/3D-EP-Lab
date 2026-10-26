@@ -646,6 +646,10 @@ const doorCol = {x0:0, x1:0, z0:TZ-1.25, z1:TZ+1.42, y0:DY-0.1, y1:5.4}, doorCol
 
 /* ---- Nachbarräume nach dem Grundriss (raeume.js, Daten aus tools/grundriss.py); bringt auch die Hallenwände als Kollision mit ---- */
 window.baueRaeume(THREE, scene, cols, cadMeshes);
+for (const d of window.raeumeTueren || []) {                     // Türen der Nachbarräume: mit E öffnen und schließen
+  hit(d.id, null, (d.x0 + d.x1)/2, 1.05, d.z, d.x1 - d.x0, 2.0, 0.4);
+  def(d.id, () => d.name + (d.offen ? ' schließen' : ' öffnen'), () => { d.offen = !d.offen; sfx('knock'); });
+  upd.push(() => { if (d.schritt()) renderer.shadowMap.needsUpdate = true; }); }
 
 /* ---- Bühne (Umriss aus dem CAD), Geländer, die beiden hinteren Treppen (ergänzt, fehlen im CAD),
         Zwischenbühne, CAD-Treppe und obere Ebene über der EMV-Kabine ---- */
@@ -1180,7 +1184,7 @@ function reach(){
   const bad = [], v = new THREE.Vector3(); scene.updateMatrixWorld(true);
   for (const m of inters) { m.getWorldPosition(v); let ok = false;
     for (let n = 0; n < pts.length && !ok; n += 3) ok = Math.hypot(pts[n]-v.x, pts[n+1]-v.z) < 1.6 && Math.abs(pts[n+2] + 1.7 - v.y) < 1.5;
-    if (!ok && !/^(npc|udo|dok)/.test(m.userData.id)) bad.push(m.userData.id); }
+    if (!ok && !/^(npc|udo|dok|raumtuer)/.test(m.userData.id)) bad.push(m.userData.id); }
   return bad;
 }
 /* ---- Selbsttest (?test=1) und Kamerapositionen für Screenshots (?cam=x,y,z,yaw,pitch&do=a,b&ff=min) ---- */
@@ -1227,6 +1231,8 @@ if (Q.get('walk')) {
   r.vorKabine = walk(-9.5, 4.5, 0, [[90, 45]]);                           // geschlossene Kabinentür hält auf
   ACT.kab.do(); for (let i = 0; i < 40; i++) for (const u of upd) u();
   r.inKabine = walk(-9.5, 4.5, 0, [[90, 45]]);                            // durch die offene Tür in die EMV-Kabine
+  r.hallentuerZu = walk(-9.2, 5.0, 0, [[180, 40]]);                       // Hallentür zu: man bleibt in der Halle (z unter 6)
+  for (const d of window.raeumeTueren || []) { d.offen = true; while (d.schritt()); }   // Raumtüren für die folgenden Wege öffnen
   r.nach09 = walk(-9.2, 5.0, 0, [[180, 40]]);                             // durch die Tür in der Hallenwand nach Raum 09 (z deutlich über 6)
   r.hallenwand = walk(-5.0, 5.0, 0, [[180, 40]]);                          // daneben hält die Wand auf (z bleibt bei 5.68)
   r.flur08 = walk(-9.2, 5.0, 0, [[180, 600]]);                             // geradeaus durch 09, Flur 05, 08b und 08 bis ans Westende (z über 55)

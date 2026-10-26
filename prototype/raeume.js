@@ -34,15 +34,17 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const WS = R.weiss || [], imWeiss = (x, z) => WS.some(([a, b, c, d]) => x > a && x < b && z > c && z < d);   // eingerichtete Räume: weiß, ohne Leiste
   const beton = flaechen(), flurW = flaechen(), leiste = flaechen();
   const SH = 0.07, SD = 0.012;                       // Sockelleiste: Höhe und Stärke
+  const imTreppe = (x, z) => x > -15.54 && x < -10.37 && z > 13.231 && z < 16.103;   // Treppenhaus 020 (Fotos: beiger Rauputz)
+  const treppeW = flaechen();
   function teile(a, b, fn){ const n = Math.max(1, Math.ceil((b - a)/0.5)); for (let i = 0; i < n; i++) fn(a + (b-a)*i/n, a + (b-a)*(i+1)/n); }
   function wand(x0, x1, y0, y1, z0, z1, sockel){
     beton.add([0,1,0], [[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]]); beton.add([0,-1,0], [[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]]);
     teile(z0, z1, (a, b) => {
-      let x = x1 + 0.05, z = (a+b)/2, f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([1,0,0], [[x1,y0,b],[x1,y0,a],[x1,y1,a],[x1,y1,b]]); if (f && sockel) kasten(leiste, x1, x1+SD, 0, SH, a, b);
-      x = x0 - 0.05; f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([-1,0,0], [[x0,y0,a],[x0,y0,b],[x0,y1,b],[x0,y1,a]]); if (f && sockel) kasten(leiste, x0-SD, x0, 0, SH, a, b); });
+      let x = x1 + 0.05, z = (a+b)/2, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([1,0,0], [[x1,y0,b],[x1,y0,a],[x1,y1,a],[x1,y1,b]]); if (f && sockel) kasten(leiste, x1, x1+SD, 0, SH, a, b);
+      x = x0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([-1,0,0], [[x0,y0,a],[x0,y0,b],[x0,y1,b],[x0,y1,a]]); if (f && sockel) kasten(leiste, x0-SD, x0, 0, SH, a, b); });
     teile(x0, x1, (a, b) => {
-      let x = (a+b)/2, z = z1 + 0.05, f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z1, z1+SD);
-      z = z0 - 0.05; f = imFlur(x, z); (f || imWeiss(x, z) ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
+      let x = (a+b)/2, z = z1 + 0.05, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z1, z1+SD);
+      z = z0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
   }
   for (const [x0, x1, z0, z1] of R.walls) wand(x0, x1, 0, HR, z0, z1, true);
   for (const [x0, x1, z0, z1, u] of R.doors) wand(x0, x1, u || 2.1, HR, z0, z1, false);
@@ -76,7 +78,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   wand(T.xW, T.xO + 0.17, T.K, 0, T.zN - 0.41, T.zN, false);                     // Norden,
   wand(T.xW, T.xO + 0.17, T.K, 0, T.zS, T.zS + 0.41, false);                     // Süden
   wand(T.xO, T.xO + 0.17, T.K, 0, T.zN, T.zS, false);                            // und Osten mit der Kellertür
-  wand(T.xP, T.xA, T.K, T.H + 0.95, T.zT0, T.zT1, false);                        // Trennwand zwischen den Läufen, vom Keller bis oben
+  // zwischen den Läufen keine Wand, sondern ein offenes Treppenauge mit Geländer (unten); die Kollision bleibt
   cols.push({x0:T.xP, x1:T.xA, z0:T.zT0, z1:T.zT1, y0:-99, y1:99},               // Trennwand
             {x0:T.xW - 0.3, x1:T.xW, z0:T.zN - 0.4, z1:T.zS + 0.4, y0:-99, y1:0},  // Kellerschacht (die Wände darüber reichen nur bis -1)
             {x0:T.xW, x1:T.xO + 0.17, z0:T.zN - 0.4, z1:T.zN, y0:-99, y1:0}, {x0:T.xW, x1:T.xO + 0.17, z0:T.zS, z1:T.zS + 0.4, y0:-99, y1:0},
@@ -96,6 +98,10 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   mesh(beton.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)));   // hell wie auf den Fotos, auch auf der Schattenseite
   // Flure: glatter, weißer Anstrich mit leichter Struktur (Textur 'flurwand' nach dem Foto am Ende von Flur 05), schwarze Sockelleiste
   mesh(flurW.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)));
+  { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#efe3c3'; g.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 2500; i++) { const v = Math.random(); g.fillStyle = v < 0.5 ? 'rgba(150,130,90,0.16)' : 'rgba(255,255,245,0.3)'; g.fillRect(Math.random()*128, Math.random()*128, 1 + (v*2|0), 1 + (v*2|0)); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/0.5, 1/0.5);
+    mesh(treppeW.geo(), [new THREE.MeshLambertMaterial({map:t, emissive:0x5a5448, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x5a5448, emissiveMap:t, roughness:0.95, metalness:0})]); }
   mesh(leiste.geo(), [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5, metalness:0})]);
   for (const [x0, x1, z0, z1] of R.walls) cols.push({x0, x1, z0, z1, y0:-1, y1:HR});
 
@@ -162,7 +168,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     stufe(T.xA, T.xO, T.K, T.zN, T.zT0, T.K - 0.1);                                                                 // vor der Kellertür
     kasten(K, T.xA, T.xO, T.K, -0.25, T.zT0, T.zS);                                                                 // unter dem Vorplatz: Beton
     kasten(K, T.xA, T.xO, -0.25, 0, T.zN, T.zT0);                                                                   // Decke über dem Kellerabsatz
-    mesh(K.geo(), mats(0xb3b2ac, 0x2a2a28)); mesh(B.geo(), mats(0x44474c, 0x101112)); }
+    const sp = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#86888b'; g.fillRect(0, 0, 128, 128);
+      for (let i = 0; i < 3000; i++) { const v = Math.random(); g.fillStyle = v < 0.45 ? '#55585c' : v < 0.8 ? '#a9abad' : '#d6d6d4'; g.fillRect(Math.random()*128, Math.random()*128, 1, 1); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/0.4, 1/0.4); return t; })();
+    const N = flaechen();                                  // schwarze Stufenkanten an der Vorderseite jeder Stufe
+    for (let i = 0; i < n; i++) { const x = T.xA - (T.xA - T.xP)*(i+1)/n; kasten(N, x - 0.012, x + 0.012, T.h*(i+1)/n - 0.05, T.h*(i+1)/n + 0.003, T.zN, T.zT0);
+      const x2 = T.xP + (T.xB - T.xP)*(i)/n; kasten(N, x2 - 0.012, x2 + 0.012, T.h + (T.H - T.h)*(i+1)/n - 0.05, T.h + (T.H - T.h)*(i+1)/n + 0.003, T.zT1, T.zS);
+      const x3 = T.xA - (T.xA - T.xP)*i/n; kasten(N, x3 - 0.012, x3 + 0.012, -T.h*(i+1)/n - 0.05, -T.h*(i+1)/n + 0.003, T.zT1, T.zS);
+      const x4 = T.xP + (T.xA - T.xP)*i/n; kasten(N, x4 - 0.012, x4 + 0.012, -T.h + (T.K + T.h)*(i+1)/n - 0.05, -T.h + (T.K + T.h)*(i+1)/n + 0.003, T.zN, T.zT0); }
+    mesh(K.geo(), mats(0xe2d6b6, 0x3a362c)); mesh(B.geo(), [new THREE.MeshLambertMaterial({map:sp}), new THREE.MeshStandardMaterial({map:sp, roughness:0.5, metalness:0})]);
+    mesh(N.geo(), mats(0x141414, 0)); }
   // Handläufe aus Stahlrohr an beiden Seiten der Trennwand, 0,9 m über den Stufen, und ein Geländer oben am Austritt
   { const stahl = mats(0x9aa0a6, 0x1a1c1e), R0 = 0.02;
     const rohr = (a, b) => { const A = new THREE.Vector3(...a), D = new THREE.Vector3(...b).sub(A), L = D.length();
@@ -172,7 +187,30 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     rohr([T.xA, hl, z1], [T.xP, T.h + hl, z1]); rohr([T.xP, T.h + hl, z2], [T.xB, T.H + hl, z2]); rohr([T.xB, T.H + hl, z2], [T.xO, T.H + hl, z2]);
     for (const x of [T.xA, (T.xA + T.xO)/2, T.xO]) rohr([x, T.H, zm], [x, T.H + 1.0, zm]);
     rohr([T.xA, T.H + 1.0, zm], [T.xO, T.H + 1.0, zm]); rohr([T.xA, T.H + 0.5, zm], [T.xO, T.H + 0.5, zm]);
-    rohr([T.xA, hl, z2], [T.xP, -T.h + hl, z2]); rohr([T.xP, -T.h + hl, z1], [T.xA, T.K + hl, z1]); }       // in den Keller
+    rohr([T.xA, hl, z2], [T.xP, -T.h + hl, z2]); rohr([T.xP, -T.h + hl, z1], [T.xA, T.K + hl, z1]);       // in den Keller
+    // Geländerstäbe unter den Handläufen am Treppenauge (Foto: Stahlstäbe, Handlauf aus dunklem Holz)
+    const S = flaechen(), stab = (x, y0, z) => kasten(S, x - 0.007, x + 0.007, y0, y0 + hl, z - 0.007, z + 0.007);
+    for (let k = 0; k <= 24; k++) { const f = k/24;
+      stab(T.xA + (T.xP - T.xA)*f, T.h*f, z1); stab(T.xP + (T.xB - T.xP)*f, T.h + (T.H - T.h)*f, z2);
+      stab(T.xA + (T.xP - T.xA)*f, -T.h*f, z2); stab(T.xP + (T.xA - T.xP)*f, -T.h + (T.K + T.h)*f, z1); }
+    mesh(S.geo(), stahl); }
+  { const holzG = mats(0x4a3626, 0x120c08);                     // die Handläufe am Treppenauge in dunklem Holz
+    for (const o of cadMeshes.slice(-30)) if (o.geometry && o.geometry.type === 'CylinderGeometry' && o.geometry.parameters.radiusTop === 0.02 && Math.abs(o.position.z - (T.zT0 + T.zT1)/2) < 0.2) {
+      o.geometry = new THREE.BoxGeometry(0.06, o.geometry.parameters.height, 0.045); o.userData.mats = holzG; o.material = holzG[1]; } }
+  { const fe = window.TEX && window.TEX.poster_fenster020 ? (t => { t.colorSpace = THREE.SRGBColorSpace; return t; })(new THREE.TextureLoader().load(window.TEX.poster_fenster020)) : null;
+    const zc = (T.zN + T.zS)/2, weissM = mats(0xf4f4f1, 0x3a3a38);
+    for (const y of [T.h, -T.h]) {                                  // langes, liegendes Fenster an der Außenwand über den Podesten
+      if (fe) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.52), new THREE.MeshBasicMaterial({map:fe, toneMapped:false})); m.rotation.y = Math.PI/2; m.position.set(T.xW + 0.006, y + 1.25, zc); scene.add(m); }
+      const sb = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, 2.4), weissM[1]); sb.userData.mats = weissM; cadMeshes.push(sb); sb.position.set(T.xW + 0.08, y + 0.98, zc); scene.add(sb);
+      const l = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 1.0), new THREE.MeshBasicMaterial({color:0xfffbe8})); l.position.set(T.xO + 0.13, y + 2.1 + (y < 0 ? 0 : 0), (T.zN + T.zT0)/2); if (y > 0) l.position.set(T.xW + 0.04, y + 2.1, zc); scene.add(l); }
+    // gelbes Warnschild „Rutschgefahr“ am Treppenkopf zwischen den Läufen
+    const gelb = mats(0xf2c200, 0x3a2e00), c = document.createElement('canvas'); c.width = 64; c.height = 96; const g = c.getContext('2d');
+    g.fillStyle = '#f2c200'; g.fillRect(0, 0, 64, 96); g.fillStyle = '#111'; g.beginPath(); g.moveTo(32, 18); g.lineTo(54, 56); g.lineTo(10, 56); g.closePath(); g.fill();
+    g.fillStyle = '#f2c200'; g.beginPath(); g.moveTo(32, 26); g.lineTo(47, 52); g.lineTo(17, 52); g.closePath(); g.fill(); g.fillStyle = '#111'; g.fillRect(29, 34, 6, 12);
+    const st = new THREE.CanvasTexture(c); st.colorSpace = THREE.SRGBColorSpace;
+    for (const s of [-1, 1]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.62, 0.3), [new THREE.MeshLambertMaterial({map:st}), new THREE.MeshLambertMaterial({map:st}), gelb[0], gelb[0], gelb[0], gelb[0]]);
+      m.position.set(-10.42 + s*0.1, 0.31, (T.zT0 + T.zT1)/2); m.rotation.z = -s*0.18; scene.add(m); }
+    cols.push({x0:-10.6, x1:-10.25, z0:(T.zT0 + T.zT1)/2 - 0.18, z1:(T.zT0 + T.zT1)/2 + 0.18, y0:-1, y1:0.65}); }
   // Oben: geschlossene Holztür zum Obergeschoss mit Schild, Leuchte unter der Treppenraumdecke
   { const cv = document.createElement('canvas'); cv.width = 256; cv.height = 512; const g = cv.getContext('2d');
     g.fillStyle = '#3a3d42'; g.fillRect(0, 0, 256, 512); g.fillStyle = '#b7895a'; g.fillRect(14, 14, 228, 498);
@@ -514,16 +552,32 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const rot = M(0x8e1c1c, {roughness:0.45}), ahorn = M(0xe2cfa6, {roughness:0.6, metalness:0}), dunkel = M(0x2a2d31), edel = M(0xc4c8cc, {roughness:0.3, metalness:0.75}),
           weiss = M(0xf4f4f1, {roughness:0.6, metalness:0}), blau = M(0x23366e), grau = M(0xb9bcbf);
     const zarge = (x, z0, z1, h, sx) => { kiste(rot, 0.06, 0.06, z1 - z0 + 0.12, x + sx*0.03, h + 0.03, (z0 + z1)/2); for (const z of [z0 - 0.03, z1 + 0.03]) kiste(rot, 0.06, h, 0.06, x + sx*0.03, h/2, z); };
-    // Halle: rote Zarge, die beiden Flügel stehen offen an der Wand; Fluchtwegschilder (leuchtend und als Folie)
+    // Halle: rote Zarge, darüber Fluchtwegschild, zwei Warnleuchten und ein gelbes Schild; die Tür selbst steht unten (raumTuer)
     { const x0 = -10.15, x1 = -8.2, h = 2.1; kiste(rot, x1 - x0 + 0.12, 0.06, 0.06, (x0 + x1)/2, h + 0.03, ZH + 0.03);
       for (const x of [x0 - 0.03, x1 + 0.03]) kiste(rot, 0.06, h, 0.06, x, h/2, ZH + 0.03);
-      kiste(rot, 0.04, 2.05, 0.96, x0 + 0.03, 1.03, ZH + 0.55); kiste(rot, 0.04, 2.05, 0.96, x1 + 0.2, 1.03, ZH + 0.55);
       const exit = bildTex(256, 96, (g, w, hh) => { g.fillStyle = '#18a558'; g.fillRect(0, 0, w, hh); g.fillStyle = '#fff'; g.font = 'bold 60px system-ui'; g.fillText('↓', 30, 70);
         g.fillRect(120, 20, 60, 56); g.fillStyle = '#18a558'; g.fillRect(128, 26, 44, 44); g.fillStyle = '#fff'; g.beginPath(); g.arc(200, 34, 8, 0, 7); g.fill(); g.fillRect(190, 46, 16, 26); });
-      flach(exit, 0.36, 0.14, -9.4, 2.35, ZH + 0.02, 0, true); flach(exit, 0.3, 0.11, -8.85, 2.3, ZH + 0.006, 0, false);
-      cols.push({x0:x0, x1:x0 + 0.06, z0:ZH, z1:ZH + 1.05, y0:-1, y1:2.1}, {x0:x1 + 0.18, x1:x1 + 0.24, z0:ZH, z1:ZH + 1.05, y0:-1, y1:2.1}); }
+      flach(exit, 0.4, 0.15, -9.6, 2.55, ZH + 0.02, 0, true);
+      for (const x of [-9.0, -8.55]) { kiste(dunkel, 0.07, 0.16, 0.07, x, 2.5, ZH + 0.04); kiste(M(0xc4201c, {emissive:0x400000}), 0.05, 0.05, 0.05, x, 2.42, ZH + 0.08); }
+      const gs = bildTex(128, 64, (g, w, hh) => { g.fillStyle = '#f2c200'; g.fillRect(0, 0, w, hh); g.fillStyle = '#b3261e'; g.font = 'bold 12px system-ui'; g.fillText('Gesperrt bei', 12, 20); g.fillText('Technikbetrieb', 12, 36); g.fillText('Raum nicht betreten', 6, 52); });
+      flach(gs, 0.3, 0.15, -8.25, 2.5, ZH + 0.006, 0, false); }
     // rechte Wand: Zarge der offenen Tür in den Übergangsraum, Türschild
-    zarge(XR, 9.436, 10.462, 2.05, -1);
+    zarge(XR, 9.436, 10.462, 2.05, -1); kiste(rot, 0.98, 2.0, 0.045, XR - 0.52, 1.0, 9.42);   // Türblatt steht offen in den Raum
+    cols.push({x0:XR - 1.02, x1:XR, z0:9.39, z1:9.45, y0:-1, y1:2.05});
+    // Schwerlastregal an der rechten Wand vor der Hallentür: Stahl, fünf Böden, oben weiße Schutzhelme, Kartons, blaue Box mit Gebotszeichen
+    { const rz0 = 8.25, rz1 = 9.33, rd = 0.45, rx = XR - rd/2, st = M(0x9da3a8, {roughness:0.45, metalness:0.6});
+      for (const z of [rz0 + 0.02, rz1 - 0.02]) for (const x of [XR - rd + 0.02, XR - 0.02]) kiste(st, 0.035, 2.0, 0.035, x, 1.0, z);
+      for (const y of [0.12, 0.55, 0.98, 1.41, 1.84]) kiste(st, rd, 0.03, rz1 - rz0, rx, y, (rz0 + rz1)/2);
+      for (let k = 0; k < 4; k++) { const hm = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 8, 0, Math.PI*2, 0, Math.PI/2), weiss[1]); hm.position.set(rx, 1.86, rz0 + 0.16 + k*0.25); scene.add(hm); }
+      kiste(M(0xd8c497), 0.35, 0.22, 0.4, rx, 1.54, rz0 + 0.3); kiste(weiss, 0.3, 0.12, 0.3, rx, 1.48, rz1 - 0.3); kiste(M(0x2f8fd8), 0.3, 0.1, 0.25, rx, 1.09, rz0 + 0.3);
+      kiste(M(0x1f4fb0), 0.38, 0.3, 0.5, rx, 0.29, rz0 + 0.35); kiste(M(0xc4201c), 0.2, 0.1, 0.2, rx, 1.04, rz1 - 0.25); kiste(weiss, 0.3, 0.2, 0.35, rx, 0.68, rz1 - 0.3);
+      cols.push({x0:XR - rd, x1:XR, z0:rz0, z1:rz1, y0:-1, y1:2.05}); }
+    // Transportwagen mit Holzkiste neben der Hallentür, davor ein weißer Eimer
+    { const wx = -7.85, wz = 6.95, st = M(0x8f9599, {roughness:0.4, metalness:0.6});
+      kiste(M(0xd2a868, {roughness:0.8, metalness:0}), 0.62, 0.6, 0.62, wx, 0.72, wz); kiste(st, 0.66, 0.03, 0.7, wx, 0.4, wz);
+      for (const dx of [-0.3, 0.3]) for (const dz of [-0.32, 0.32]) { kiste(st, 0.025, 0.4, 0.025, wx + dx, 0.2, wz + dz); zyl(dunkel, 0.05, 0.03, wx + dx, 0.05, wz + dz, Math.PI/2); }
+      kiste(st, 0.025, 0.6, 0.025, wx - 0.31, 0.75, wz + 0.34); kiste(st, 0.025, 0.6, 0.025, wx + 0.31, 0.75, wz + 0.34); kiste(st, 0.64, 0.025, 0.025, wx, 1.05, wz + 0.34);
+      zyl(weiss, 0.15, 0.3, -8.0, 0.15, 7.55); cols.push({x0:wx - 0.35, x1:XR, z0:ZH, z1:7.75, y0:-1, y1:1.1}); }
     const schild = bildTex(128, 80, (g, w, h) => { g.fillStyle = '#f2f2f0'; g.fillRect(0, 0, w, h); g.fillStyle = '#2d4a7a'; g.fillRect(0, 0, w, 14);
       g.fillStyle = '#222'; g.font = '12px system-ui'; g.fillText('015-017', 8, 30); g.fillStyle = '#1d8a4a'; g.beginPath(); g.arc(22, 56, 14, 0, 7); g.fill();
       g.fillStyle = '#fff'; g.fillRect(19, 46, 6, 20); g.fillRect(12, 53, 20, 6); g.fillStyle = 'rgba(0,0,0,0.55)'; for (let i = 0; i < 3; i++) g.fillRect(44, 42 + i*11, 66, 5); });
@@ -560,19 +614,15 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     cols.push({x0:XL, x1:XL + 0.06, z0:tz0, z1:tz1, y0:-1, y1:2.1});
     const zeichen = (gruen) => bildTex(128, 128, (g, w, h) => { g.fillStyle = gruen ? '#18a558' : '#c4201c'; g.fillRect(0, 0, w, h); g.fillStyle = '#f4f4f0';
       if (gruen) { g.fillRect(50, 18, 28, 92); g.fillRect(18, 50, 92, 28); } else { g.lineWidth = 7; g.strokeStyle = '#f4f4f0'; g.strokeRect(46, 34, 30, 70); g.beginPath(); g.arc(80, 40, 20, -1.5, 1.2); g.stroke(); } });
-    flach(zeichen(true), 0.24, 0.24, XL + 0.006, 2.45, 11.62, Math.PI/2, true); flach(zeichen(false), 0.24, 0.24, XL + 0.006, 2.18, 11.62, Math.PI/2, false);
-    kiste(M(0xe8621e), 0.07, 0.13, 0.14, XL + 0.035, 1.7, 11.66);                                                         // Druckknopfmelder
-    kiste(weiss, 0.12, 0.22, 0.28, XL + 0.06, 1.35, 11.66); kiste(M(0x1d8a4a), 0.122, 0.22, 0.04, XL + 0.06, 1.35, 11.79); // Verbandkasten
-    zyl(M(0xc4201c, {roughness:0.35}), 0.065, 0.42, XL + 0.08, 0.55, 11.66); zyl(dunkel, 0.03, 0.12, XL + 0.08, 0.82, 11.66);
-    // großes Whiteboard: Jahreskalender oben, Aushänge und Montageanleitung darunter
-    const wbz0 = 11.86, wbz1 = 12.78;
-    const wb = bildTex(256, 384, (g, w, h) => { g.fillStyle = '#f7f7f5'; g.fillRect(0, 0, w, h);
-      for (let k = 0; k < 6; k++) { g.fillStyle = '#2d4a8a'; g.fillRect(8 + k*41, 8, 38, 10); for (let r = 0; r < 31; r++) { g.fillStyle = (r % 7 > 4) ? '#2d4a8a' : (r % 2 ? '#e9edf5' : '#ffffff'); g.fillRect(8 + k*41, 20 + r*5.4, 38, 5); } }
-      const papier = (x, y, w2, h2, rand) => { g.fillStyle = rand || '#ffffff'; g.fillRect(x, y, w2, h2); if (rand) { g.fillStyle = '#fff'; g.fillRect(x + 4, y + 4, w2 - 8, h2 - 8); }
-        g.fillStyle = 'rgba(40,40,40,0.5)'; for (let i = 0; i < h2/9 - 2; i++) g.fillRect(x + 8, y + 12 + i*9, w2 - 16, 3); };
-      papier(10, 196, 60, 90, '#e8621e'); papier(74, 196, 60, 90, '#e8621e'); papier(140, 196, 50, 110); papier(196, 196, 52, 90);
-      g.fillStyle = '#2f8fd8'; g.fillRect(198, 220, 48, 60); papier(10, 292, 60, 80); papier(80, 312, 50, 66); });
-    kiste(grau, 0.025, 1.25, wbz1 - wbz0 + 0.04, XL + 0.012, 1.55, (wbz0 + wbz1)/2); flach(wb, wbz1 - wbz0, 1.2, XL + 0.026, 1.55, (wbz0 + wbz1)/2, Math.PI/2, false);
+    flach(zeichen(true), 0.24, 0.24, XL + 0.006, 2.45, 10.12, Math.PI/2, true); flach(zeichen(false), 0.24, 0.24, XL + 0.006, 2.18, 10.12, Math.PI/2, false);
+    kiste(M(0xe8621e), 0.07, 0.13, 0.14, XL + 0.035, 1.7, 10.12);                                                         // Druckknopfmelder
+    kiste(weiss, 0.12, 0.22, 0.28, XL + 0.06, 1.35, 10.12); kiste(M(0x1d8a4a), 0.122, 0.22, 0.04, XL + 0.06, 1.35, 9.99); // Verbandkasten
+    zyl(M(0xc4201c, {roughness:0.35}), 0.065, 0.42, XL + 0.08, 0.55, 10.15); zyl(dunkel, 0.03, 0.12, XL + 0.08, 0.82, 10.15);
+    // großes Whiteboard (Foto, Textur 'poster_whiteboard09') zwischen Tür und Halle: Betriebsanweisungen, Jahreskalender, Aushänge
+    { const wbz0 = 7.9, wbz1 = 9.75, wh = 1.22;
+      kiste(grau, 0.025, wh + 0.05, wbz1 - wbz0 + 0.05, XL + 0.012, 1.5, (wbz0 + wbz1)/2);
+      if (window.TEX && window.TEX.poster_whiteboard09) { const t = new THREE.TextureLoader().load(window.TEX.poster_whiteboard09); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+        flach(t, wbz1 - wbz0, wh, XL + 0.026, 1.5, (wbz0 + wbz1)/2, Math.PI/2, false); } }
   }
 
   // Übergangsraum zwischen 09 und 017: Meme-Whiteboard (Foto docs/fotos/pinnwand, Textur 'poster_pinnwand', tools/postertex.py) an der
@@ -585,6 +635,36 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const alu = M(0xc3c7ca); kiste(alu, x1 - x0 + 0.04, 0.02, 0.02, (x0 + x1)/2, y1 + 0.01, ZW - 0.012); kiste(alu, 0.02, y1 - y0, 0.02, x0 - 0.01, (y0 + y1)/2, ZW - 0.012); kiste(alu, 0.02, y1 - y0, 0.02, x1 + 0.01, (y0 + y1)/2, ZW - 0.012);
     kiste(M(0xc8a46e), x1 - x0 + 0.06, 0.04, 0.07, (x0 + x1)/2, y0 - 0.02, ZW - 0.035);
     kiste(M(0x1f2124), 0.18, 0.32, 0.42, -4.776 - 0.09, 2.6, 10.1); kiste(M(0x1f2124), 0.06, 0.05, 0.5, -4.776 - 0.03, 2.35, 10.1); }
+
+  // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
+  // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
+  { window.raeumeTueren = [];
+    const rotM = [new THREE.MeshLambertMaterial({color:0x8e1c1c}), new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1})];
+    const schlicht = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 512; const g = c.getContext('2d');
+      g.fillStyle = '#8e1c1c'; g.fillRect(0, 0, 256, 512); g.strokeStyle = 'rgba(40,0,0,0.5)'; g.lineWidth = 3; g.strokeRect(2, 2, 252, 508);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    const foto = window.TEX && window.TEX.poster_hallentuer ? (t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; })(new THREE.TextureLoader().load(window.TEX.poster_hallentuer)) : null;
+    const edelM = [new THREE.MeshLambertMaterial({color:0xc4c8cc}), new THREE.MeshStandardMaterial({color:0xc4c8cc, roughness:0.3, metalness:0.8})];
+    const tuer = (id, name, x0, x1, zw, s, vorn, hinten, h = 2.08) => {
+      const w = (x1 - x0)/2, fl = [];
+      for (const k of [0, 1]) {
+        const g = new THREE.Group(); g.position.set(k ? x1 : x0, 0, zw); scene.add(g);
+        const tex = (t, links) => { if (!t) return rotM[0]; const c = t.clone(); c.repeat.set(t === foto ? 0.5 : 1, 1); c.offset.set(t === foto ? (links ? 0 : 0.5) : 0, 0); c.needsUpdate = true; return new THREE.MeshLambertMaterial({map:c}); };
+        const mats = [rotM[0], rotM[0], rotM[0], rotM[0], tex(vorn > 0 ? hinten : vorn, !k), tex(vorn > 0 ? vorn : hinten, !k)];
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w - 0.01, h, 0.05), [rotM[0], rotM[0], rotM[0], rotM[0], tex(vorn, !k), tex(hinten, !k)]);
+        m.position.set(k ? -w/2 : w/2, h/2, 0); g.add(m);
+        for (const sz of [-1, 1]) { const kl = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.02, 0.02), edelM[1]); kl.position.set(k ? -w + 0.12 : w - 0.12, 1.05, sz*0.045); g.add(kl); }
+        fl.push(g); }
+      const col = {x0, x1, z0:zw - 0.12, z1:zw + 0.12, y0:-1, y1:h}; cols.push(col);
+      const t = {id, name, x0, x1, z:zw, offen:false, a:0,
+        schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
+          fl[0].rotation.y = -s*1.55*this.a; fl[1].rotation.y = s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } };
+      window.raeumeTueren.push(t); };
+    // vorn = Seite +z, hinten = Seite -z
+    tuer('raumtuer_halle', 'Tür zur Jumbo-Halle', -10.15, -8.2, 6.42, 1, foto || schlicht, schlicht, 2.08);
+    tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht);
+    tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, schlicht, schlicht);
+  }
 
   // Ostende von Flur 05 (vor 014), nach den Fotos docs/fotos/tuer_flur05 und poster_*: dunkle Türanlage über die ganze Flurbreite mit
   // verglaster Doppeltür nach draußen und Notausgangsschild (Textur 'tuer05', tools/tuertex.py), davor eine Fußmatte. Rechts (Wand zu 06)
