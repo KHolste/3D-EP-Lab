@@ -292,7 +292,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       if (ft) { const f = new THREE.Mesh(new THREE.PlaneGeometry(L - 0.5, 1.0), new THREE.MeshBasicMaterial({map:ft, toneMapped:false}));
         f.rotation.y = -Math.PI/2; f.position.set(XW - 0.004, 2.05, zm); scene.add(f); }
       box(weiss, 0.16, 0.03, L - 0.4, XW - 0.08, 1.535, zm);
-      // Werkbänke wie auf den Panoramen: Holzplatte, Gestell grau, rote Schubladenblöcke links und rechts; im zweiten Feld steht die Glovebox davor
+      // Werkbänke wie auf den Panoramen: Holzplatte, Gestell grau, rote Schubladenblöcke links und rechts
       { const z0 = za + 0.1, z1 = (i === felder.length - 1) ? zb - 0.75 : zb - 0.1, tl = z1 - z0, tz = (z0 + z1)/2, tx = XW - 0.4;
         box(holz, 0.8, 0.04, tl, tx, 0.88, tz);
         for (const zz of [z0 + 0.3, z1 - 0.3]) { box(grau, 0.7, 0.84, 0.5, tx, 0.43, zz); for (let k = 0; k < 3; k++) box(rot, 0.02, 0.24, 0.46, tx - 0.36, 0.17 + k*0.27, zz);
@@ -303,7 +303,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
         box(mat(0xe6e4dd), 0.4, 0.15, 0.4, tx, 0.98, tz + 0.5); if (i % 2) box(mat(0x2f6fd0), 0.3, 0.12, 0.25, tx + 0.05, 0.96, z0 + 0.4);
         box(dunkel, 0.18, 0.4, 0.4, tx + 0.15, 1.1, z1 - 0.35); box(holz, 0.3, 0.1, 0.25, tx - 0.1, 0.95, tz);
         // Bürostuhl (schwarz) bzw. Hocker davor
-        if (i !== 1) { const g = new THREE.Group(); g.position.set(XW - 1.15, 0, tz - 0.2); g.rotation.y = Math.PI/2 + 0.3; scene.add(g);
+        if (true) { const g = new THREE.Group(); g.position.set(XW - 1.15, 0, tz - 0.2); g.rotation.y = Math.PI/2 + 0.3; scene.add(g);
           const k2 = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.position.set(x, y, z); g.add(o); };
           k2(dunkel, 0.5, 0.08, 0.5, 0, 0.5, 0); k2(dunkel, 0.48, 0.6, 0.08, 0, 0.85, -0.24); k2(dunkel, 0.05, 0.45, 0.05, 0, 0.24, 0); k2(dunkel, 0.6, 0.03, 0.06, 0, 0.04, 0); k2(dunkel, 0.06, 0.03, 0.6, 0, 0.04, 0);
           cols.push({x0:XW - 1.45, x1:XW - 0.85, z0:tz - 0.5, z1:tz + 0.1, y0:-1, y1:1.1}); }
@@ -321,7 +321,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const zz of [38.4, 41.6, 44.6, 47.6]) for (const x of [-1.9, -5.3]) { box(weiss, 1.5, 0.08, 0.2, x, 2.86, zz); box(licht, 1.4, 0.01, 0.12, x, 2.815, zz); }
   }
 
-  // Raum 019 (Alte Schreinerei) nach den Panoramafotos: Glovebox vor dem Fenster, Ecke beim Eingang mit Metallregal, grauem Schaltschrank,
+  // Raum 019 (Alte Schreinerei) nach den Panoramafotos: Ecke beim Eingang mit Metallregal, grauem Schaltschrank,
   // Edelstahl-Kühlgerät mit roten Schläuchen, rotem Schrank, CEE-Steckdosen und blauem Rack; zwei Klimakassetten unter der Decke
   { const M = (c, o = {}) => [new THREE.MeshLambertMaterial({color:c, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1}),
                               new THREE.MeshStandardMaterial({color:c, roughness:o.r ?? 0.55, metalness:o.m ?? 0.15, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1})];
@@ -331,14 +331,6 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const rohr = (pts, r, m) => { const o = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 40, r, 8), m[1]); scene.add(o); };
     const edel = M(0xc6c9cb, {r:0.3, m:0.7, emissive:0x2a2c2e}), grauG = M(0x9a9c99, {r:0.5, m:0.3}), dunkel = M(0x1b1d20), weiss = M(0xf2f2ef), rotS = M(0xb01e1a, {r:0.4}),
           blau = M(0x2d62b5, {r:0.4}), schlauch = M(0xd2401e, {r:0.6, m:0}), kupfer = M(0xc0703e, {r:0.35, m:0.8});
-    // Glovebox: Edelstahlwanne mit schräger Scheibe und zwei schwarzen Handschuhen, auf Edelstahlgestell, Handschuhe zum Raum (-x)
-    { const gx = -1.55, gz = 41.2;
-      for (const dx of [-0.35, 0.35]) for (const dz of [-0.6, 0.6]) box(edel, 0.04, 0.9, 0.04, gx + dx, 0.45, gz + dz);
-      box(edel, 0.75, 0.04, 1.25, gx, 0.2, gz); box(grauG, 0.8, 0.55, 1.3, gx, 1.2, gz);
-      const sch = box(M(0xd8c79a, {transparent:true, opacity:0.55, r:0.1}), 0.02, 0.6, 1.2, gx - 0.33, 1.52, gz); sch.rotation.z = -0.35;
-      box(grauG, 0.6, 0.06, 1.3, gx + 0.05, 1.82, gz);
-      for (const dz of [-0.28, 0.28]) { zyl(dunkel, 0.08, 0.04, gx - 0.41, 1.15, gz + dz, 'x'); const h = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.05, 0.75, 12), dunkel[1]); h.position.set(gx - 0.43, 0.78, gz + dz); scene.add(h); }
-      zyl(edel, 0.12, 0.4, gx, 1.2, gz + 0.85, 'z'); cols.push({x0:gx - 0.5, x1:gx + 0.4, z0:gz - 0.7, z1:gz + 1.0, y0:-1, y1:1.9}); }
     // Ecke am Eingang (Gangwand x = -7.44, Nordwand z = 36.41)
     const XG = -7.44, ZN = 36.41;
     box(M(0x3a3c3f, {r:0.95, m:0}), 1.0, 0.012, 0.8, XG + 0.75, 0.006, 38.8);                                         // Fußmatte innen vor der Tür
