@@ -237,7 +237,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const y of [T.h, -T.h]) {                                  // langes, liegendes Fenster an der Außenwand über den Podesten
       if (fe) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.52), new THREE.MeshBasicMaterial({map:fe, toneMapped:false})); m.rotation.y = Math.PI/2; m.position.set(T.xW + 0.006, y + 1.25, zc); scene.add(m); }
       const sb = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, 2.4), weissM[1]); sb.userData.mats = weissM; cadMeshes.push(sb); sb.position.set(T.xW + 0.08, y + 0.98, zc); scene.add(sb);
-      const l = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 1.0), new THREE.MeshBasicMaterial({color:0xfffbe8})); l.position.set(T.xO + 0.13, y + 2.1 + (y < 0 ? 0 : 0), (T.zN + T.zT0)/2); if (y > 0) l.position.set(T.xW + 0.04, y + 2.1, zc); scene.add(l); }
+      if (y > 0) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 1.0), new THREE.MeshBasicMaterial({color:0xfffbe8})); l.position.set(T.xW + 0.04, y + 2.1, zc); scene.add(l); } }   // (die Leuchte für unten stand versehentlich auf dem Vorplatz)
     // gelbes Warnschild „Rutschgefahr“ am Treppenkopf zwischen den Läufen
     const gelb = mats(0xf2c200, 0x3a2e00), c = document.createElement('canvas'); c.width = 64; c.height = 96; const g = c.getContext('2d');
     g.fillStyle = '#f2c200'; g.fillRect(0, 0, 64, 96); g.fillStyle = '#111'; g.beginPath(); g.moveTo(32, 18); g.lineTo(54, 56); g.lineTo(10, 56); g.closePath(); g.fill();
@@ -942,6 +942,14 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       for (const z of [z0 - 0.03, z1 + 0.03]) box(rotM, 0.08, h, 0.06, xw, h/2, z);
       box(edelM, 0.06, 0.02, 0.14, xw - 0.04, 1.05, (z1 - z0 > 1.5 ? (z0 + z1)/2 - 0.1 : z1 - 0.18)); cols.push({x0:xw - 0.12, x1:xw + 0.12, z0, z1, y0:-1, y1:h}); } }
 
+  // Flur 05 vor der Flügeltür nach 08b: links und rechts ein Wandvorsprung (verkleideter Installationsschacht), weiß mit schwarzer Leiste
+  { const w = [new THREE.MeshLambertMaterial({color:0xf3f3f1, emissive:0x5a5a58}), new THREE.MeshStandardMaterial({color:0xf3f3f1, emissive:0x5a5a58, roughness:0.9, metalness:0})];
+    const sw = [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5})];
+    for (const [x0, x1] of [[-10.05, -9.72], [-8.04, -7.65]]) { const z0 = 18.25, z1 = 19.5;
+      const o = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, HR, z1 - z0), w[1]); o.userData.mats = w; cadMeshes.push(o); o.position.set((x0 + x1)/2, HR/2, (z0 + z1)/2); scene.add(o);
+      const l = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.02, 0.07, z1 - z0 + 0.02), sw[1]); l.userData.mats = sw; cadMeshes.push(l); l.position.set((x0 + x1)/2, 0.035, (z0 + z1)/2); scene.add(l);
+      cols.push({x0, x1, z0, z1, y0:-1, y1:HR}); } }
+
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
   { window.raeumeTueren = [];
@@ -1050,16 +1058,17 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const r = 0.025, d = 0.02, zr = z - s*0.004;
       kiste(alu, w + 2*r, r, d, x, y + h/2 + r/2, zr); kiste(alu, w + 2*r, r, d, x, y - h/2 - r/2, zr);
       kiste(alu, r, h, d, x - w/2 - r/2, y, zr); kiste(alu, r, h, d, x + w/2 + r/2, y, zr); };
-    poster('ptra', -0.75, 1.55, 0.6, 0.84, true); poster('pb', -1.85, 1.55, 0.6, 0.84, true); poster('fair', -3.15, 1.5, 0.84, 1.16, true);
-    poster('inlab', -0.55, 1.55, 0.6, 0.84, false);
+    // alle so groß wie das FAIR-Poster, Abstand 30 % größer
+    poster('ptra', -0.85, 1.5, 0.84, 1.16, true); poster('pb', -2.39, 1.5, 0.84, 1.16, true); poster('fair', -3.93, 1.5, 0.84, 1.16, true);
+    poster('inlab', -0.65, 1.5, 0.84, 1.16, false);
     // Desinfektionsspender (weiß mit blauem Fenster) und hoher Heizkörper (cremeweiß, mit Thermostatkopf oben)
-    kiste(M(0xf2f2ef), 0.12, 0.3, 0.1, -1.05, 1.3, ZL + 0.06); kiste(M(0x5a8fc8), 0.05, 0.12, 0.005, -1.05, 1.27, ZL + 0.112);
-    kiste(M(0xf2f2ef), 0.18, 0.015, 0.12, -1.05, 1.12, ZL + 0.07);
+    kiste(M(0xf2f2ef), 0.12, 0.3, 0.1, -1.35, 1.3, ZL + 0.06); kiste(M(0x5a8fc8), 0.05, 0.12, 0.005, -1.35, 1.27, ZL + 0.112);
+    kiste(M(0xf2f2ef), 0.18, 0.015, 0.12, -1.35, 1.12, ZL + 0.07);
     const creme = M(0xe9e3c4, {roughness:0.3, metalness:0.1});
-    kiste(creme, 0.75, 1.45, 0.06, -1.75, 0.95, ZL + 0.07);
-    for (let k = 0; k < 14; k++) kiste(M(0xd9d3b2), 0.006, 1.4, 0.004, -2.09 + k*0.052, 0.95, ZL + 0.101);
-    kiste(M(0xb9bcbf), 0.04, 0.08, 0.04, -2.1, 1.74, ZL + 0.07); kiste(M(0xf2f2ef), 0.06, 0.06, 0.06, -2.1, 1.81, ZL + 0.07);
-    cols.push({x0:-2.15, x1:-1.35, z0:ZL, z1:ZL + 0.12, y0:-1, y1:1.7});
+    kiste(creme, 0.75, 1.45, 0.06, -2.05, 0.95, ZL + 0.07);
+    for (let k = 0; k < 14; k++) kiste(M(0xd9d3b2), 0.006, 1.4, 0.004, -2.39 + k*0.052, 0.95, ZL + 0.101);
+    kiste(M(0xb9bcbf), 0.04, 0.08, 0.04, -2.4, 1.74, ZL + 0.07); kiste(M(0xf2f2ef), 0.06, 0.06, 0.06, -2.4, 1.81, ZL + 0.07);
+    cols.push({x0:-2.45, x1:-1.65, z0:ZL, z1:ZL + 0.12, y0:-1, y1:1.7});
   }
 
   // Raumnummern auf dem Boden, lesbar beim Blick von der Halle aus (nach +z, im Plan: nach links)
