@@ -856,6 +856,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       for (const z of [za + 0.1, zb - 0.1]) kiste(M(0x2d4fa3), tx1 - tx0 - 0.1, 0.74, 0.05, (tx0 + tx1)/2, 0.37, z);
       kiste(dunkel, 0.03, 0.32, 0.5, tx0 + 0.25, 0.97, zm - 0.4); kiste(M(0x2b3a58, {emissive:0x0c1426}), 0.005, 0.28, 0.46, tx0 + 0.27, 0.97, zm - 0.4);
       kiste(M(0xe2e2de), 0.4, 0.22, 0.45, tx0 + 0.3, 0.89, zm + 0.5); if (i % 2) kiste(M(0x3c6fc4), 0.3, 0.12, 0.35, tx0 + 0.3, 0.84, zm + 0.05);
+      kiste(i % 2 ? M(0xd8c29a, {r:0.7, m:0}) : M(0xe9e9e6), 0.55, 0.6, 0.45, tx0 + 0.32, 0.32, zb - 0.4);                       // Rollcontainer (Panorama)
+      for (let q = 0; q < 3; q++) kiste(M(0x2a2d31), 0.01, 0.015, 0.2, tx0 + 0.6, 0.5 - q*0.17, zb - 0.4);
       cols.push({x0:tx0, x1:tx1, z0:za + 0.05, z1:zb - 0.05, y0:-1, y1:1.0}); });
     // Deckenrohre, Kabelpritsche und Lichtbänder im Labor
     for (const x of [-14.6, -12.0]) { zyl(stahl, 0.06, LZ1 - LZ0, x, Y - 0.15, (LZ0 + LZ1)/2, 'z'); }
@@ -888,10 +890,18 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       for (const w of [0.785, 2.356, 3.927, 5.498]) { const a = new THREE.Vector3(mx, yb, cz), b = new THREE.Vector3(mx + Math.cos(w)*0.42, yb + Math.sin(w)*0.42, cz);
         const d = b.clone().sub(a), o = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, d.length(), 14), dunkel[1]); o.position.copy(a).addScaledVector(d, 0.6);
         o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); scene.add(o); }
+      kiste(M(0x2d62b5, {r:0.4}), 0.65, 2.0, 0.65, -13.6, 1.0, 55.7); kiste(M(0x14304f, {emissive:0x1a3050}), 0.01, 0.3, 0.45, -13.27, 1.5, 55.7);
+      for (let q = 0; q < 4; q++) kiste(M(0xd9d8d2), 0.01, 0.1, 0.5, -13.27, 0.6 + q*0.2, 55.7);
+      cols.push({x0:-13.95, x1:-13.25, z0:55.35, z1:56.05, y0:-1, y1:2.1});
       kiste(M(0x1b1d20), 0.7, 1.9, 0.8, -13.75, 0.95, 57.6); kiste(M(0xc4201c), 0.4, 0.4, 0.3, -11.05, 0.2, 56.2); kiste(M(0xe8e8e4), 0.45, 0.55, 0.4, -11.1, 0.28, 57.9);
       cols.push({x0:mx - 0.7, x1:mx + 0.7, z0:mz - 0.65, z1:cz + 0.5, y0:-1, y1:2.0}, {x0:-14.1, x1:-13.4, z0:57.2, z1:58.0, y0:-1, y1:2.0}, {x0:-11.35, x1:-10.85, z0:56.0, z1:58.15, y0:-1, y1:0.8}); }
     // rechts (hinter den rechten Schränken): kleiner, weiß lackierter Tank
     kammer(43.0, 45.2, -13.2, 0.6, M(0xf3f3f0, {r:0.4, m:0.05, emissive:0x2a2a28}));
+    // davor zwei schwarze Racks, auf dem vorderen ein Monitor mit Tastatur und Laborbuch (Panorama)
+    for (const [x, z] of [[-12.0, 45.6], [-11.6, 44.3]]) { kiste(M(0x1b1d20), 0.75, 0.95, 0.75, x, 0.475, z); kiste(M(0x2b2d31), 0.6, 0.12, 0.02, x, 0.6, z + 0.38);
+      cols.push({x0:x - 0.4, x1:x + 0.4, z0:z - 0.4, z1:z + 0.4, y0:-1, y1:1.5}); }
+    kiste(M(0xf2f2ef), 0.5, 0.33, 0.04, -12.0, 1.3, 45.45); kiste(M(0x14304f, {emissive:0x0a1a2e}), 0.47, 0.29, 0.01, -12.0, 1.3, 45.48); kiste(M(0x1b1d20), 0.4, 0.02, 0.15, -12.0, 0.96, 45.75);
+    kiste(M(0xf6f6f2), 0.3, 0.02, 0.22, -11.85, 0.97, 45.95);
     // Messrack (blau) an der Gangwand, Werkzeugwagen bei den linken Schränken, rote Schränke an der Stirnwand
     kiste(M(0x2d62b5, {r:0.4}), 0.8, 2.0, 0.8, -11.0, 1.0, 41.5); for (let k = 0; k < 5; k++) kiste(M(0xd9d8d2), 0.02, 0.12, 0.6, -11.41, 0.5 + k*0.3, 41.5);
     cols.push({x0:-11.45, x1:-10.55, z0:41.05, z1:41.95, y0:-1, y1:2.1});
@@ -900,6 +910,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (let k = 0; k < 4; k++) { const x = -15.0 + k*1.02; kiste(M(0xc9cbcc), 1.0, 1.95, 0.55, x, 0.975, LZ0 + 0.3); kiste(M(0xb01e1a, {r:0.4}), 0.96, 1.85, 0.02, x, 0.975, LZ0 + 0.585);
       kiste(M(0x1b1d20), 0.04, 0.06, 0.02, x + 0.4, 1.0, LZ0 + 0.6); }
     cols.push({x0:-15.54, x1:-11.4, z0:LZ0, z1:LZ0 + 0.6, y0:-1, y1:2.0});
+    // Gangwand bei der nördlichen Tür (Panorama „Idefix“): Metallregal, zwei rote Schränke, grauer Schaltschrank
+    { const st = M(0xa7acb0, {r:0.45, m:0.5}), z0 = 54.9;
+      for (const z of [z0, z0 + 0.95]) for (const x of [LX1 - 0.45, LX1 - 0.03]) kiste(st, 0.03, 1.9, 0.03, x, 0.95, z);
+      for (const y of [0.1, 0.55, 1.0, 1.45, 1.88]) kiste(st, 0.45, 0.025, 0.95, LX1 - 0.24, y, z0 + 0.475);
+      kiste(M(0x3c6fc4), 0.3, 0.12, 0.35, LX1 - 0.25, 1.08, z0 + 0.3); kiste(M(0xd2b48a), 0.35, 0.25, 0.4, LX1 - 0.25, 0.7, z0 + 0.6); kiste(M(0x1b1d20), 0.3, 0.3, 0.3, LX1 - 0.25, 1.62, z0 + 0.5);
+      for (let k = 0; k < 2; k++) { const z = 56.15 + k*1.02; kiste(M(0xc9cbcc), 0.55, 1.95, 1.0, LX1 - 0.3, 0.975, z); kiste(M(0xb01e1a, {r:0.4}), 0.02, 1.85, 0.96, LX1 - 0.585, 0.975, z);
+        kiste(M(0x1b1d20), 0.02, 0.06, 0.04, LX1 - 0.6, 1.0, z + 0.1); }
+      kiste(M(0xd3d5d3, {r:0.5}), 0.4, 1.7, 0.6, LX1 - 0.2, 0.85, 58.5);
+      for (let k = 0; k < 3; k++) kiste(M(0x1b1d20), 0.3, 0.3, 0.3, LX1 - 0.3, 2.13, 55.9 + k*0.34);
+      cols.push({x0:LX1 - 0.6, x1:LX1, z0:z0, z1:58.85, y0:-1, y1:2.1}); }
     // Stühle vor den Fenstertischen (rot und blau), Whiteboards an den Stirnwänden
     const stuhlR = (x, z, c) => { kiste(M(c, {r:0.8, m:0}), 0.45, 0.07, 0.45, x, 0.48, z); kiste(M(c, {r:0.8, m:0}), 0.06, 0.45, 0.43, x - 0.22, 0.8, z);
       kiste(M(0x1b1d20), 0.05, 0.45, 0.05, x, 0.23, z); cols.push({x0:x - 0.27, x1:x + 0.25, z0:z - 0.25, z1:z + 0.25, y0:-1, y1:1.0}); };
