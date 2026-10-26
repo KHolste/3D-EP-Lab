@@ -35,16 +35,18 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const beton = flaechen(), flurW = flaechen(), leiste = flaechen();
   const SH = 0.07, SD = 0.012;                       // Sockelleiste: Höhe und Stärke
   const imTreppe = (x, z) => x > -15.54 && x < -10.37 && z > 13.231 && z < 16.103;   // Treppenhaus 020 (Fotos: beiger Rauputz)
-  const treppeW = flaechen();
+  const treppeW = flaechen(), gangW = flaechen();
+  const im018 = (x, z) => x > -15.54 && x < -10.37 && z > 36.41 && z < 61.08;
+  const imGang = (x, z) => (imFlur(x, z) && z > 19.65) || im018(x, z);       // Flur 08b/08 und Labor 018 (Videos IMG_0948/0949)
   function teile(a, b, fn){ const n = Math.max(1, Math.ceil((b - a)/0.5)); for (let i = 0; i < n; i++) fn(a + (b-a)*i/n, a + (b-a)*(i+1)/n); }
   function wand(x0, x1, y0, y1, z0, z1, sockel){
     beton.add([0,1,0], [[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]]); beton.add([0,-1,0], [[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]]);
     teile(z0, z1, (a, b) => {
-      let x = x1 + 0.05, z = (a+b)/2, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([1,0,0], [[x1,y0,b],[x1,y0,a],[x1,y1,a],[x1,y1,b]]); if (f && sockel) kasten(leiste, x1, x1+SD, 0, SH, a, b);
-      x = x0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([-1,0,0], [[x0,y0,a],[x0,y0,b],[x0,y1,b],[x0,y1,a]]); if (f && sockel) kasten(leiste, x0-SD, x0, 0, SH, a, b); });
+      let x = x1 + 0.05, z = (a+b)/2, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : imGang(x, z) ? gangW : f || imWeiss(x, z) ? flurW : beton).add([1,0,0], [[x1,y0,b],[x1,y0,a],[x1,y1,a],[x1,y1,b]]); if (f && sockel && !imGang(x, z)) kasten(leiste, x1, x1+SD, 0, SH, a, b);
+      x = x0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : imGang(x, z) ? gangW : f || imWeiss(x, z) ? flurW : beton).add([-1,0,0], [[x0,y0,a],[x0,y0,b],[x0,y1,b],[x0,y1,a]]); if (f && sockel && !imGang(x, z)) kasten(leiste, x0-SD, x0, 0, SH, a, b); });
     teile(x0, x1, (a, b) => {
-      let x = (a+b)/2, z = z1 + 0.05, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z1, z1+SD);
-      z = z0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : f || imWeiss(x, z) ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
+      let x = (a+b)/2, z = z1 + 0.05, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : imGang(x, z) ? gangW : f || imWeiss(x, z) ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel && !imGang(x, z)) kasten(leiste, a, b, 0, SH, z1, z1+SD);
+      z = z0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : imGang(x, z) ? gangW : f || imWeiss(x, z) ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel && !imGang(x, z)) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
   }
   for (const [x0, x1, z0, z1] of R.walls) wand(x0, x1, 0, HR, z0, z1, true);
   for (const [x0, x1, z0, z1, u] of R.doors) wand(x0, x1, u || 2.1, HR, z0, z1, false);
@@ -103,6 +105,10 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#efe3c3'; g.fillRect(0, 0, 128, 128);
     for (let i = 0; i < 2500; i++) { const v = Math.random(); g.fillStyle = v < 0.5 ? 'rgba(150,130,90,0.16)' : 'rgba(255,255,245,0.3)'; g.fillRect(Math.random()*128, Math.random()*128, 1 + (v*2|0), 1 + (v*2|0)); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/0.5, 1/0.5);
+    { const c2 = document.createElement('canvas'); c2.width = 256; c2.height = 128; const q = c2.getContext('2d'); q.fillStyle = '#f5f5f2'; q.fillRect(0, 0, 256, 128);
+      q.fillStyle = '#dcdcd8'; for (let r = 0; r < 4; r++) { q.fillRect(0, r*32, 256, 3); for (let k = 0; k < 2; k++) q.fillRect((k*128 + (r % 2)*64) % 256, r*32, 3, 32); }
+      const t2 = new THREE.CanvasTexture(c2); t2.colorSpace = THREE.SRGBColorSpace; t2.wrapS = t2.wrapT = THREE.RepeatWrapping; t2.repeat.set(1/1.0, 1/0.5);
+      mesh(gangW.geo(), [new THREE.MeshLambertMaterial({map:t2, emissive:0x6a6a68, emissiveMap:t2}), new THREE.MeshStandardMaterial({map:t2, emissive:0x6a6a68, emissiveMap:t2, roughness:0.9, metalness:0})]); }
     mesh(treppeW.geo(), [new THREE.MeshLambertMaterial({map:t, emissive:0x5a5448, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x5a5448, emissiveMap:t, roughness:0.95, metalness:0})]); }
   mesh(leiste.geo(), [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5, metalness:0})]);
   for (const [x0, x1, z0, z1] of R.walls) cols.push({x0, x1, z0, z1, y0:-1, y1:HR});
@@ -127,7 +133,13 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     if (bodenM[0].map) { bodenM[0].map.repeat.set(1/0.7, 1/1.6); }       // Flächen haben UV in Metern
     mesh(F.geo(), bodenM); }
   // Flurboden: hellgrauer Belag mit dunklen Sprenkeln (Textur 'flurboden', Kachel 1,0 x 0,5 m), knapp über dem Raumboden
-  { const F = flaechen(); bodenFl(F, 0.004, FL);
+  const FLg = FL.filter(r => (r[2] + r[3])/2 > 19.65), FLs = FL.filter(r => (r[2] + r[3])/2 <= 19.65);
+  { const F = flaechen(); bodenFl(F, 0.005, FLg.concat([[-15.54, -10.37, 36.41, 61.08]]));
+    const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#a7abad'; g.fillRect(0, 0, 64, 64);
+    for (let i = 0; i < 300; i++) { g.fillStyle = 'rgba(70,70,70,0.08)'; g.fillRect(Math.random()*64, Math.random()*64, 2, 2); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/1.5, 1/1.5);
+    mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x6c6e70}), new THREE.MeshStandardMaterial({map:t, color:0x5e6062, roughness:0.55, metalness:0.05})]); }
+  { const F = flaechen(); bodenFl(F, 0.004, FLs);
     const t = tex('flurboden', 1.0, 0.5, true);
     mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x9a9a9a}), new THREE.MeshStandardMaterial({map:t, color:0x8c8c8c, roughness:0.75, metalness:0})]); }
   // Eingerichtete Räume (019): heller, glatter Beschichtungsboden wie auf dem Foto
@@ -152,7 +164,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/0.625, 1/0.625); return t; })();
     const Fx = flaechen(), Fz = flaechen(), F9 = flaechen(), y = HR - 0.004;
     const unten = (F, [x0, x1, z0, z1]) => F.add([0,-1,0], [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]]);
-    for (const r of FL) for (const q of clip(r, loch)) { if (innen(q, R09)) unten(F9, q); else unten(q[1] - q[0] > q[3] - q[2] ? Fx : Fz, q); }
+    for (const r of FLs) for (const q of clip(r, loch)) { if (innen(q, R09)) unten(F9, q); else unten(q[1] - q[0] > q[3] - q[2] ? Fx : Fz, q); }
     const mm = t => [new THREE.MeshLambertMaterial({map:t, emissive:0x8a8a88, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x8a8a88, emissiveMap:t, roughness:0.9, metalness:0})];
     mesh(Fx.geo(), mm(linien(true))); mesh(Fz.geo(), mm(linien(false))); mesh(F9.geo(), mm(raster));
     const panel = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.01, 0.6), new THREE.MeshBasicMaterial({color:0xffffff})); panel.position.set(-8.8, HR - 0.01, 8.7); scene.add(panel);
@@ -786,6 +798,98 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     { const k = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[ax, Y0 + 1.4, az], [ax + 0.1, Y0 + 0.05, az + 0.3], [-12.6, Y0 + 0.01, 1.8], [-12.4, Y0 + 0.01, 1.6]].map(p => new THREE.Vector3(...p))), 30, 0.008, 5), new THREE.MeshLambertMaterial({color:0x2d4fa3})); scene.add(k); }
   }
 
+  // Flur 08b/08 nach Video IMG_0948 (von 05 aus durch die Doppeltür): Rohre aus Edelstahl, Kupfer und grau gestrichen sowie eine
+  // Kabelpritsche unter der Decke, Lichtbänder, dunkle Randlinien am Boden, Feuerlöscher, gelber Aufsteller, Notausgangsschilder,
+  // Erste-Hilfe-Schrank, Pinnwand, Metallwagen. Labor 018 nach Video IMG_0949 (von 08 aus).
+  { const M = (c, o = {}) => [new THREE.MeshLambertMaterial({color:c, emissive:o.emissive || 0}), new THREE.MeshStandardMaterial({color:c, roughness:o.r ?? 0.6, metalness:o.m ?? 0.1, emissive:o.emissive || 0})];
+    const kiste = (m, dx, h, dz, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const zyl = (m, r, len, x, y, z, achse = 'y', seg = 24) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, seg), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z);
+      if (achse === 'x') o.rotation.z = Math.PI/2; else if (achse === 'z') o.rotation.x = Math.PI/2; scene.add(o); return o; };
+    const stahl = M(0xccd0d3, {r:0.3, m:0.7, emissive:0x2a2c2e}), grauR = M(0x9ea3a7, {r:0.4, m:0.5, emissive:0x1a1c1e}), kupfer = M(0xc0703e, {r:0.35, m:0.8}),
+          rot = M(0x8e1c1c, {r:0.45}), gelb = M(0xf2c200, {emissive:0x3a2e00}), weiss = M(0xf2f2ef), dunkel = M(0x2a2d31), licht = M(0xffffff, {emissive:0xffffff});
+    const Z0 = 19.8, Z1 = 59.0, Y = HR;
+    // Rohre und Pritsche
+    zyl(stahl, 0.07, Z1 - Z0, -9.75, Y - 0.15, (Z0 + Z1)/2, 'z'); zyl(stahl, 0.05, Z1 - Z0, -9.55, Y - 0.15, (Z0 + Z1)/2, 'z');
+    zyl(grauR, 0.09, Z1 - Z0, -8.0, Y - 0.2, (Z0 + Z1)/2, 'z'); zyl(kupfer, 0.025, Z1 - Z0, -8.25, Y - 0.12, (Z0 + Z1)/2, 'z'); zyl(stahl, 0.04, Z1 - Z0, -9.35, Y - 0.25, (Z0 + Z1)/2, 'z');
+    kiste(grauR, 0.45, 0.04, Z1 - Z0, -8.75, Y - 0.38, (Z0 + Z1)/2); for (let z = Z0 + 0.5; z < Z1; z += 1.5) kiste(dunkel, 2.3, 0.04, 0.05, -8.85, Y - 0.06, z);
+    for (let z = Z0 + 1.6; z < Z1; z += 3.0) kiste(licht, 0.12, 0.03, 1.4, -8.85, Y - 0.42, z);
+    // dunkle Randlinien am Boden
+    kiste(dunkel, 0.06, 0.004, Z1 - Z0, -10.0, 0.008, (Z0 + Z1)/2); kiste(dunkel, 0.06, 0.004, Z1 - Z0, -7.85, 0.008, (Z0 + Z1)/2);
+    // Feuerlöscher, Aufsteller, Notausgangsschilder, Erste-Hilfe-Schrank, Pinnwand
+    for (const [x, z] of [[-10.03, 22.5], [-7.72, 30.5], [-10.03, 44.0], [-7.72, 56.0]]) { zyl(M(0xc4201c, {r:0.35}), 0.065, 0.42, x, 0.55, z); zyl(dunkel, 0.03, 0.12, x, 0.82, z); }
+    for (const z of [27.0, 50.5]) { const a = kiste(gelb, 0.3, 0.6, 0.03, -8.1, 0.3, z); a.rotation.x = 0.15; const b = kiste(gelb, 0.3, 0.6, 0.03, -8.1, 0.3, z + 0.15); b.rotation.x = -0.15;
+      cols.push({x0:-8.3, x1:-7.9, z0:z - 0.15, z1:z + 0.3, y0:-1, y1:0.7}); }
+    for (const z of [20.2, 36.7, 58.5]) kiste(M(0x18a558, {emissive:0x0d5a2e}), 0.4, 0.15, 0.04, -8.85, Y - 0.55, z);
+    kiste(M(0xe8621e), 0.12, 0.35, 0.45, -7.66, 1.5, 33.5); kiste(weiss, 0.02, 0.18, 0.18, -7.64, 1.85, 33.5);
+    kiste(M(0xb48a5a, {r:0.9, m:0}), 0.02, 0.7, 1.1, -7.64, 1.5, 51.5); kiste(weiss, 0.005, 0.28, 0.21, -7.63, 1.55, 51.3);
+    // Metallwagen mit Kasten an der Wand (Video)
+    { const x = -8.05, z = 42.0, st = M(0x9da3a8, {r:0.45, m:0.6}); for (const dx of [-0.25, 0.25]) for (const dz of [-0.35, 0.35]) kiste(st, 0.03, 1.0, 0.03, x + dx, 0.5, z + dz);
+      for (const y of [0.15, 0.55, 0.95]) kiste(st, 0.55, 0.025, 0.75, x, y, z); kiste(weiss, 0.45, 0.4, 0.6, x, 1.17, z); cols.push({x0:x - 0.3, x1:x + 0.3, z0:z - 0.4, z1:z + 0.4, y0:-1, y1:1.4}); }
+
+    // ---- Labor 018 (von 08 aus) nach Video IMG_0949: großer Raum an der Außenwand, Fenster, große Vakuumkammern, rote Schränke ----
+    const LX0 = -15.54, LX1 = -10.37, LZ0 = 36.41, LZ1 = 61.0;
+    // Fenster an der Außenwand (oberer Teil verglast), Heizkörper darunter
+    for (let z = LZ0 + 0.6; z < LZ1 - 1.5; z += 3.25) { kiste(M(0xdbe6eb, {emissive:0xaab8bf}), 0.02, 1.2, 2.6, LX0 + 0.01, 2.1, z + 1.3);
+      kiste(dunkel, 0.06, 0.06, 2.7, LX0 + 0.03, 1.48, z + 1.3); kiste(dunkel, 0.06, 0.06, 2.7, LX0 + 0.03, 2.72, z + 1.3); kiste(weiss, 0.18, 0.03, 2.7, LX0 + 0.09, 1.45, z + 1.3);
+      for (let k = 0; k < 10; k++) kiste(weiss, 0.08, 0.5, 0.03, LX0 + 0.1, 0.65, z + 0.8 + k*0.08); }
+    // Deckenrohre und Lichtbänder im Labor
+    for (const x of [-14.6, -12.0]) { zyl(stahl, 0.06, LZ1 - LZ0, x, Y - 0.15, (LZ0 + LZ1)/2, 'z'); }
+    for (let z = LZ0 + 1.5; z < LZ1; z += 3.0) for (const x of [-14.0, -11.8]) kiste(licht, 1.2, 0.03, 0.12, x, Y - 0.05, z);
+    // große Vakuumkammern (Edelstahl, liegend, längs zum Raum), eine mit offener Tür
+    const kammer = (z0, z1, x, r, offen) => { const zm = (z0 + z1)/2, yc = r + 0.35;
+      zyl(stahl, r, z1 - z0, x, yc, zm, 'z', 36);
+      for (const [z, s] of [[z0, -1], [z1, 1]]) { const k = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 12, 0, Math.PI*2, 0, Math.PI/2), stahl[1]); k.scale.set(1, 0.35, 1);
+        k.rotation.x = s*Math.PI/2; k.position.set(x, yc, z); if (!(offen && s < 0)) scene.add(k); zyl(stahl, r + 0.05, 0.08, x, yc, z, 'z', 36); }
+      if (offen) { const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.15, 32), stahl[1]); d.rotation.set(Math.PI/2, 0, 0); d.position.set(x + r*0.8, yc, z0 - 0.45); d.rotation.y = 0.9; scene.add(d);
+        const in_ = new THREE.Mesh(new THREE.CircleGeometry(r - 0.02, 32), new THREE.MeshLambertMaterial({color:0x2a2c2e})); in_.position.set(x, yc, z0 + 0.05); scene.add(in_); }
+      for (const z of [z0 + 0.5, z1 - 0.5]) for (const s of [-1, 1]) kiste(grauR, 0.08, r + 0.35, 0.08, x + s*r*0.6, (r + 0.35)/2, z);
+      for (const dz of [0.6, 1.5]) { zyl(stahl, 0.12, 0.3, x, yc + r + 0.1, z0 + dz); zyl(dunkel, 0.15, 0.04, x, yc + r + 0.27, z0 + dz); }
+      zyl(stahl, 0.16, 0.5, x + r + 0.2, yc, (z0 + z1)/2, 'x'); zyl(stahl, 0.2, 0.04, x + r + 0.45, yc, (z0 + z1)/2, 'x');
+      cols.push({x0:x - r - 0.1, x1:x + r + 0.5, z0:z0 - 0.3, z1:z1 + 0.3, y0:-1, y1:2.6}); };
+    kammer(41.0, 45.5, -13.4, 0.9, true); kammer(54.2, 58.4, -13.4, 0.85, false);
+    // roter Aufbau mit Strahlrohr, Pumpstand, Messrack (blau)
+    { const rx = -13.6, rz = 49.3, rotA = M(0xb3261e, {r:0.45});
+      for (const dx of [-0.5, 0.5]) for (const dz of [-0.6, 0.6]) kiste(rotA, 0.08, 1.0, 0.08, rx + dx, 0.5, rz + dz);
+      for (const y of [0.15, 1.0]) kiste(rotA, 1.1, 0.08, 1.3, rx, y, rz);
+      zyl(stahl, 0.08, 2.4, rx, 1.3, rz, 'z'); for (const dz of [-0.8, 0, 0.8]) zyl(stahl, 0.13, 0.35, rx, 1.3, rz + dz);
+      kiste(M(0xe8e8e4), 0.35, 0.3, 0.4, rx, 0.35, rz + 0.3); cols.push({x0:rx - 0.6, x1:rx + 0.6, z0:rz - 1.25, z1:rz + 1.25, y0:-1, y1:1.6}); }
+    kiste(M(0x2d62b5, {r:0.4}), 0.8, 2.0, 0.8, -11.0, 1.0, 46.5); kiste(M(0x1b1d20), 0.7, 1.8, 0.8, -11.0, 0.9, 52.0);
+    for (let k = 0; k < 5; k++) kiste(M(0xd9d8d2), 0.6, 0.12, 0.02, -11.0, 0.5 + k*0.3, 46.09);
+    cols.push({x0:-11.45, x1:-10.55, z0:46.05, z1:46.95, y0:-1, y1:2.1}, {x0:-11.4, x1:-10.6, z0:51.55, z1:52.45, y0:-1, y1:2.1});
+    // Reihe roter Schränke an der Stirnwand (Süden) und an der Gangwand
+    for (let k = 0; k < 4; k++) { const x = -15.0 + k*1.02; kiste(M(0xc9cbcc), 1.0, 1.95, 0.55, x, 0.975, LZ0 + 0.3); kiste(M(0xb01e1a, {r:0.4}), 0.96, 1.85, 0.02, x, 0.975, LZ0 + 0.585);
+      kiste(M(0x1b1d20), 0.04, 0.06, 0.02, x + 0.4, 1.0, LZ0 + 0.6); }
+    cols.push({x0:-15.54, x1:-11.4, z0:LZ0, z1:LZ0 + 0.6, y0:-1, y1:2.0});
+    for (let k = 0; k < 3; k++) { const z = 56.4 + k*1.02; kiste(M(0xc9cbcc), 0.55, 1.95, 1.0, LX1 - 0.3, 0.975, z); kiste(M(0xb01e1a, {r:0.4}), 0.02, 1.85, 0.96, LX1 - 0.585, 0.975, z); }
+    cols.push({x0:LX1 - 0.6, x1:LX1, z0:55.9, z1:59.0, y0:-1, y1:2.0});
+    // Werkbänke mit schwarzer Platte an der Außenwand, rote Stühle, Werkzeugwagen, Whiteboards an der Gangwand
+    const bank = (z0, z1) => { kiste(M(0x1f2124), 0.8, 0.04, z1 - z0, LX0 + 0.45, 0.88, (z0 + z1)/2);
+      for (const z of [z0 + 0.05, z1 - 0.05]) kiste(M(0x2d4fa3), 0.7, 0.86, 0.05, LX0 + 0.45, 0.43, z); cols.push({x0:LX0, x1:LX0 + 0.85, z0, z1, y0:-1, y1:1.0}); };
+    bank(37.4, 39.6); bank(47.2, 48.6); bank(51.2, 52.8);
+    kiste(M(0xe2e2de), 0.35, 0.3, 0.4, LX0 + 0.4, 1.05, 38.0); kiste(M(0x2a2d31), 0.05, 0.35, 0.55, LX0 + 0.15, 1.15, 38.9); kiste(M(0xe2e2de), 0.4, 0.25, 0.35, LX0 + 0.4, 1.03, 52.0);
+    const stuhlR = (x, z) => { kiste(M(0xa82a2a, {r:0.8, m:0}), 0.45, 0.07, 0.45, x, 0.48, z); kiste(M(0xa82a2a, {r:0.8, m:0}), 0.06, 0.45, 0.43, x - 0.22, 0.8, z);
+      kiste(M(0x1b1d20), 0.05, 0.45, 0.05, x, 0.23, z); cols.push({x0:x - 0.27, x1:x + 0.25, z0:z - 0.25, z1:z + 0.25, y0:-1, y1:1.0}); };
+    stuhlR(-14.35, 38.4); stuhlR(-14.35, 52.0);
+    { const x = -11.0, z = 40.5; kiste(M(0x1b1d20), 0.5, 0.9, 0.7, x, 0.45, z); for (let k = 0; k < 4; k++) kiste(M(0xc4201c), 0.48, 0.02, 0.68, x, 0.92 + k*0.0, z);
+      cols.push({x0:x - 0.25, x1:x + 0.25, z0:z - 0.35, z1:z + 0.35, y0:-1, y1:1.0}); }
+    const wbT = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#fbfbf9'; g.fillRect(0, 0, 256, 128); g.lineWidth = 1.5;
+      for (let i = 0; i < 30; i++) { g.strokeStyle = ['#1f3f8f', '#202020', '#b3261e'][i % 3]; g.beginPath(); let x = 15 + Math.random()*220, y = 15 + Math.random()*95; g.moveTo(x, y);
+        for (let k = 0; k < 3; k++) { x += (Math.random() - 0.4)*30; y += (Math.random() - 0.5)*12; g.lineTo(x, y); } g.stroke(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+    for (const z of [43.0, 55.0]) { kiste(M(0xc4c8cc, {m:0.6}), 0.03, 1.04, 1.84, LX1 - 0.02, 1.6, z);
+      const o = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.0), new THREE.MeshBasicMaterial({map:wbT, color:0xe6e6e6})); o.rotation.y = -Math.PI/2; o.position.set(LX1 - 0.04, 1.6, z); scene.add(o); }
+    // Gasverteilung aus Kupfer an der Wand, Schild an der Tür
+    for (let k = 0; k < 6; k++) { zyl(kupfer, 0.02, 0.9, LX1 - 0.05, 1.8, 49.0 + k*0.13); kiste(dunkel, 0.05, 0.08, 0.05, LX1 - 0.06, 1.6, 49.0 + k*0.13); }
+  }
+
+  // Raum 014: rote Tür von Flur 05 aus (geschlossen), in der Öffnung aus dem Grundriss
+  { const rotM = [new THREE.MeshLambertMaterial({color:0x8e1c1c}), new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1})];
+    const edelM = [new THREE.MeshLambertMaterial({color:0xc4c8cc}), new THREE.MeshStandardMaterial({color:0xc4c8cc, roughness:0.3, metalness:0.8})];
+    const x0 = -4.083, x1 = -2.698, zw = 16.3, h = 2.05, box = (m, dx, dy, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, dy, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(px, py, pz); scene.add(o); };
+    box(rotM, x1 - x0 - 0.02, h, 0.05, (x0 + x1)/2, h/2, zw); box(rotM, x1 - x0 + 0.12, 0.06, 0.08, (x0 + x1)/2, h + 0.03, zw);
+    for (const x of [x0 - 0.03, x1 + 0.03]) box(rotM, 0.06, h, 0.08, x, h/2, zw);
+    box(edelM, 0.14, 0.02, 0.06, x1 - 0.18, 1.05, zw + 0.04); cols.push({x0, x1, z0:zw - 0.1, z1:zw + 0.1, y0:-1, y1:h}); }
+
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
   { window.raeumeTueren = [];
@@ -864,7 +968,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   }
 
   // Raumnummern auf dem Boden, lesbar beim Blick von der Halle aus (nach +z, im Plan: nach links)
-  for (const [nr, [x, z]] of Object.entries(R.labels)) {
+  for (let [nr, [x, z]] of Object.entries(R.labels)) {
+    if (nr === '020') { x = -10.3; z = 15.6; }                           // nicht über dem Treppenloch, sondern auf dem Vorplatz
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128; const g = cv.getContext('2d');
     g.fillStyle = 'rgba(245,245,240,0.9)'; g.font = 'bold 84px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(nr, 128, 68);
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
