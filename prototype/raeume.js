@@ -701,19 +701,20 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       for (let k = 0; k < 5; k++) { const o = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.03, 0.04), dunkel[1]); o.position.set(Math.cos(k*1.2566)*0.16, 0.05, Math.sin(k*1.2566)*0.16); o.rotation.y = -k*1.2566; g.add(o); }
       add(dunkel, 0.04, 0.2, 0.3, 0.26, 0.62, 0); add(dunkel, 0.04, 0.2, 0.3, -0.26, 0.62, 0);
       cols.push({x0:x - 0.25, x1:x + 0.25, z0:z - 0.2, z1:z + 0.2, y0:-1, y1:1.0}); };
-    // am Fenster: Eckarbeitsplatz zur Hallenseite und zwei Plätze mit Blick nach draußen
-    tisch(XW + 0.25, XW + 1.05, ZN + 0.05, ZN + 1.65); tisch(XW + 1.05, XW + 2.5, ZN + 0.05, ZN + 0.85);
-    monitor(XW + 0.55, ZN + 0.9, Math.PI/2); monitor(XW + 1.8, ZN + 0.32, 0); kiste(dunkel, 0.18, 0.4, 0.4, XW + 2.25, 0.95, ZN + 0.45);
-    stuhl(XW + 1.55, ZN + 1.45, -2.3, schwarz);
-    tisch(XW + 0.25, XW + 1.05, 9.1, 10.7); monitor(XW + 0.55, 9.6, Math.PI/2); monitor(XW + 0.55, 10.2, Math.PI/2); stuhl(XW + 1.5, 9.9, -Math.PI/2, blau);
-    tisch(XW + 0.25, XW + 1.05, 11.0, 12.3); monitor(XW + 0.55, 11.6, Math.PI/2); stuhl(XW + 1.5, 11.55, -Math.PI/2, blau);
-    // Mitte: zwei Tische Rücken an Rücken mit Monitoren, Stühle davor
-    tisch(-13.6, -11.9, 8.5, 9.3); tisch(-13.6, -11.9, 9.3, 10.1);
-    monitor(-13.1, 9.15, Math.PI); monitor(-12.4, 9.15, Math.PI); monitor(-13.1, 9.45, 0); monitor(-12.4, 9.45, 0);
-    kiste(M(0xc4201c), 0.3, 0.12, 0.2, -12.2, 0.82, 8.75); stuhl(-12.75, 8.0, Math.PI, blau); stuhl(-12.75, 10.35, 0, blau);
-    // Rollhocker
-    zyl(alu, 0.2, 0.04, -11.6, 0.62, 11.7, 18); zyl(alu, 0.025, 0.55, -11.6, 0.33, 11.7); zyl(dunkel, 0.24, 0.02, -11.6, 0.05, 11.7, 18); cols.push({x0:-11.85, x1:-11.35, z0:11.45, z1:11.95, y0:-1, y1:0.7});
-    // Wand zum Treppenhaus (z = ZS): Whiteboard, Ventilator mit Papierkorb, Schrank (Buche/grau) neben der Tür
+    // Anordnung nach der Handskizze (R06.jpg): drei Tischgruppen mit je zwei Schreibtischen, Stühle an den Stirnseiten,
+    // Tafel an der Wand zum Treppenhaus, zwei Schränke an der Türwand in der Ecke zum Treppenhaus, ein Schrank an der Hallenwand
+    const cols06 = cols.length;
+    // Gruppe A: zwei Tische vom Fenster in den Raum hinein, Stühle zur Treppenhauswand
+    tisch(XW + 0.05, -13.68, 11.07, 11.92); tisch(-13.68, -11.78, 11.07, 11.92);
+    monitor(-14.6, 11.3, 0); monitor(-12.7, 11.3, 0); stuhl(-14.45, 12.25, Math.PI, blau); stuhl(-12.75, 12.25, Math.PI, schwarz);
+    // Gruppe B: am Fenster, zwei Tische hintereinander, Stühle an beiden Enden
+    tisch(XW + 0.05, -13.75, 9.01, 9.96); tisch(XW + 0.05, -13.75, 8.06, 9.01);
+    monitor(-14.65, 9.2, 0); monitor(-14.65, 8.85, Math.PI); stuhl(-14.65, 10.25, Math.PI, blau); stuhl(-14.7, 7.75, 0, blau);
+    // Gruppe C: an der Türwand, zwei Tische hintereinander, Stühle an beiden Enden
+    tisch(-12.34, XO - 0.02, 9.42, 9.99); tisch(-12.34, XO - 0.02, 8.88, 9.42);
+    monitor(-11.35, 9.6, 0); monitor(-11.35, 9.25, Math.PI); stuhl(-11.4, 10.15, Math.PI, blau); stuhl(-11.4, 8.55, 0, schwarz);
+    for (let k = cols06; k < cols.length; k++) { const c = cols[k]; if (c.x1 - c.x0 < 0.55 && c.z1 - c.z0 < 0.45) { c.z0 += 0.02; c.z1 -= 0.02; } }   // Stühle etwas schmaler
+    // Tafel an der Wand zum Treppenhaus, Ventilator mit Papierkorb daneben
     const wb = (x0, x1, z, ry) => { const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d'); g.fillStyle = '#fbfbf9'; g.fillRect(0, 0, 512, 256);
       g.lineWidth = 2; for (let i = 0; i < 40; i++) { g.strokeStyle = ['#1f3f8f', '#202020', '#b3261e', '#1d6a3a'][i % 4]; g.beginPath(); let x = 30 + Math.random()*440, y = 25 + Math.random()*200; g.moveTo(x, y);
         for (let k = 0; k < 4; k++) { x += (Math.random() - 0.4)*50; y += (Math.random() - 0.5)*20; g.lineTo(x, y); } g.stroke(); }
@@ -721,17 +722,17 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const xm = (x0 + x1)/2, w = x1 - x0;
       kiste(alu, w + 0.04, 1.24, 0.025, xm, 1.6, z); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.2), new THREE.MeshBasicMaterial({map:t, color:0xe6e6e6})); m.rotation.y = ry; m.position.set(xm, 1.6, z + (ry ? -0.015 : 0.015)); scene.add(m);
       kiste(alu, w*0.5, 0.03, 0.08, xm, 0.98, z + (ry ? -0.04 : 0.04)); };
-    wb(-14.8, -12.6, ZS, Math.PI);
-    zyl(dunkel, 0.015, 1.1, -12.2, 0.55, 12.45); const fan = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.08, 20), dunkel[1]); fan.rotation.x = Math.PI/2; fan.position.set(-12.2, 1.15, 12.45); scene.add(fan);
-    zyl(M(0x9aa2b5), 0.15, 0.32, -12.5, 0.16, 12.55); cols.push({x0:-12.7, x1:-12.0, z0:12.25, z1:ZS, y0:-1, y1:1.3});
-    kiste(buche, 0.9, 0.95, 0.42, -11.0, 0.475, ZS - 0.21); kiste(grau, 0.9, 1.05, 0.42, -11.0, 1.475, ZS - 0.21);
-    for (const dx of [-0.05, 0.05]) kiste(alu, 0.015, 0.12, 0.02, -11.0 + dx, 1.0, ZS - 0.43);
-    cols.push({x0:-11.45, x1:-10.55, z0:ZS - 0.42, z1:ZS, y0:-1, y1:2.1});
-    // Hallenwand (z = ZN): zweites Whiteboard, Regal mit Ordnern, grauer Schrank
-    wb(-13.0, -11.4, ZN, 0);
-    { const x0 = -11.3, x1 = -10.45, d = 0.4; for (const x of [x0, x1]) kiste(buche, 0.025, 2.0, d, x, 1.0, ZN + d/2);
+    wb(-14.48, -12.23, ZS, Math.PI);
+    zyl(dunkel, 0.015, 1.1, -11.9, 0.55, 12.5); const fan = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.08, 20), dunkel[1]); fan.rotation.x = Math.PI/2; fan.position.set(-11.9, 1.15, 12.5); scene.add(fan);
+    zyl(M(0x9aa2b5), 0.15, 0.32, -11.55, 0.16, 12.55); cols.push({x0:-12.1, x1:-11.35, z0:12.3, z1:ZS, y0:-1, y1:1.3});
+    // zwei Schränke an der Türwand in der Ecke (Buche unten, grau oben)
+    for (const [z0, z1] of [[11.94, ZS], [11.55, 11.94]]) { const zm = (z0 + z1)/2, w = z1 - z0;
+      kiste(buche, 0.58, 0.95, w - 0.02, XO - 0.29, 0.475, zm); kiste(grau, 0.58, 1.05, w - 0.02, XO - 0.29, 1.475, zm); kiste(alu, 0.02, 0.12, 0.015, XO - 0.59, 1.0, zm); }
+    cols.push({x0:XO - 0.6, x1:XO, z0:11.55, z1:ZS, y0:-1, y1:2.1});
+    // Schrank an der Hallenwand: offenes Regal mit Ordnern
+    { const x0 = -13.75, x1 = -12.41, d = 0.42; for (const x of [x0, x1]) kiste(buche, 0.025, 2.0, d, x, 1.0, ZN + d/2);
       for (const y of [0.02, 0.42, 0.82, 1.22, 1.62, 1.99]) kiste(buche, x1 - x0, 0.025, d, (x0 + x1)/2, y, ZN + d/2);
-      for (let r = 0; r < 3; r++) for (let k = 0; k < 9; k++) kiste(k % 4 === 3 ? weiss : blau, 0.07, 0.31, 0.28, x0 + 0.08 + k*0.085, 0.6 + r*0.4, ZN + 0.18);
+      for (let r = 0; r < 4; r++) for (let k = 0; k < 14; k++) kiste(k % 5 === 4 ? weiss : blau, 0.07, 0.31, 0.28, x0 + 0.1 + k*0.085, 0.2 + r*0.4, ZN + 0.18);
       cols.push({x0, x1, z0:ZN, z1:ZN + d, y0:-1, y1:2.1}); }
     // Ostwand (zu 09): Infrarot-Heizpaneele unter der Decke, Brandmelder, Schild über der Tür
     for (const z of [7.6, 9.2]) { kiste(weiss, 0.05, 0.5, 1.0, XO - 0.03, 2.4, z); kiste(dunkel, 0.08, 0.06, 0.06, XO - 0.05, 2.4, z - 0.55); }

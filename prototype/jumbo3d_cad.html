@@ -1240,7 +1240,7 @@ if (Q.get('walk')) {
   r.zwischenKammernUndMagnet = walk(-9.0, 48.2, 0, [[-90, 20], [0, 18], [-90, 55]]);   // Doppeltür, dann zwischen Tanks und kleiner Kammer durch (x über -2)
   r.hinterTanks = walk(-6.75, 39.9, 0, [[180, 70]]);                       // knapper Durchgang zwischen Wandpfeilern und Tankenden (z über 45.5)
   r.kueche016 = walk(-8.5, 9.95, 0, [[-90, 33], [0, 25]]);                 // von 09 durch den Vorraum in die Teeküche 016 (z unter 9)
-  r.raum06 = walk(-8.8, 10.9, 0, [[90, 40]]);                              // aus 09 durch die geöffnete Tür nach 06 (x unter -10.5)
+  r.raum06 = walk(-8.8, 10.68, 0, [[90, 40]]);                              // aus 09 durch die geöffnete Tür nach 06 (x unter -10.5)
   $('testout').style.display = 'block'; $('testout').textContent = 'WALKRESULT ' + JSON.stringify(r);
 }
 applyQuality();
