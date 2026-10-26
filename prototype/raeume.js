@@ -890,6 +890,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const x of [x0 - 0.03, x1 + 0.03]) box(rotM, 0.06, h, 0.08, x, h/2, zw);
     box(edelM, 0.14, 0.02, 0.06, x1 - 0.18, 1.05, zw + 0.04); cols.push({x0, x1, z0:zw - 0.1, z1:zw + 0.1, y0:-1, y1:h}); }
 
+  // Raum 010: rote Türen vom Flur 08 aus, geschlossen und nicht zu öffnen
+  { const rotM = [new THREE.MeshLambertMaterial({color:0x8e1c1c}), new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1})];
+    const edelM = [new THREE.MeshLambertMaterial({color:0xc4c8cc}), new THREE.MeshStandardMaterial({color:0xc4c8cc, roughness:0.3, metalness:0.8})];
+    const h = 2.05, box = (m, dx, dy, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, dy, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(px, py, pz); scene.add(o); };
+    for (const [xw, z0, z1] of [[-7.5, 59.282, 60.359], [-7.62, 57.897, 58.974], [-7.5, 53.179, 55.333]]) {     // alle drei Öffnungen vom Flur zu 010
+      box(rotM, 0.05, h, z1 - z0 - 0.02, xw, h/2, (z0 + z1)/2); box(rotM, 0.08, 0.06, z1 - z0 + 0.12, xw, h + 0.03, (z0 + z1)/2);
+      for (const z of [z0 - 0.03, z1 + 0.03]) box(rotM, 0.08, h, 0.06, xw, h/2, z);
+      if (z1 - z0 > 1.5) box(rotM, 0.06, h - 0.05, 0.01, xw - 0.03, h/2, (z0 + z1)/2);                        // Mittelfuge der Doppeltür
+      box(edelM, 0.06, 0.02, 0.14, xw - 0.04, 1.05, (z1 - z0 > 1.5 ? (z0 + z1)/2 - 0.1 : z1 - 0.18)); cols.push({x0:xw - 0.12, x1:xw + 0.12, z0, z1, y0:-1, y1:h}); } }
+
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
   { window.raeumeTueren = [];
@@ -925,6 +935,28 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       m.rotation.y = Math.PI; m.position.set(-9.2, 2.5, 5.99); scene.add(m); }
     tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht);
     tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, schlicht, schlicht);
+    // Labor 018: Türen in der Wand zum Flur 08 (Wand entlang z): links und rechts je ein Flügel, in der Mitte die Doppeltür mit den
+    // Warnschildern wie an der Hallentür; alle öffnen ins Labor
+    const tuerZ = (id, name, xw, z0, z1, mitFoto, h = 2.08) => {
+      const zwei = z1 - z0 > 1.5, n = zwei ? 2 : 1, w = (z1 - z0)/n, fl = [];
+      for (let k = 0; k < n; k++) {
+        const g = new THREE.Group(), s = k === 0 ? 1 : -1; g.position.set(xw, 0, k === 0 ? z0 : z1); scene.add(g);
+        let vorn = rotM[0];
+        if (mitFoto && foto) { const c = foto.clone(); c.repeat.set(zwei ? 0.5 : 1, 1); c.offset.set(zwei ? (k === 0 ? 0.5 : 0) : 0, 0); c.needsUpdate = true; vorn = new THREE.MeshLambertMaterial({map:c}); }
+        else vorn = new THREE.MeshLambertMaterial({map:schlicht});
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, h, w - 0.01), [vorn, new THREE.MeshLambertMaterial({map:schlicht}), rotM[0], rotM[0], rotM[0], rotM[0]]);
+        m.position.set(0, h/2, s*w/2); g.add(m);
+        for (const sx of [-1, 1]) { const kl = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.14), edelM[1]); kl.position.set(sx*0.045, 1.05, s*(w - 0.12)); g.add(kl); }
+        fl.push([g, s]); }
+      const rahmen = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, z1 - z0 + 0.12), rotM[1]); rahmen.position.set(xw, h + 0.03, (z0 + z1)/2); scene.add(rahmen);
+      for (const z of [z0 - 0.03, z1 + 0.03]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.08, h, 0.06), rotM[1]); p.position.set(xw, h/2, z); scene.add(p); }
+      const col = {x0:xw - 0.1, x1:xw + 0.1, z0, z1, y0:-1, y1:h}; cols.push(col);
+      window.raeumeTueren.push({id, name, x0:xw - 0.1, x1:xw + 0.1, z:(z0 + z1)/2, offen:false, a:0, hit:[xw, 1.05, (z0 + z1)/2, 0.4, 2.0, z1 - z0],
+        schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
+          for (const [g, s] of fl) g.rotation.y = -s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); };
+    tuerZ('raumtuer_018a', 'Tür zum Labor 018', -10.29, 38.256, 39.385, false);
+    tuerZ('raumtuer_018b', 'Doppeltür zum Labor 018', -10.29, 47.077, 49.179, true);
+    tuerZ('raumtuer_018c', 'Tür zum Labor 018', -10.29, 59.282, 60.359, false);
     // einflügelige Tür in der linken Wand von 09 (nach 06): Scharnier auf der Hallenseite, öffnet nach 06 hinein
     { const xw = -10.13, z0 = 10.359, z1 = 11.436, h = 2.0, g = new THREE.Group(); g.position.set(xw, 0, z0 + 0.01); scene.add(g);
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.045, h, z1 - z0 - 0.02), rotM[1]); m.position.set(0, h/2, (z1 - z0 - 0.02)/2); g.add(m);
