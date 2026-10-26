@@ -14,6 +14,7 @@ POSTER = {
     'pb':    ('poster_pb.JPEG',    [(278, 300), (1340, 272), (1320, 1750), (325, 1710)], (400, 560)),
     'ptra':  ('poster_ptra.JPEG',  [(307, 359), (1398, 329), (1361, 1751), (353, 1742)], (400, 560)),
     'inlab': ('poster_inlab.JPEG', [(169, 261), (1146, 301), (1137, 1582), (215, 1644)], (400, 560)),
+    'gonzalez': ('pinnwand.JPEG', [(1129, 812), (1253, 807), (1251, 942), (1131, 953)], (480, 520)),   # Schnitzel Gonzalez vom Whiteboard, groß als Poster in der Küche
     'pinnwand': ('pinnwand.JPEG', [(287, 252), (1645, 366), (1650, 1112), (338, 1312)], (840, 560)),   # Meme-Whiteboard im Übergangsraum (Foto 2048 x 1536)
 }
 RAND = 0.025                      # Anteil, der an jeder Seite wegfaellt (Alurahmen)
@@ -36,6 +37,7 @@ for name, (foto, ecken, (w, h)) in POSTER.items():
     hell = ndimage.gaussian_filter(a.mean(2), min(w, h)/4)                       # grober Helligkeitsverlauf (Spiegelung, Fensterlicht)
     a = a * np.clip(hell.mean()/np.maximum(hell, 1), 0.75, 1.25)[..., None]
     img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+    if name == 'gonzalez': img = img.filter(ImageFilter.UnsharpMask(3, 120, 2))          # stark vergrößert: etwas nachschärfen
     buf = io.BytesIO(); img.save(buf, 'JPEG', quality=80, optimize=True)
     tex['poster_' + name] = 'data:image/jpeg;base64,' + base64.b64encode(buf.getvalue()).decode()
     print(f'poster_{name} {w}x{h}px {len(buf.getvalue())/1024:.0f} kB')

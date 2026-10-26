@@ -482,6 +482,11 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     kiste(weiss, 0.06, 0.06, 0.48, XO - 0.07, 1.27, 6.98); kiste(weiss, 0.06, 0.06, 0.48, XO - 0.07, 0.23, 6.98); zyl(weiss, 0.025, 0.08, XO - 0.07, 1.34, 6.74);
     zyl(M(0xc9ccce, {roughness:0.4, metalness:0.6}), 0.05, 3.0, XO - 0.08, 1.5, Z0 + 0.08);
     cols.push({x0:XO - 0.12, x1:XO, z0:Z0, z1:7.25, y0:-1, y1:1.4});
+    // großes Poster „Schnitzel Gonzalez“ an der Hallenwand gegenüber der Küchenzeile (Ausschnitt vom Meme-Whiteboard), schwarzer Rahmen
+    if (window.TEX && window.TEX.poster_gonzalez) { const t = new THREE.TextureLoader().load(window.TEX.poster_gonzalez); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+      const px = -5.55, py = 1.65, w = 0.7, h = 0.76;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:t, color:0xe8e8e8})); m.position.set(px, py, Z0 + 0.022); scene.add(m);
+      kiste(sockel, w + 0.06, h + 0.06, 0.02, px, py, Z0 + 0.01); }
     // Laminatboden graubraun in Dielen, über Raum und Vorraum
     { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const g = c.getContext('2d');
       for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const v = 108 + ((r*7 + k*13) % 5)*5; g.fillStyle = 'rgb(' + v + ',' + (v - 6) + ',' + (v - 12) + ')';
