@@ -48,6 +48,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   }
   for (const [x0, x1, z0, z1] of R.walls) wand(x0, x1, 0, HR, z0, z1, true);
   for (const [x0, x1, z0, z1, u] of R.doors) wand(x0, x1, u || 2.1, HR, z0, z1, false);
+  // 014a ist vom Raum 014 durch eine Trennwand abgeteilt (etwa ein Drittel der Fläche, im Grundriss nicht eingezeichnet)
+  wand(-4.72, -4.62, 0, HR, 13.231, 16.103, true); cols.push({x0:-4.72, x1:-4.62, z0:13.231, z1:16.103, y0:-1, y1:HR});
 
   // Treppenhaus 020: zweiläufige Podesttreppe nach dem Grundriss (je 10 Stufen à 17 cm, Geschosshöhe 3,4 m). Ohne Foto: graue Betonstufen
   // mit dunklem Belag, Trennwand zwischen den Läufen, Stahlhandlauf. Lauf 1 (Seite 06) beginnt am Vorplatz vor 09 und steigt nach Westen
@@ -635,6 +637,16 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const alu = M(0xc3c7ca); kiste(alu, x1 - x0 + 0.04, 0.02, 0.02, (x0 + x1)/2, y1 + 0.01, ZW - 0.012); kiste(alu, 0.02, y1 - y0, 0.02, x0 - 0.01, (y0 + y1)/2, ZW - 0.012); kiste(alu, 0.02, y1 - y0, 0.02, x1 + 0.01, (y0 + y1)/2, ZW - 0.012);
     kiste(M(0xc8a46e), x1 - x0 + 0.06, 0.04, 0.07, (x0 + x1)/2, y0 - 0.02, ZW - 0.035);
     kiste(M(0x1f2124), 0.18, 0.32, 0.42, -4.776 - 0.09, 2.6, 10.1); kiste(M(0x1f2124), 0.06, 0.05, 0.5, -4.776 - 0.03, 2.35, 10.1); }
+
+  // Tür von Flur 05 (Treppenvorplatz) nach 014a: rote Tür, geschlossen (Foto vom Hallenvorraum aus)
+  { const rot = [new THREE.MeshLambertMaterial({color:0x8e1c1c}), new THREE.MeshStandardMaterial({color:0x8e1c1c, roughness:0.45, metalness:0.1})];
+    const edel = [new THREE.MeshLambertMaterial({color:0xc4c8cc}), new THREE.MeshStandardMaterial({color:0xc4c8cc, roughness:0.3, metalness:0.8})];
+    const z0 = 14.462, z1 = 15.59, x = -7.44, h = 2.05;
+    const box = (m, dx, dy, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, dy, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(px, py, pz); scene.add(o); };
+    box(rot, 0.05, h, z1 - z0 - 0.02, x + 0.05, h/2, (z0 + z1)/2);
+    box(rot, 0.06, 0.06, z1 - z0 + 0.12, x - 0.03, h + 0.03, (z0 + z1)/2); for (const z of [z0 - 0.03, z1 + 0.03]) box(rot, 0.06, h, 0.06, x - 0.03, h/2, z);
+    box(edel, 0.03, 0.05, 0.03, x + 0.01, 1.05, z0 + 0.12); box(edel, 0.02, 0.02, 0.13, x - 0.01, 1.05, z0 + 0.17);
+    cols.push({x0:x - 0.1, x1:x + 0.1, z0, z1, y0:-1, y1:h}); }
 
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
