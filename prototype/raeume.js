@@ -828,58 +828,80 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
 
     // ---- Labor 018 (von 08 aus) nach Video IMG_0949: großer Raum an der Außenwand, Fenster, große Vakuumkammern, rote Schränke ----
     const LX0 = -15.54, LX1 = -10.37, LZ0 = 36.41, LZ1 = 61.0;
-    // Fenster an der Außenwand (oberer Teil verglast), Heizkörper darunter
-    for (let z = LZ0 + 0.6; z < LZ1 - 1.5; z += 3.25) { kiste(M(0xdbe6eb, {emissive:0xaab8bf}), 0.02, 1.2, 2.6, LX0 + 0.01, 2.1, z + 1.3);
-      kiste(dunkel, 0.06, 0.06, 2.7, LX0 + 0.03, 1.48, z + 1.3); kiste(dunkel, 0.06, 0.06, 2.7, LX0 + 0.03, 2.72, z + 1.3); kiste(weiss, 0.18, 0.03, 2.7, LX0 + 0.09, 1.45, z + 1.3);
-      for (let k = 0; k < 10; k++) kiste(weiss, 0.08, 0.5, 0.03, LX0 + 0.1, 0.65, z + 0.8 + k*0.08); }
-    // Deckenrohre und Lichtbänder im Labor
+    // Achsen der Außenwand zwischen den Wandpfeilern (aus dem Grundriss): je ein hoch sitzendes, flaches Fenster mit tiefer Laibung,
+    // darunter ein Tisch (weiße Platte, blaue Beine) mit Geräten; Stühle davor
+    const pf = R.walls.filter(([x0, x1, z0, z1]) => x0 < -15.5 && x1 > -15.1 && x1 < -14.9 && z0 > LZ0 && z1 < LZ1).map(w => [w[2], w[3]]).sort((a, b) => a[0] - b[0]);
+    const achsen = []; { let z = LZ0; for (const [a, b] of pf) { achsen.push([z, a]); z = b; } achsen.push([z, LZ1]); }
+    const XP = -15.0;                                                             // Vorderkante der Pfeiler
+    achsen.forEach(([za, zb], i) => { const zm = (za + zb)/2, L = zb - za;
+      kiste(M(0xdbe6eb, {emissive:0xb0bec5}), 0.02, 0.72, L - 0.4, LX0 + 0.01, 2.3, zm);                  // Glas
+      for (const y of [1.92, 2.68]) kiste(dunkel, 0.06, 0.06, L - 0.3, LX0 + 0.04, y, zm);
+      for (const z of [za + 0.17, zm, zb - 0.17]) kiste(dunkel, 0.06, 0.8, 0.06, LX0 + 0.04, 2.3, z);
+      kiste(weiss, XP - LX0 + 0.05, 0.04, L, (LX0 + XP)/2, 1.88, zm);                                     // tiefe Fensterbank
+      if (i === 0 || i === achsen.length - 1 || L < 2.2) return;
+      const tx0 = LX0 + 0.02, tx1 = XP - 0.02 + 0.3;                                                       // Tisch bis knapp vor die Pfeiler
+      kiste(weiss, tx1 - tx0, 0.035, L - 0.12, (tx0 + tx1)/2, 0.76, zm);
+      for (const z of [za + 0.1, zb - 0.1]) kiste(M(0x2d4fa3), tx1 - tx0 - 0.1, 0.74, 0.05, (tx0 + tx1)/2, 0.37, z);
+      kiste(dunkel, 0.03, 0.32, 0.5, tx0 + 0.25, 0.97, zm - 0.4); kiste(M(0x2b3a58, {emissive:0x0c1426}), 0.005, 0.28, 0.46, tx0 + 0.27, 0.97, zm - 0.4);
+      kiste(M(0xe2e2de), 0.4, 0.22, 0.45, tx0 + 0.3, 0.89, zm + 0.5); if (i % 2) kiste(M(0x3c6fc4), 0.3, 0.12, 0.35, tx0 + 0.3, 0.84, zm + 0.05);
+      cols.push({x0:tx0, x1:tx1, z0:za + 0.05, z1:zb - 0.05, y0:-1, y1:1.0}); });
+    // Deckenrohre, Kabelpritsche und Lichtbänder im Labor
     for (const x of [-14.6, -12.0]) { zyl(stahl, 0.06, LZ1 - LZ0, x, Y - 0.15, (LZ0 + LZ1)/2, 'z'); }
+    kiste(grauR, 0.4, 0.04, LZ1 - LZ0, -13.2, Y - 0.4, (LZ0 + LZ1)/2); zyl(kupfer, 0.02, LZ1 - LZ0, -11.0, Y - 0.12, (LZ0 + LZ1)/2, 'z');
     for (let z = LZ0 + 1.5; z < LZ1; z += 3.0) for (const x of [-14.0, -11.8]) kiste(licht, 1.2, 0.03, 0.12, x, Y - 0.05, z);
-    // große Vakuumkammern (Edelstahl, liegend, längs zum Raum), eine mit offener Tür
-    const kammer = (z0, z1, x, r, offen) => { const zm = (z0 + z1)/2, yc = r + 0.35;
-      zyl(stahl, r, z1 - z0, x, yc, zm, 'z', 36);
-      for (const [z, s] of [[z0, -1], [z1, 1]]) { const k = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 12, 0, Math.PI*2, 0, Math.PI/2), stahl[1]); k.scale.set(1, 0.35, 1);
-        k.rotation.x = s*Math.PI/2; k.position.set(x, yc, z); if (!(offen && s < 0)) scene.add(k); zyl(stahl, r + 0.05, 0.08, x, yc, z, 'z', 36); }
-      if (offen) { const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.15, 32), stahl[1]); d.rotation.set(Math.PI/2, 0, 0); d.position.set(x + r*0.8, yc, z0 - 0.45); d.rotation.y = 0.9; scene.add(d);
-        const in_ = new THREE.Mesh(new THREE.CircleGeometry(r - 0.02, 32), new THREE.MeshLambertMaterial({color:0x2a2c2e})); in_.position.set(x, yc, z0 + 0.05); scene.add(in_); }
+    // Vakuumtanks, alle geschlossen
+    const kammer = (z0, z1, x, r, mat = stahl) => { const zm = (z0 + z1)/2, yc = r + 0.35;
+      zyl(mat, r, z1 - z0, x, yc, zm, 'z', 36);
+      for (const [z, s] of [[z0, -1], [z1, 1]]) { const k = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 12, 0, Math.PI*2, 0, Math.PI/2), mat[1]); k.scale.set(1, 0.35, 1);
+        k.rotation.x = s*Math.PI/2; k.position.set(x, yc, z); scene.add(k); zyl(mat, r + 0.05, 0.08, x, yc, z, 'z', 36); }
       for (const z of [z0 + 0.5, z1 - 0.5]) for (const s of [-1, 1]) kiste(grauR, 0.08, r + 0.35, 0.08, x + s*r*0.6, (r + 0.35)/2, z);
-      for (const dz of [0.6, 1.5]) { zyl(stahl, 0.12, 0.3, x, yc + r + 0.1, z0 + dz); zyl(dunkel, 0.15, 0.04, x, yc + r + 0.27, z0 + dz); }
-      zyl(stahl, 0.16, 0.5, x + r + 0.2, yc, (z0 + z1)/2, 'x'); zyl(stahl, 0.2, 0.04, x + r + 0.45, yc, (z0 + z1)/2, 'x');
-      cols.push({x0:x - r - 0.1, x1:x + r + 0.5, z0:z0 - 0.3, z1:z1 + 0.3, y0:-1, y1:2.6}); };
-    kammer(41.0, 45.5, -13.4, 0.9, true); kammer(54.2, 58.4, -13.4, 0.85, false);
-    // roter Aufbau mit Strahlrohr, Pumpstand, Messrack (blau)
-    { const rx = -13.6, rz = 49.3, rotA = M(0xb3261e, {r:0.45});
-      for (const dx of [-0.5, 0.5]) for (const dz of [-0.6, 0.6]) kiste(rotA, 0.08, 1.0, 0.08, rx + dx, 0.5, rz + dz);
-      for (const y of [0.15, 1.0]) kiste(rotA, 1.1, 0.08, 1.3, rx, y, rz);
-      zyl(stahl, 0.08, 2.4, rx, 1.3, rz, 'z'); for (const dz of [-0.8, 0, 0.8]) zyl(stahl, 0.13, 0.35, rx, 1.3, rz + dz);
-      kiste(M(0xe8e8e4), 0.35, 0.3, 0.4, rx, 0.35, rz + 0.3); cols.push({x0:rx - 0.6, x1:rx + 0.6, z0:rz - 1.25, z1:rz + 1.25, y0:-1, y1:1.6}); }
-    kiste(M(0x2d62b5, {r:0.4}), 0.8, 2.0, 0.8, -11.0, 1.0, 46.5); kiste(M(0x1b1d20), 0.7, 1.8, 0.8, -11.0, 0.9, 52.0);
-    for (let k = 0; k < 5; k++) kiste(M(0xd9d8d2), 0.6, 0.12, 0.02, -11.0, 0.5 + k*0.3, 46.09);
-    cols.push({x0:-11.45, x1:-10.55, z0:46.05, z1:46.95, y0:-1, y1:2.1}, {x0:-11.4, x1:-10.6, z0:51.55, z1:52.45, y0:-1, y1:2.1});
-    // Reihe roter Schränke an der Stirnwand (Süden) und an der Gangwand
+      cols.push({x0:x - r - 0.1, x1:x + r + 0.1, z0:z0 - 0.35, z1:z1 + 0.35, y0:-1, y1:2.6}); return yc; };
+    // links (hinter den linken Schränken): großer Edelstahltank nah an der Gangwand, Tür zum Durchgang mit Schauglas und Schwenkarmen,
+    // Turbopumpen an der Seite; zwischen Tank und Gangwand ein schmaler Durchgang mit der Wasserwand
+    { const x = -12.15, r = 0.9, z0 = 51.0, z1 = 54.8, yc = kammer(z0, z1, x, r);
+      zyl(stahl, 0.2, 0.08, x, yc, z0 - 0.33, 'z', 24); zyl(dunkel, 0.1, 0.09, x, yc, z0 - 0.34, 'z', 20);              // Schauglas in der Tür
+      for (const y of [yc + 0.45, yc - 0.45]) { kiste(stahl, 1.1, 0.06, 0.06, x - 0.25, y, z0 - 0.33); kiste(stahl, 0.06, 0.06, 0.4, x - 0.8, y, z0 - 0.15); }
+      for (const z of [52.2, 53.6]) { zyl(M(0xc6c9cb, {r:0.3, m:0.7}), 0.13, 0.35, x - r - 0.1, yc - 0.1, z, 'x'); kiste(M(0xc4201c), 0.2, 0.06, 0.28, x - r - 0.3, yc - 0.1, z);
+        kiste(M(0x1b1d20), 0.35, 0.45, 0.4, x - r - 0.15, 0.35, z); }
+      for (const dz of [0.8, 2.0]) { zyl(stahl, 0.12, 0.3, x, yc + r + 0.1, z0 + dz); zyl(dunkel, 0.15, 0.04, x, yc + r + 0.27, z0 + dz); }
+      cols.push({x0:x - r - 0.5, x1:x - r, z0:51.9, z1:53.9, y0:-1, y1:1.6}); }
+    // dahinter ein Aufbau wie im Labor 019: roter Unterbau, Dipolmagnet (graues Joch, rote Spulen), Sechswege-Kreuz mit Manipulatoren,
+    // Strahlrohr zum Tank; daneben ein schwarzes Rack und eine Scrollpumpe
+    { const mx = -12.15, mz = 57.0, yb = 1.25, rotM = M(0xb3261e, {r:0.45}), joch = M(0xc9ccc8, {r:0.7}), spule = M(0xd2531f, {r:0.55});
+      kiste(rotM, 1.3, 0.1, 1.2, mx, 0.25, mz); kiste(rotM, 1.1, 0.1, 1.0, mx, 0.55, mz); for (const dx of [-0.55, 0.55]) for (const dz of [-0.5, 0.5]) kiste(rotM, 0.08, 0.5, 0.08, mx + dx, 0.3, mz + dz);
+      kiste(joch, 1.0, 0.14, 0.62, mx, yb + 0.42, mz); kiste(joch, 1.0, 0.14, 0.62, mx, yb - 0.42, mz); kiste(joch, 0.14, 0.98, 0.62, mx - 0.43, yb, mz); kiste(joch, 0.14, 0.98, 0.62, mx + 0.43, yb, mz);
+      kiste(spule, 0.7, 0.22, 0.7, mx, yb + 0.23, mz); kiste(spule, 0.7, 0.22, 0.7, mx, yb - 0.23, mz);
+      zyl(stahl, 0.05, 1.7, mx, yb, (54.8 + 0.3 + mz - 0.35)/2, 'z');                                                 // Strahlrohr vom Tank
+      const cz = mz + 0.95; zyl(stahl, 0.13, 0.25, mx, yb, cz, 'z'); zyl(stahl, 0.05, 0.6, mx, yb, mz + 0.6, 'z');
+      for (const w of [0.785, 2.356, 3.927, 5.498]) { const a = new THREE.Vector3(mx, yb, cz), b = new THREE.Vector3(mx + Math.cos(w)*0.42, yb + Math.sin(w)*0.42, cz);
+        const d = b.clone().sub(a), o = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, d.length(), 14), dunkel[1]); o.position.copy(a).addScaledVector(d, 0.6);
+        o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); scene.add(o); }
+      kiste(M(0x1b1d20), 0.7, 1.9, 0.8, -13.75, 0.95, 57.6); kiste(M(0xc4201c), 0.4, 0.4, 0.3, -11.05, 0.2, 56.2); kiste(M(0xe8e8e4), 0.45, 0.55, 0.4, -11.1, 0.28, 57.9);
+      cols.push({x0:mx - 0.7, x1:mx + 0.7, z0:mz - 0.65, z1:cz + 0.5, y0:-1, y1:2.0}, {x0:-14.1, x1:-13.4, z0:57.2, z1:58.0, y0:-1, y1:2.0}, {x0:-11.35, x1:-10.85, z0:56.0, z1:58.15, y0:-1, y1:0.8}); }
+    // rechts (hinter den rechten Schränken): kleiner, weiß lackierter Tank
+    kammer(43.0, 45.2, -13.2, 0.6, M(0xf3f3f0, {r:0.4, m:0.05, emissive:0x2a2a28}));
+    // Messrack (blau) an der Gangwand, Werkzeugwagen bei den linken Schränken, rote Schränke an der Stirnwand
+    kiste(M(0x2d62b5, {r:0.4}), 0.8, 2.0, 0.8, -11.0, 1.0, 41.5); for (let k = 0; k < 5; k++) kiste(M(0xd9d8d2), 0.02, 0.12, 0.6, -11.41, 0.5 + k*0.3, 41.5);
+    cols.push({x0:-11.45, x1:-10.55, z0:41.05, z1:41.95, y0:-1, y1:2.1});
+    { const x = -12.85, z = 49.9; kiste(M(0x1b1d20), 0.5, 0.9, 0.7, x, 0.45, z); for (let k = 0; k < 5; k++) kiste(M(0xc4201c), 0.02, 0.06, 0.6, x + 0.26, 0.2 + k*0.15, z);
+      cols.push({x0:x - 0.25, x1:x + 0.27, z0:z - 0.35, z1:z + 0.35, y0:-1, y1:1.0}); }
     for (let k = 0; k < 4; k++) { const x = -15.0 + k*1.02; kiste(M(0xc9cbcc), 1.0, 1.95, 0.55, x, 0.975, LZ0 + 0.3); kiste(M(0xb01e1a, {r:0.4}), 0.96, 1.85, 0.02, x, 0.975, LZ0 + 0.585);
       kiste(M(0x1b1d20), 0.04, 0.06, 0.02, x + 0.4, 1.0, LZ0 + 0.6); }
     cols.push({x0:-15.54, x1:-11.4, z0:LZ0, z1:LZ0 + 0.6, y0:-1, y1:2.0});
-    for (let k = 0; k < 3; k++) { const z = 56.4 + k*1.02; kiste(M(0xc9cbcc), 0.55, 1.95, 1.0, LX1 - 0.3, 0.975, z); kiste(M(0xb01e1a, {r:0.4}), 0.02, 1.85, 0.96, LX1 - 0.585, 0.975, z); }
-    cols.push({x0:LX1 - 0.6, x1:LX1, z0:55.9, z1:59.0, y0:-1, y1:2.0});
-    // Werkbänke mit schwarzer Platte an der Außenwand, rote Stühle, Werkzeugwagen, Whiteboards an der Gangwand
-    const bank = (z0, z1) => { kiste(M(0x1f2124), 0.8, 0.04, z1 - z0, LX0 + 0.45, 0.88, (z0 + z1)/2);
-      for (const z of [z0 + 0.05, z1 - 0.05]) kiste(M(0x2d4fa3), 0.7, 0.86, 0.05, LX0 + 0.45, 0.43, z); cols.push({x0:LX0, x1:LX0 + 0.85, z0, z1, y0:-1, y1:1.0}); };
-    bank(37.4, 39.6); bank(47.2, 48.6); bank(51.2, 52.8);
-    kiste(M(0xe2e2de), 0.35, 0.3, 0.4, LX0 + 0.4, 1.05, 38.0); kiste(M(0x2a2d31), 0.05, 0.35, 0.55, LX0 + 0.15, 1.15, 38.9); kiste(M(0xe2e2de), 0.4, 0.25, 0.35, LX0 + 0.4, 1.03, 52.0);
-    const stuhlR = (x, z) => { kiste(M(0xa82a2a, {r:0.8, m:0}), 0.45, 0.07, 0.45, x, 0.48, z); kiste(M(0xa82a2a, {r:0.8, m:0}), 0.06, 0.45, 0.43, x - 0.22, 0.8, z);
+    // Stühle vor den Fenstertischen (rot und blau), Whiteboards an den Stirnwänden
+    const stuhlR = (x, z, c) => { kiste(M(c, {r:0.8, m:0}), 0.45, 0.07, 0.45, x, 0.48, z); kiste(M(c, {r:0.8, m:0}), 0.06, 0.45, 0.43, x - 0.22, 0.8, z);
       kiste(M(0x1b1d20), 0.05, 0.45, 0.05, x, 0.23, z); cols.push({x0:x - 0.27, x1:x + 0.25, z0:z - 0.25, z1:z + 0.25, y0:-1, y1:1.0}); };
-    stuhlR(-14.35, 38.4); stuhlR(-14.35, 52.0);
-    { const x = -11.0, z = 40.5; kiste(M(0x1b1d20), 0.5, 0.9, 0.7, x, 0.45, z); for (let k = 0; k < 4; k++) kiste(M(0xc4201c), 0.48, 0.02, 0.68, x, 0.92 + k*0.0, z);
-      cols.push({x0:x - 0.25, x1:x + 0.25, z0:z - 0.35, z1:z + 0.35, y0:-1, y1:1.0}); }
+    stuhlR(-14.15, 40.9, 0xa82a2a); stuhlR(-14.15, 47.6, 0x23379a);
     const wbT = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#fbfbf9'; g.fillRect(0, 0, 256, 128); g.lineWidth = 1.5;
       for (let i = 0; i < 30; i++) { g.strokeStyle = ['#1f3f8f', '#202020', '#b3261e'][i % 3]; g.beginPath(); let x = 15 + Math.random()*220, y = 15 + Math.random()*95; g.moveTo(x, y);
         for (let k = 0; k < 3; k++) { x += (Math.random() - 0.4)*30; y += (Math.random() - 0.5)*12; g.lineTo(x, y); } g.stroke(); }
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
-    for (const z of [43.0, 55.0]) { kiste(M(0xc4c8cc, {m:0.6}), 0.03, 1.04, 1.84, LX1 - 0.02, 1.6, z);
-      const o = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.0), new THREE.MeshBasicMaterial({map:wbT, color:0xe6e6e6})); o.rotation.y = -Math.PI/2; o.position.set(LX1 - 0.04, 1.6, z); scene.add(o); }
-    // Gasverteilung aus Kupfer an der Wand, Schild an der Tür
-    for (let k = 0; k < 6; k++) { zyl(kupfer, 0.02, 0.9, LX1 - 0.05, 1.8, 49.0 + k*0.13); kiste(dunkel, 0.05, 0.08, 0.05, LX1 - 0.06, 1.6, 49.0 + k*0.13); }
+    { kiste(M(0xc4c8cc, {m:0.6}), 1.84, 1.04, 0.03, -12.7, 1.6, LZ1 - 0.02);
+      const o = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.0), new THREE.MeshBasicMaterial({map:wbT, color:0xe6e6e6})); o.rotation.y = Math.PI; o.position.set(-12.7, 1.6, LZ1 - 0.04); scene.add(o); }
+    // Wasserwand: Kupferverteiler mit Ventilen an der Gangwand im Durchgang hinter dem großen Tank
+    { const xw = LX1 - 0.06; kiste(M(0xd8d8d4), 0.02, 0.9, 1.2, LX1 - 0.02, 1.45, 52.9);
+      for (let k = 0; k < 7; k++) { const z = 52.4 + k*0.16; zyl(kupfer, 0.022, 0.75, xw, 1.45, z); kiste(M(0xb8922e, {m:0.7}), 0.06, 0.08, 0.06, xw, 1.25, z); kiste(M(0xc4201c), 0.07, 0.03, 0.03, xw - 0.04, 1.6, z); }
+      zyl(kupfer, 0.03, 1.2, xw, 1.85, 52.9, 'z'); zyl(kupfer, 0.03, 1.2, xw, 1.05, 52.9, 'z'); zyl(M(0x6b6f73), 0.12, 0.05, xw - 0.03, 1.7, 52.25, 'x'); }
   }
 
   // Raum 014: rote Tür von Flur 05 aus (geschlossen), in der Öffnung aus dem Grundriss
@@ -955,7 +977,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
         schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
           for (const [g, s] of fl) g.rotation.y = -s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); };
     tuerZ('raumtuer_018a', 'Tür zum Labor 018', -10.29, 38.256, 39.385, false);
-    tuerZ('raumtuer_018b', 'Doppeltür zum Labor 018', -10.29, 47.077, 49.179, true);
+    tuerZ('raumtuer_018b', 'Doppeltür zum Labor 018', -10.29, 47.077, 49.179, false);   // Schilder folgen nach weiteren Videos
     tuerZ('raumtuer_018c', 'Tür zum Labor 018', -10.29, 59.282, 60.359, false);
     // einflügelige Tür in der linken Wand von 09 (nach 06): Scharnier auf der Hallenseite, öffnet nach 06 hinein
     { const xw = -10.13, z0 = 10.359, z1 = 11.436, h = 2.0, g = new THREE.Group(); g.position.set(xw, 0, z0 + 0.01); scene.add(g);
