@@ -611,9 +611,8 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     cols.push({x0:XR - 0.25, x1:XR, z0:12.0, z1:12.75, y0:-1, y1:2.0});
     // linke Wand: rote Tür (zu) mit Türschließer, darüber Erste-Hilfe- und Feuerlöscherschild, Melder, Verbandkasten, Feuerlöscher
     const tz0 = 10.359, tz1 = 11.436;
-    zarge(XL, tz0, tz1, 2.05, 1); kiste(rot, 0.04, 2.0, tz1 - tz0 - 0.02, XL + 0.02, 1.0, (tz0 + tz1)/2);
-    kiste(edel, 0.03, 0.05, 0.03, XL + 0.05, 1.05, tz1 - 0.12); kiste(edel, 0.12, 0.02, 0.02, XL + 0.09, 1.05, tz1 - 0.12); kiste(grau, 0.05, 0.06, 0.32, XL + 0.05, 2.0, (tz0 + tz1)/2 + 0.2);
-    cols.push({x0:XL, x1:XL + 0.06, z0:tz0, z1:tz1, y0:-1, y1:2.1});
+    zarge(XL, tz0, tz1, 2.05, 1);                                   // Türblatt: unten bei den Türen zum Öffnen (raumtuer_06)
+    kiste(grau, 0.05, 0.06, 0.32, XL + 0.05, 2.0, (tz0 + tz1)/2 + 0.2);
     const zeichen = (gruen) => bildTex(128, 128, (g, w, h) => { g.fillStyle = gruen ? '#18a558' : '#c4201c'; g.fillRect(0, 0, w, h); g.fillStyle = '#f4f4f0';
       if (gruen) { g.fillRect(50, 18, 28, 92); g.fillRect(18, 50, 92, 28); } else { g.lineWidth = 7; g.strokeStyle = '#f4f4f0'; g.strokeRect(46, 34, 30, 70); g.beginPath(); g.arc(80, 40, 20, -1.5, 1.2); g.stroke(); } });
     flach(zeichen(true), 0.24, 0.24, XL + 0.006, 2.45, 10.12, Math.PI/2, true); flach(zeichen(false), 0.24, 0.24, XL + 0.006, 2.18, 10.12, Math.PI/2, false);
@@ -676,6 +675,14 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     tuer('raumtuer_halle', 'Tür zur Jumbo-Halle', -10.15, -8.2, 6.42, 1, foto || schlicht, schlicht, 2.08);
     tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht);
     tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, schlicht, schlicht);
+    // einflügelige Tür in der linken Wand von 09 (nach 06): Scharnier auf der Hallenseite, öffnet nach 06 hinein
+    { const xw = -10.13, z0 = 10.359, z1 = 11.436, h = 2.0, g = new THREE.Group(); g.position.set(xw, 0, z0 + 0.01); scene.add(g);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.045, h, z1 - z0 - 0.02), rotM[1]); m.position.set(0, h/2, (z1 - z0 - 0.02)/2); g.add(m);
+      for (const sx of [-1, 1]) { const kl = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.14), edelM[1]); kl.position.set(sx*0.04, 1.05, z1 - z0 - 0.15); g.add(kl); }
+      const col = {x0:xw - 0.1, x1:xw + 0.1, z0, z1, y0:-1, y1:h}; cols.push(col);
+      window.raeumeTueren.push({id:'raumtuer_06', name:'Tür zu Raum 06', x0:xw - 0.1, x1:xw + 0.1, z:(z0 + z1)/2, offen:false, a:0, hit:[xw, 1.05, (z0 + z1)/2, 0.4, 2.0, z1 - z0],
+        schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
+          g.rotation.y = -1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); }
   }
 
   // Ostende von Flur 05 (vor 014), nach den Fotos docs/fotos/tuer_flur05 und poster_*: dunkle Türanlage über die ganze Flurbreite mit
