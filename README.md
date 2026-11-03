@@ -40,7 +40,7 @@ Die Spiele selbst liegen in `prototype/` und lassen sich auch direkt öffnen:
 
 Anna (oben auf der Bühne) und Kalle (unten in der Halle) helfen weiter, wenn man sie anspricht.
 
-Neben der Halle (Raum 07) ist das übrige Gebäude nach dem Grundriss begehbar: Durch die Tür an der Längswand
+Das Spiel beginnt im Vorraum 09 vor der Tür in die Halle. Neben der Halle (Raum 07) ist das übrige Gebäude nach dem Grundriss begehbar: Durch die Tür an der Längswand
 neben der EMV-Kabine geht es nach Raum 09 und von dort in die Flure und Räume. Die Räume sind noch leer und
 werden nach und nach anhand von Fotos eingerichtet (`prototype/raeume.js`). Im Treppenhaus 020 kann man bis zur (geschlossenen)
 Tür ins 1. Obergeschoss hinaufgehen und in den Keller hinunter. Raum 019 ist nach einem Foto eingerichtet
@@ -51,9 +51,9 @@ folgen dem Spieler), das Hallenlicht bleibt in der Halle, und unbewegliche Teile
 zusammengefasst, damit es auch auf Onboard-Grafik flüssig läuft. Die Rechenauflösung ist je Grafikstufe begrenzt.
 Ab Stufe „hoch“ bekommen alle Oberflächen je nach Materialklasse Struktur, Glanzunterschiede und Relief
 (Texturen von ambientCG.com, CC0, aus drei Richtungen projiziert; Klasse von Hand per `material.userData.jgKlasse` oder geschätzt).
-Das Licht der Räume ist vorberechnet (`prototype/cad/licht_data.js`, erzeugt mit `python tools\lichtbake.py`, braucht Blender):
-Wände, Böden und Decken haben eine Lightmap, kleinere Teile das Licht an ihren Eckpunkten. Bewegliche Teile und Metall
-bekommen weiter Echtzeitlicht. Teile, die sich seit dem Vorberechnen geändert haben, fallen automatisch auf Echtzeitlicht zurück.
+Das Licht der Räume und der Halle ist vorberechnet (`prototype/cad/licht_data.js`, erzeugt mit `python tools\lichtbake.py`, braucht Blender):
+Wände, Böden und Decken haben eine Lightmap, kleinere Teile das Licht an ihren Eckpunkten. Figuren, bewegliche Raumtüren und Metall
+bekommen weiter Echtzeitlicht. Kästen haben leicht gerundete Kanten (`RundBox` in den HTML-Dateien). Teile, die sich seit dem Vorberechnen geändert haben, fallen automatisch auf Echtzeitlicht zurück.
 
 ### Testmodi
 

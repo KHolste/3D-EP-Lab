@@ -104,7 +104,10 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
         #endif
       }`)
     .replace('getDirectionalLightInfo( directionalLight, directLight );', `getDirectionalLightInfo( directionalLight, directLight );
-      directLight.color *= jgSonne;`);
+      directLight.color *= jgSonne;
+      #ifdef JG_BAKED
+      directLight.color = vec3( 0.0 );          // vorberechnet: das Licht der Hallenstrahler steckt schon in der Lightmap
+      #endif`);
   const maps = THREE.ShaderChunk.lights_fragment_maps
     .replace('iblIrradiance += getIBLIrradiance( geometryNormal );', 'iblIrradiance += getIBLIrradiance( geometryNormal ) * jgUmgDiff;')
     .replace('#if defined( RE_IndirectDiffuse )', '#if defined( RE_IndirectDiffuse )\n\t#ifdef JG_ECKEN\n\t\tirradiance += pow( vJgLicht, vec3( 2.2 ) ) * jgLichtSkala;\n\t#endif')
@@ -161,7 +164,7 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
 
   function raeume(objekte, cadMeshes){
     const neu = [], mats = new Set(), lampen = new Set();
-    for (const o of objekte) o.traverse(m => { if (!m.isMesh || !m.material) return;
+    for (const o of objekte) o.traverse(m => { if (!m.isMesh || !m.material) return; m.userData.jgRaum = true;
       for (const mt of [].concat(m.material)) mats.add(mt);
       if (m.userData.mats) for (const mt of m.userData.mats) mats.add(mt);
       const mt = [].concat(m.material)[0];
@@ -196,7 +199,8 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
       for (const mt of [].concat(m.material)) mats.add(mt); if (m.userData.mats) for (const mt of m.userData.mats) mats.add(mt); });
     raumMats = [...mats].filter(m => m.emissive && !lampen.has(m) && m.emissive.r + m.emissive.g + m.emissive.b > 0.05).map(m => [m, m.emissive.clone()]);
     lampenMats = [...lampen].map(m => [m, m.isMeshBasicMaterial ? m.color.clone() : m.emissiveIntensity]);
-    if (new URLSearchParams(location.search).has('bakeexport')) bakeExport(zahl.neu); else wendeLichtAn(zahl.neu);
+    for (const n of zahl.neu) n.userData.jgRaum = true; for (const p of panels) p.userData.jgRaum = true;
+    raumListe = zahl.neu; if (!EXPORT) wendeLichtAn(zahl.neu);
     window.__grafik = {anker:anker.length, raeume:flaeche.length - 1, lampen:lampenMats.length, raumMats:raumMats.length, patchOk, teileVorher:zahl.vorher, teileNachher:zahl.nachher, gebacken};
     setQuality(quality, true);
   }
@@ -248,15 +252,17 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
   // ---------- Vorberechnetes Licht (cad/licht_data.js, erzeugt von tools/lichtbake.py) ----------
   // Jedes Objekt mit passender Punktzahl bekommt Lightmap-Koordinaten (uv1) und Materialkopien mit der Lightmap.
   const LICHT_HELL = 0.7;                       // Gesamthelligkeit des vorberechneten Lichts
-  let gebacken = 0;
+  let gebacken = 0, lichtTex = null, raumListe = [];
+  const hallAnker = [], EXPORT = new URLSearchParams(location.search).has('bakeexport');
   function wendeLichtAn(liste){
     const L = window.LICHT; if (!L) return;
     const roh = atob(L.uv), u8 = new Uint8Array(roh.length); for (let i = 0; i < roh.length; i++) u8[i] = roh.charCodeAt(i);
     const uv = new Float32Array(u8.buffer), info = new Map(L.objekte.map(o => [o.name, o]));
     const er = atob(L.ecken || ''), ecken = new Uint8Array(er.length); for (let i = 0; i < er.length; i++) ecken[i] = er.charCodeAt(i);
     U.jgLichtSkala.value = Math.PI*L.skala*LICHT_HELL;
-    const tex = new THREE.TextureLoader().load(L.bild); tex.colorSpace = THREE.SRGBColorSpace; tex.channel = 1;
-    tex.generateMipmaps = false; tex.minFilter = THREE.LinearFilter;      // keine Mipmaps: sonst färben benachbarte Inseln ab
+    if (!lichtTex) { lichtTex = new THREE.TextureLoader().load(L.bild); lichtTex.colorSpace = THREE.SRGBColorSpace; lichtTex.channel = 1;
+      lichtTex.generateMipmaps = false; lichtTex.minFilter = THREE.LinearFilter; }     // keine Mipmaps: sonst färben benachbarte Inseln ab
+    const tex = lichtTex;
     const kopie = new Map(), kop = (m, art) => { const k = art + m.uuid; if (!kopie.has(k)) { const c = m.clone();
         if (art === 'lm') { c.lightMap = tex; c.lightMapIntensity = Math.PI*L.skala*LICHT_HELL; }
         if (c.emissive) c.emissive.setRGB(0, 0, 0); c.userData = {...m.userData, jgGebacken:true, jgEcken:art === 'ecken'}; kopie.set(k, c); } return kopie.get(k); };
@@ -266,6 +272,26 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
       if (o.art === 'ecken') g.setAttribute('jgLicht', new THREE.BufferAttribute(ecken.subarray(o.versatz, o.versatz + 3*o.punkte), 3, true));
       else g.setAttribute('uv1', new THREE.BufferAttribute(uv.subarray(o.versatz, o.versatz + 2*o.punkte), 2));
       n.material = kop(n.material, o.art); if (n.userData.mats) n.userData.mats = n.userData.mats.map(m => kop(m, o.art)); gebacken++; }
+  }
+
+  // ---------- Halle: feste Teile vorberechnen (nach dem Aufbau der ganzen Szene aufrufen) ----------
+  // Alle Teile außerhalb der Räume, außer Figuren (userData.dynamisch), der Hand an der Kamera und selbstleuchtenden Schildern.
+  // Kleine bewegliche Teile (Griffe, Tasten, Tür) nehmen ihr vorberechnetes Licht einfach mit.
+  function halle(){
+    scene.updateMatrixWorld(true);
+    const liste = [], dyn = o => { for (let p = o; p; p = p.parent) if (p.userData.dynamisch || p === camera || !p.visible) return true; return false; };
+    scene.traverse(m => {
+      if (!m.isMesh || m.isInstancedMesh || m.isSkinnedMesh || m.userData.jgRaum || Array.isArray(m.material)) return;
+      const mt = m.material, g = m.geometry;
+      if (!mt.visible || mt.transparent || mt.depthWrite === false || !g.attributes.position || !g.attributes.normal || dyn(m)) return;
+      const lampe = mt.isMeshBasicMaterial && !mt.map && hell(mt.color);
+      if (mt.isMeshBasicMaterial && !lampe) return;                     // Schilder, Anzeigen: leuchten selbst
+      if (lampe) { W.setFromObject(m); W.getCenter(C); W.getSize(S);
+        if (C.y > 2.2 && S.y < 0.25) hallAnker.push({x:C.x, y:W.min.y - 0.1, z:C.z, echt:true, w:C.y > 4 ? 300 : 60}); }   // Hallenstrahler unter der hohen Decke stärker
+      if (g.index) m.geometry = g.toNonIndexed();                        // Punktreihenfolge wie beim Export
+      m.name = 'jh_' + liste.length; m.userData.lampe = lampe; liste.push(m); });
+    if (EXPORT) bakeExport(raumListe.concat(liste)); else wendeLichtAn(liste);
+    if (window.__grafik) window.__grafik.halle = liste.length;
   }
 
   // ---------- Export für das Vorberechnen des Lichts (tools/lichtbake.py) ----------
@@ -287,8 +313,9 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
           const e = m.emissive ? m.emissive.clone().multiplyScalar(m.emissiveIntensity || 1) : new THREE.Color(0, 0, 0);
           matIdx.set(m, mats.length); mats.push({farbe:[c.r, c.g, c.b], leucht:[e.r, e.g, e.b], lampe:!!n.userData.lampe || !!m.isMeshBasicMaterial,
                                                  rau:m.roughness ?? 1, metall:m.metalness ?? 0}); }
-        const g = n.geometry; objekte.push({name:n.name, mat:matIdx.get(m), pos:b64(g.attributes.position.array), nrm:b64(g.attributes.normal.array)}); }
-      pre.textContent = 'BAKEJSON ' + JSON.stringify({mats, objekte, anker:anker.map(a => ({x:a.x, y:a.y, z:a.z, echt:a.echt}))}) + ' BAKEENDE';
+        const g = n.geometry.clone().applyMatrix4(n.matrixWorld);       // Weltkoordinaten (Raumteile liegen schon so vor)
+        objekte.push({name:n.name, mat:matIdx.get(m), pos:b64(g.attributes.position.array), nrm:b64(g.attributes.normal.array)}); }
+      pre.textContent = 'BAKEJSON ' + JSON.stringify({mats, objekte, anker:anker.concat(hallAnker).map(a => ({x:a.x, y:a.y, z:a.z, echt:a.echt, w:a.w || 60}))}) + ' BAKEENDE';
     } catch (e) { pre.textContent = 'BAKEFEHLER ' + e.stack; } }, 2000);       // kurz warten, bis die Texturbilder geladen sind
   }
 
@@ -373,5 +400,5 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
     verteile(dt);
     if (quality === 3 && composer) composer.render(); else renderer.render(scene, camera);
   }
-  return {raeume, setQuality, resize, render, raumAn};
+  return {raeume, halle, setQuality, resize, render, raumAn};
 };

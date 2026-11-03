@@ -73,7 +73,7 @@ for o in d['objekte']:
     (lampen_objs if d['mats'][o['mat']]['lampe'] else objs).append(ob)
 
 for a in d['anker']:               # Flaechenlichter unter den Leuchten, nach unten gerichtet
-    L = bpy.data.lights.new('Lampe', 'AREA'); L.size = 0.6; L.energy = LAMPE_W; L.color = (1.0, 0.97, 0.92)
+    L = bpy.data.lights.new('Lampe', 'AREA'); L.size = 0.6; L.energy = a.get('w', LAMPE_W); L.color = (1.0, 0.97, 0.92)
     lo = bpy.data.objects.new('Lampe', L); lo.location = (a['x'], -a['z'], a['y'] + 0.1); sc.collection.objects.link(lo)
 
 lm_objs = [ob for ob in objs if ob['art'] == 'lm']; ecken_objs = [ob for ob in objs if ob['art'] == 'ecken']

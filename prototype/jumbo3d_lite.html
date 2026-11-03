@@ -85,6 +85,7 @@ import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 const Q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -403,7 +404,11 @@ const yellow = M(0xf0b800, {roughness:0.45, metalness:0.25}), blue = M(0x1c5fc4,
       steel = M(0xb9bdc4, {roughness:0.3, metalness:0.9}), dark = M(0x2a2e35, {roughness:0.45, metalness:0.6}), grey = M(0x3c4a5a);
 const hitMat = new THREE.MeshBasicMaterial({visible:false});
 function add(m, parent, shadow=true){ m.castShadow = m.receiveShadow = shadow; (parent || scene).add(m); return m; }
-function box(w,h,d,mat,x,y,z,parent){ const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); return add(m, parent); }
+// Kästen mit leicht gerundeten Kanten (1,2 cm): die schmalen Rundungen fangen Licht wie bei echten Gegenständen; sehr dünne Teile bleiben eckig
+function RundBox(w = 1, h = 1, d = 1, ...rest){ const m = Math.min(w, h, d);
+  return m < 0.02 || rest.length ? new THREE.BoxGeometry(w, h, d, ...rest) : new RoundedBoxGeometry(w, h, d, 1, Math.min(0.012, m*0.2)); }
+const THREE_R = {...THREE, BoxGeometry:RundBox};       // für raeume.js: dort werden alle Kästen über THREE.BoxGeometry gebaut
+function box(w,h,d,mat,x,y,z,parent){ const m = new THREE.Mesh(new RundBox(w,h,d), mat); m.position.set(x,y,z); return add(m, parent); }
 function cyl(r,len,mat,x,y,z,axis='y',parent,seg=24){ const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg), mat); m.position.set(x,y,z);
   if (axis === 'x') m.rotation.z = Math.PI/2; if (axis === 'z') m.rotation.x = Math.PI/2; return add(m, parent); }
 function bar(a,b,r,mat,parent){ const A = new THREE.Vector3(...a), d = new THREE.Vector3(...b).sub(A), L = d.length();
@@ -518,6 +523,7 @@ function figure(shirt, o={}){
     part(new THREE.BoxGeometry(0.038, 0.007, 0.008), M(0xa85d52), head, 0, -0.053, 0.093); }
   if (o.glasses) { for (const s of [-1, 1]) { part(new THREE.TorusGeometry(0.021, 0.0028, 6, 18), dk, head, s*0.037, 0.015, 0.1); part(new THREE.BoxGeometry(0.004, 0.004, 0.1), dk, head, s*0.094, 0.018, 0.05); }
     part(new THREE.BoxGeometry(0.02, 0.004, 0.004), dk, head, 0, 0.018, 0.101); }
+  g.userData.dynamisch = true;                         // Figuren laufen herum: kein vorberechnetes Licht (grafik.js)
   scene.add(g); pose(g, 0, 0, 0); return g;
 }
 // ph = Phase des Schritts, amt = 0 (steht) bis 1 (geht), t = Zeit in s (für Atmen und Umsehen im Stand)
@@ -650,7 +656,7 @@ for (const i of [0,1]) {
 const doorCol = {x0:0, x1:0, z0:TZ-1.25, z1:TZ+1.42, y0:DY-0.1, y1:5.4}, doorCol2 = {x0:0, x1:0, z0:TZ-0.4, z1:TZ+0.75, y0:DY-0.1, y1:5.4}; cols.push(doorCol, doorCol2);
 
 /* ---- Nachbarräume nach dem Grundriss (raeume.js, Daten aus tools/grundriss.py); bringt auch die Hallenwände als Kollision mit ---- */
-{ const vorher = new Set(scene.children); window.baueRaeume(THREE, scene, cols, cadMeshes); G.raeume(scene.children.filter(o => !vorher.has(o)), cadMeshes); }
+{ const vorher = new Set(scene.children); window.baueRaeume(THREE_R, scene, cols, cadMeshes); G.raeume(scene.children.filter(o => !vorher.has(o)), cadMeshes); }
 for (const d of window.raeumeTueren || []) {                     // Türen der Nachbarräume: mit E öffnen und schließen
   hit(d.id, null, ...(d.hit || [(d.x0 + d.x1)/2, 1.05, d.z, d.x1 - d.x0, 2.0, 0.4]));
   def(d.id, () => d.name + (d.offen ? ' schließen' : ' öffnen'), () => { d.offen = !d.offen; sfx('knock'); });
@@ -999,7 +1005,7 @@ function moveNpcs(dt, now){
 /* =====================================================================
    4) STEUERUNG + HAUPTSCHLEIFE
    ===================================================================== */
-const P = {x:-9.0, z:38.8, feet:0, yaw:-Math.PI/2, pitch:-0.02};   // Start im Flur 08 vor der ersten Tür zu Raum 019 (Arbeitsgruppe); zur Halle über 08b, 05 und 09
+const P = {x:-8.8, z:9.6, feet:0, yaw:0, pitch:-0.02};   // Start im Vorraum 09, Blick auf die Tür in die Jumbo-Halle
 const keys = {};
 const locked = () => document.pointerLockElement === canvas;
 let mouseLook = true; try { mouseLook = localStorage.getItem('jumboMouse') !== '0'; } catch(e) {}
@@ -1252,6 +1258,7 @@ if (Q.get('walk')) {
   r.labor018 = walk(-8.8, 47.0, 0, [[180, 12], [90, 50]]);                 // Flur 08 bis zur Doppeltür, hinein ins Labor 018 (x unter -11)
   $('testout').style.display = 'block'; $('testout').textContent = 'WALKRESULT ' + JSON.stringify(r);
 }
+G.halle();                                             // vorberechnetes Licht der Halle (grafik.js)
 applyQuality();
 requestAnimationFrame(frame);
 </script>

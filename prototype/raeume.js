@@ -1055,7 +1055,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const blau = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 512; const g = c.getContext('2d');
       g.fillStyle = '#1f3fae'; g.fillRect(0, 0, 256, 512); g.strokeStyle = 'rgba(10,20,60,0.5)'; g.lineWidth = 3; g.strokeRect(2, 2, 252, 508);
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
-    tuer('raumtuer_halle', 'Tür aus der Jumbo-Halle', -10.15, -8.2, 6.42, 1, foto || schlicht, blau, 2.08);     // zur Halle hin blau lackiert (Video)
+    tuer('raumtuer_halle', 'Tür zwischen Jumbo-Halle und Vorraum 09', -10.15, -8.2, 6.42, 1, foto || schlicht, blau, 2.08);     // zur Halle hin blau lackiert (Video)
     { const c = document.createElement('canvas'); c.width = 256; c.height = 96; const g = c.getContext('2d'); g.fillStyle = '#18a558'; g.fillRect(0, 0, 256, 96); g.fillStyle = '#fff';
       g.font = 'bold 60px system-ui'; g.fillText('↓', 30, 70); g.fillRect(150, 22, 56, 54); g.fillStyle = '#18a558'; g.fillRect(158, 28, 40, 42);
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.15), new THREE.MeshBasicMaterial({map:t, toneMapped:false}));
