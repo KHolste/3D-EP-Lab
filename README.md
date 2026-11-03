@@ -51,6 +51,9 @@ folgen dem Spieler), das Hallenlicht bleibt in der Halle, und unbewegliche Teile
 zusammengefasst, damit es auch auf Onboard-Grafik flüssig läuft. Die Rechenauflösung ist je Grafikstufe begrenzt.
 Ab Stufe „hoch“ bekommen alle Oberflächen je nach Materialklasse Struktur, Glanzunterschiede und Relief
 (Texturen von ambientCG.com, CC0, aus drei Richtungen projiziert; Klasse von Hand per `material.userData.jgKlasse` oder geschätzt).
+Das Licht der Räume ist vorberechnet (`prototype/cad/licht_data.js`, erzeugt mit `python tools\lichtbake.py`, braucht Blender):
+Wände, Böden und Decken haben eine Lightmap, kleinere Teile das Licht an ihren Eckpunkten. Bewegliche Teile und Metall
+bekommen weiter Echtzeitlicht. Teile, die sich seit dem Vorberechnen geändert haben, fallen automatisch auf Echtzeitlicht zurück.
 
 ### Testmodi
 
@@ -83,6 +86,7 @@ Alle Aufrufe gehen vom Repo-Wurzelordner aus.
 | `tools/glb_opt.py` | verschlankt die GLB zu `halle_data.js` bzw. mit `lite` zu `halle_lite.js` |
 | `tools/fototex.py` | schneidet aus `docs/fotos` kachelbare Texturen für `tex_lite.js` |
 | `tools/pbrtex.py` | lädt Oberflächentexturen (ambientCG, CC0) für Metall, Lack, Putz, Beton, Boden, Holz, Kunststoff und packt sie in `tex_pbr.js` |
+| `tools/lichtbake.py` | berechnet das Licht der Nachbarräume vor (exportiert die Räume aus dem Spiel, Blender/Cycles mit `tools/blender_licht.py`) und schreibt `licht_data.js`; nach Änderungen an den Räumen neu ausführen |
 | `tools/tuertex.py` | entzerrt das Foto der Türanlage am Ende von Flur 05 zur Textur `tuer05` |
 | `tools/postertex.py` | entzerrt die Poster am Ende von Flur 05 zu den Texturen `poster_*` |
 | `tools/fenstertex.py` | baut aus dem Foto von Raum 019 die Fenstertextur `fenster019` |

@@ -43,7 +43,7 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
   const mapTex = new THREE.DataTexture(ids, NX, NZ, THREE.RedFormat, THREE.UnsignedByteType);
   mapTex.magFilter = mapTex.minFilter = THREE.NearestFilter; mapTex.unpackAlignment = 1; mapTex.needsUpdate = true;   // Zeilen sind nicht durch 4 teilbar
   const U = { jgMap:{value:mapTex}, jgMin:{value:new THREE.Vector2(X0, Z0)}, jgSize:{value:new THREE.Vector2(NX*CELL, NZ*CELL)},
-             jgUmgebungRaum:{value:1}, jgDetail:{value:0} };
+             jgUmgebungRaum:{value:1}, jgDetail:{value:0}, jgLichtSkala:{value:1} };
 
   // ---------- Licht-Shader aller Materialien erweitern ----------
   const KAB = [-15.03, -10.0, 0.27, 5.85, 3.4].map(v => v.toFixed(3));   // als GLSL-Kommazahlen;             // EMV-Kabine (innen): dort scheint keine Hallensonne hinein
@@ -55,11 +55,23 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
       bool jgKab = jgW.x > ${KAB[0]} && jgW.x < ${KAB[1]} && jgW.z > ${KAB[2]} && jgW.z < ${KAB[3]} && jgW.y < ${KAB[4]};
       float jgSonne = ( jgRaum < 0.5 && ! jgKab ) ? 1.0 : 0.0;
       float jgUmgebung = jgSonne > 0.5 ? 1.0 : jgUmgebungRaum;   // Grundhelligkeit in den Räumen (Himmelslicht, Umgebungsbild) gedämpft
+      float jgUmgDiff = jgUmgebung, jgUmgSpieg = sqrt( jgUmgebung );
+      #ifdef JG_BAKED
+        jgUmgDiff = 0.0; jgUmgSpieg = 0.6;      // vorberechnetes Licht (Lightmap) ersetzt Grundhelligkeit und Raumlampen; Spiegelungen bleiben
+      #endif
       #ifdef STANDARD
       if ( jgDetail > 0.0 ) {                    // kleine Unregelmäßigkeiten: keine Fläche ist überall gleich hell und gleich glänzend
         float jgGrob = jgRausch( jgW * 1.7 ) - 0.5, jgFein = jgRausch( jgW * 9.0 ) - 0.5;
         material.roughness = clamp( material.roughness * ( 1.0 + jgGrob * 0.3 * jgDetail ), 0.0525, 1.0 );   // Glanz: nur großflächig
         material.diffuseColor *= 1.0 + ( jgGrob * 0.08 + jgFein * 0.04 ) * jgDetail;
+        // Gebrauchsspuren: Schmutzrand am Wandfuß, Laufspuren und Flecken auf dem Boden (matter, etwas dunkler)
+        vec3 jgNs = transpose( mat3( viewMatrix ) ) * normal;
+        float jgFuss = ( 1.0 - smoothstep( 0.02, 0.45, jgW.y ) ) * step( -0.02, jgW.y ) * ( 1.0 - abs( jgNs.y ) );
+        material.diffuseColor *= 1.0 - jgFuss * clamp( 0.16 + 0.5 * jgGrob + 0.3 * jgFein, 0.0, 0.4 ) * jgDetail;
+        float jgBoden = step( 0.85, jgNs.y ) * ( 1.0 - step( 0.06, abs( jgW.y ) ) );
+        float jgFleck = smoothstep( 0.58, 0.82, jgRausch( jgW * vec3( 0.9, 1.0, 0.45 ) ) ) * 0.7 + smoothstep( 0.62, 0.9, jgRausch( jgW * 4.0 + 7.0 ) ) * 0.3;
+        material.diffuseColor *= 1.0 - 0.22 * jgFleck * jgBoden * jgDetail;
+        material.roughness = mix( material.roughness, min( 1.0, material.roughness + 0.3 ), jgFleck * jgBoden * jgDetail );
       }
       #ifdef JG_PBR
       if ( jgDetail > 0.0 ) {                    // Oberflächentextur der Materialklasse, aus drei Richtungen projiziert (Objekte ohne passende Texturkoordinaten)
@@ -68,41 +80,51 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
         vec3 jgQ = jgW / jgPbrSkala;
         vec4 jgTx = texture2D( jgPbr, jgQ.zy ), jgTy = texture2D( jgPbr, jgQ.xz ), jgTz = texture2D( jgPbr, jgQ.xy );
         vec4 jgT = jgTx * jgB.x + jgTy * jgB.y + jgTz * jgB.z;
+        #ifdef JG_PBR_FARBE
+        material.diffuseColor *= mix( vec3( 1.0 ), 2.0 * jgT.rgb, jgPbrStaerke.x );      // Farbtextur (z. B. Holzmaserung) um die Grundfarbe herum
+        material.roughness = clamp( material.roughness * mix( 1.0, 2.0 * jgT.a, jgPbrStaerke.y ), 0.0525, 1.0 );
+        #else
         material.diffuseColor *= mix( 1.0, 2.0 * jgT.r, jgPbrStaerke.x );
         material.roughness = clamp( material.roughness * mix( 1.0, 2.0 * jgT.g, jgPbrStaerke.y ), 0.0525, 1.0 );
         vec2 jgNx = jgTx.ba * 2.0 - 1.0, jgNy = jgTy.ba * 2.0 - 1.0, jgNz = jgTz.ba * 2.0 - 1.0;
         vec3 jgRelief = jgB.x * vec3( 0.0, jgNx.y, jgNx.x ) + jgB.y * vec3( jgNy.x, 0.0, jgNy.y ) + jgB.z * vec3( jgNz.x, jgNz.y, 0.0 );
         normal = normalize( mat3( viewMatrix ) * normalize( jgNw + jgRelief * jgPbrStaerke.z ) );
+        #endif
       }
       #endif
       #endif
 ` + THREE.ShaderChunk.lights_fragment_begin
     .replace('irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal );',
-             'irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal ) * jgUmgebung;')
+             'irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal ) * jgUmgDiff;')
     .replace('getPointLightInfo( pointLight, geometryPosition, directLight );', `getPointLightInfo( pointLight, geometryPosition, directLight );
       { float jgId = floor( ( pointLight.decay - 2.0 ) * 10000.0 + 0.5 );
-        if ( jgId > 0.5 && jgRaum != jgId && jgRaum < 254.5 ) directLight.color = vec3( 0.0 ); }`)
+        if ( jgId > 0.5 && jgRaum != jgId && jgRaum < 254.5 ) directLight.color = vec3( 0.0 );
+        #ifdef JG_BAKED
+        if ( jgId > 0.5 ) directLight.color = vec3( 0.0 );
+        #endif
+      }`)
     .replace('getDirectionalLightInfo( directionalLight, directLight );', `getDirectionalLightInfo( directionalLight, directLight );
       directLight.color *= jgSonne;`);
   const maps = THREE.ShaderChunk.lights_fragment_maps
-    .replace('iblIrradiance += getIBLIrradiance( geometryNormal );', 'iblIrradiance += getIBLIrradiance( geometryNormal ) * jgUmgebung;')
+    .replace('iblIrradiance += getIBLIrradiance( geometryNormal );', 'iblIrradiance += getIBLIrradiance( geometryNormal ) * jgUmgDiff;')
+    .replace('#if defined( RE_IndirectDiffuse )', '#if defined( RE_IndirectDiffuse )\n\t#ifdef JG_ECKEN\n\t\tirradiance += pow( vJgLicht, vec3( 2.2 ) ) * jgLichtSkala;\n\t#endif')
     .replace('radiance += getIBLRadiance( geometryViewDir, geometryNormal, material.roughness );',
-             'radiance += getIBLRadiance( geometryViewDir, geometryNormal, material.roughness ) * sqrt( jgUmgebung );');
+             'radiance += getIBLRadiance( geometryViewDir, geometryNormal, material.roughness ) * jgUmgSpieg;');
   const RAUSCHEN = `
     float jgHash( vec3 p ) { p = fract( p * 0.3183099 + 0.1 ); p *= 17.0; return fract( p.x * p.y * p.z * ( p.x + p.y + p.z ) ); }
     float jgRausch( vec3 x ) { vec3 i = floor( x ), f = fract( x ); f = f * f * ( 3.0 - 2.0 * f );
       return mix( mix( mix( jgHash( i ), jgHash( i + vec3( 1.0, 0.0, 0.0 ) ), f.x ), mix( jgHash( i + vec3( 0.0, 1.0, 0.0 ) ), jgHash( i + vec3( 1.0, 1.0, 0.0 ) ), f.x ), f.y ),
                   mix( mix( jgHash( i + vec3( 0.0, 0.0, 1.0 ) ), jgHash( i + vec3( 1.0, 0.0, 1.0 ) ), f.x ), mix( jgHash( i + vec3( 0.0, 1.0, 1.0 ) ), jgHash( i + vec3( 1.0, 1.0, 1.0 ) ), f.x ), f.y ), f.z ); }
 `;
-  const patchOk = chunk.includes('jgSonne;') && chunk.includes('jgId') && chunk.includes('* jgUmgebung') && maps.includes('sqrt( jgUmgebung )');
+  const patchOk = chunk.includes('jgSonne;') && chunk.includes('jgId') && chunk.includes('* jgUmgDiff') && maps.includes('jgUmgSpieg');
   // Oberflächentexturen je Materialklasse (cad/tex_pbr.js, erzeugt von tools/pbrtex.py):
   // skala = Kachelgröße in Metern, staerke = (Helligkeitsstruktur, Glanzunterschiede, Relief)
-  const PBR = {}, PBR_ART = {metall:[1.0, [0.15, 0.35, 0.35]], lack:[0.5, [0.25, 0.5, 0.35]], putz:[1.2, [0.5, 0.5, 0.6]], beton:[1.5, [0.6, 0.5, 0.6]],
-                              boden:[1.2, [0.6, 0.7, 0.4]], holz:[0.8, [0.9, 0.6, 0.4]], kunststoff:[0.4, [0.3, 0.6, 0.3]]};
-  if (window.TEX_PBR) for (const [k, [skala, st]] of Object.entries(PBR_ART)) { if (!window.TEX_PBR[k]) continue;
-    const t = new THREE.TextureLoader().load(window.TEX_PBR[k]); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;   // Daten, kein sRGB
-    PBR[k] = {tex:t, skala, staerke:new THREE.Vector3(...st)}; }
-  THREE.Material.prototype.customProgramCacheKey = function(){ return this.userData.jgKlasse && PBR[this.userData.jgKlasse] ? 'jgpbr' : 'jg'; };
+  const PBR = {}, PBR_ART = {metall:[1.0, [0.15, 0.35, 0.35]], lack:[0.5, [0.45, 0.6, 0.5]], putz:[1.2, [1.2, 0.6, 0.8]], beton:[1.5, [1.0, 0.6, 0.8]],
+                              boden:[1.2, [1.8, 0.8, 0.6]], holz:[0.9, [2.4, 0.6, 0.0]], kunststoff:[0.4, [0.45, 0.6, 0.45]]};
+  if (window.TEX_PBR) for (const [k, [skala, st]] of Object.entries(PBR_ART)) { const e = window.TEX_PBR[k]; if (!e) continue;
+    const t = new THREE.TextureLoader().load(e.bild || e); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;   // Daten, kein sRGB
+    PBR[k] = {tex:t, skala, staerke:new THREE.Vector3(...st), farbe:e.art === 'farbe'}; }
+  THREE.Material.prototype.customProgramCacheKey = function(){ const P = this.userData.jgKlasse && PBR[this.userData.jgKlasse]; return (P ? (P.farbe ? 'jgpbrf' : 'jgpbr') : 'jg') + (this.userData.jgGebacken ? 'b' : '') + (this.userData.jgEcken ? 'e' : ''); };
   // Klasse eines Materials: von Hand gesetzt (material.userData.jgKlasse) oder aus Farbe und Glanz geschätzt
   function klasse(m){
     if (!m.isMeshStandardMaterial || m.userData.jgKlasse !== undefined) return;
@@ -119,7 +141,13 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
     Object.assign(shader.uniforms, U);
     const k = this.userData.jgKlasse, P = k && PBR[k];
     if (P) Object.assign(shader.uniforms, {jgPbr:{value:P.tex}, jgPbrSkala:{value:P.skala}, jgPbrStaerke:{value:P.staerke}});
-    shader.fragmentShader = (P ? '#define JG_PBR\nuniform sampler2D jgPbr;\nuniform float jgPbrSkala;\nuniform vec3 jgPbrStaerke;\n' : '') + 'uniform sampler2D jgMap;\nuniform vec2 jgMin;\nuniform vec2 jgSize;\nuniform float jgUmgebungRaum;\nuniform float jgDetail;\n' + RAUSCHEN +
+    if (this.userData.jgGebacken) shader.fragmentShader = '#define JG_BAKED\n' + shader.fragmentShader;
+    if (this.userData.jgEcken) {                  // vorberechnetes Licht je Eckpunkt (kleine Teile)
+      shader.uniforms.jgLichtSkala = U.jgLichtSkala;
+      shader.vertexShader = 'attribute vec3 jgLicht;\nvarying vec3 vJgLicht;\n' + shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvJgLicht = jgLicht;');
+      shader.fragmentShader = '#define JG_ECKEN\nvarying vec3 vJgLicht;\nuniform float jgLichtSkala;\n' + shader.fragmentShader;
+    }
+    shader.fragmentShader = (P ? (P.farbe ? '#define JG_PBR_FARBE\n' : '') + '#define JG_PBR\nuniform sampler2D jgPbr;\nuniform float jgPbrSkala;\nuniform vec3 jgPbrStaerke;\n' : '') + 'uniform sampler2D jgMap;\nuniform vec2 jgMin;\nuniform vec2 jgSize;\nuniform float jgUmgebungRaum;\nuniform float jgDetail;\n' + RAUSCHEN +
       shader.fragmentShader.replace('#include <lights_fragment_begin>', chunk).replace('#include <lights_fragment_maps>', maps);
   };
 
@@ -168,7 +196,8 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
       for (const mt of [].concat(m.material)) mats.add(mt); if (m.userData.mats) for (const mt of m.userData.mats) mats.add(mt); });
     raumMats = [...mats].filter(m => m.emissive && !lampen.has(m) && m.emissive.r + m.emissive.g + m.emissive.b > 0.05).map(m => [m, m.emissive.clone()]);
     lampenMats = [...lampen].map(m => [m, m.isMeshBasicMaterial ? m.color.clone() : m.emissiveIntensity]);
-    window.__grafik = {anker:anker.length, raeume:flaeche.length - 1, lampen:lampenMats.length, raumMats:raumMats.length, patchOk, teileVorher:zahl.vorher, teileNachher:zahl.nachher};
+    if (new URLSearchParams(location.search).has('bakeexport')) bakeExport(zahl.neu); else wendeLichtAn(zahl.neu);
+    window.__grafik = {anker:anker.length, raeume:flaeche.length - 1, lampen:lampenMats.length, raumMats:raumMats.length, patchOk, teileVorher:zahl.vorher, teileNachher:zahl.nachher, gebacken};
     setQuality(quality, true);
   }
 
@@ -202,18 +231,65 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
       const key = [m.material.uuid, mats ? mats.map(x => x.uuid).join(',') : '', m.castShadow, m.receiveShadow, m.renderOrder, attr, zelle].join('|');
       if (!gruppen.has(key)) gruppen.set(key, []); gruppen.get(key).push({m, mats}); }
     const neu = [], weg = new Set(); let nachher = alle.length;
-    for (const liste of gruppen.values()) { if (liste.length < 2) continue;
+    for (const liste of gruppen.values()) {      // auch einzelne Teile: alle unbeweglichen Teile liegen danach als benannte Objekte in Weltkoordinaten vor (Lightmap)
       const geos = liste.map(({m}) => { const g = (m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone()); g.clearGroups(); g.applyMatrix4(m.matrixWorld);   // Untergruppen (z. B. Würfelseiten) sind bei nur einem Material bedeutungslos
         if (m.matrixWorld.determinant() < 0) for (const a of Object.values(g.attributes)) for (let i = 0; i < a.count; i += 3)     // gespiegelt: Dreiecke umdrehen
           for (let k = 0; k < a.itemSize; k++) { const t = a.getComponent(i + 1, k); a.setComponent(i + 1, k, a.getComponent(i + 2, k)); a.setComponent(i + 2, k, t); }
         return g; });
       const geo = mergeGeometries(geos, false); if (!geo) continue;
-      const m0 = liste[0].m, n = new THREE.Mesh(geo, m0.material);
+      const m0 = liste[0].m, n = new THREE.Mesh(geo, m0.material); n.name = 'jg_' + neu.length; n.userData.lampe = lampen.has(m0.material);
       n.castShadow = m0.castShadow; n.receiveShadow = m0.receiveShadow; n.renderOrder = m0.renderOrder; if (liste[0].mats) n.userData.mats = liste[0].mats;
       for (const {m} of liste) { m.parent.remove(m); weg.add(m); }
       if (liste[0].mats) cadMeshes.push(n); scene.add(n); neu.push(n); nachher += 1 - liste.length; }
     for (let i = cadMeshes.length - 1; i >= 0; i--) if (weg.has(cadMeshes[i])) cadMeshes.splice(i, 1);
     return {neu, vorher:alle.length, nachher};
+  }
+
+  // ---------- Vorberechnetes Licht (cad/licht_data.js, erzeugt von tools/lichtbake.py) ----------
+  // Jedes Objekt mit passender Punktzahl bekommt Lightmap-Koordinaten (uv1) und Materialkopien mit der Lightmap.
+  const LICHT_HELL = 0.7;                       // Gesamthelligkeit des vorberechneten Lichts
+  let gebacken = 0;
+  function wendeLichtAn(liste){
+    const L = window.LICHT; if (!L) return;
+    const roh = atob(L.uv), u8 = new Uint8Array(roh.length); for (let i = 0; i < roh.length; i++) u8[i] = roh.charCodeAt(i);
+    const uv = new Float32Array(u8.buffer), info = new Map(L.objekte.map(o => [o.name, o]));
+    const er = atob(L.ecken || ''), ecken = new Uint8Array(er.length); for (let i = 0; i < er.length; i++) ecken[i] = er.charCodeAt(i);
+    U.jgLichtSkala.value = Math.PI*L.skala*LICHT_HELL;
+    const tex = new THREE.TextureLoader().load(L.bild); tex.colorSpace = THREE.SRGBColorSpace; tex.channel = 1;
+    tex.generateMipmaps = false; tex.minFilter = THREE.LinearFilter;      // keine Mipmaps: sonst färben benachbarte Inseln ab
+    const kopie = new Map(), kop = (m, art) => { const k = art + m.uuid; if (!kopie.has(k)) { const c = m.clone();
+        if (art === 'lm') { c.lightMap = tex; c.lightMapIntensity = Math.PI*L.skala*LICHT_HELL; }
+        if (c.emissive) c.emissive.setRGB(0, 0, 0); c.userData = {...m.userData, jgGebacken:true, jgEcken:art === 'ecken'}; kopie.set(k, c); } return kopie.get(k); };
+    for (const n of liste) { const o = info.get(n.name), g = n.geometry;
+      if (!o || o.punkte !== g.attributes.position.count) continue;            // Raum hat sich seit dem Vorberechnen geändert
+      if (n.material.metalness >= 0.5) continue;                                // Metall lebt von Spiegelungen und Glanzlichtern: behält das Echtzeitlicht
+      if (o.art === 'ecken') g.setAttribute('jgLicht', new THREE.BufferAttribute(ecken.subarray(o.versatz, o.versatz + 3*o.punkte), 3, true));
+      else g.setAttribute('uv1', new THREE.BufferAttribute(uv.subarray(o.versatz, o.versatz + 2*o.punkte), 2));
+      n.material = kop(n.material, o.art); if (n.userData.mats) n.userData.mats = n.userData.mats.map(m => kop(m, o.art)); gebacken++; }
+  }
+
+  // ---------- Export für das Vorberechnen des Lichts (tools/lichtbake.py) ----------
+  // ?bakeexport=1: schreibt alle unbeweglichen Raumteile (Dreiecke in Weltkoordinaten, Reihenfolge wie im Spiel),
+  // ihre Materialfarben und die Lampenpositionen als JSON in ein <pre id="bakeout">. Blender liefert dazu je Objekt
+  // die Lightmap-Koordinaten in derselben Punktreihenfolge zurück.
+  function bakeExport(liste){
+    const pre = document.createElement('pre'); pre.id = 'bakeout'; document.body.appendChild(pre);
+    setTimeout(() => { try {
+      const b64 = arr => { const u = new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength); let s = '';
+        for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+      const mittel = (t) => { const im = t && t.image; if (!im || !im.width) return null;           // mittlere Farbe einer Textur (linear)
+        const c = document.createElement('canvas'); c.width = c.height = 16; const g = c.getContext('2d'); g.drawImage(im, 0, 0, 16, 16);
+        const d = g.getImageData(0, 0, 16, 16).data; let r = 0, gg = 0, bb = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i+1]; bb += d[i+2]; }
+        return new THREE.Color().setRGB(r/256/255, gg/256/255, bb/256/255, THREE.SRGBColorSpace); };
+      const mats = [], matIdx = new Map(), objekte = [];
+      for (const n of liste) { const m = n.material;
+        if (!matIdx.has(m)) { const c = (m.color ? m.color.clone() : new THREE.Color(1, 1, 1)), t = mittel(m.map); if (t) c.multiply(t);
+          const e = m.emissive ? m.emissive.clone().multiplyScalar(m.emissiveIntensity || 1) : new THREE.Color(0, 0, 0);
+          matIdx.set(m, mats.length); mats.push({farbe:[c.r, c.g, c.b], leucht:[e.r, e.g, e.b], lampe:!!n.userData.lampe || !!m.isMeshBasicMaterial,
+                                                 rau:m.roughness ?? 1, metall:m.metalness ?? 0}); }
+        const g = n.geometry; objekte.push({name:n.name, mat:matIdx.get(m), pos:b64(g.attributes.position.array), nrm:b64(g.attributes.normal.array)}); }
+      pre.textContent = 'BAKEJSON ' + JSON.stringify({mats, objekte, anker:anker.map(a => ({x:a.x, y:a.y, z:a.z, echt:a.echt}))}) + ' BAKEENDE';
+    } catch (e) { pre.textContent = 'BAKEFEHLER ' + e.stack; } }, 2000);       // kurz warten, bis die Texturbilder geladen sind
   }
 
   // ---------- Nachbearbeitung ----------

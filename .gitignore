@@ -21,3 +21,5 @@ Bilder f*r 3D-Kamera/
 
 # Downloads von tools/pbrtex.py
 tools/_pbr_download/
+# Zwischenstaende von tools/lichtbake.py
+tools/_bake/
