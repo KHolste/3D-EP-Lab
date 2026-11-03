@@ -33,7 +33,7 @@ Die Spiele selbst liegen in `prototype/` und lassen sich auch direkt öffnen:
 | `H` | Anleitung zum Evakuieren |
 | `Tab` | Übersicht |
 | `T` | Zeitraffer |
-| `G` | Grafikqualität |
+| `G` | Grafikqualität: niedrig, mittel, hoch, sehr hoch (Schatten der Raumlampen, Eckenabdunkelung; nur für eigene Grafikkarten) |
 | `B` | Boden |
 | `N` | Musik an/aus |
 | `Esc` | Pause |
@@ -45,6 +45,12 @@ neben der EMV-Kabine geht es nach Raum 09 und von dort in die Flure und Räume. 
 werden nach und nach anhand von Fotos eingerichtet (`prototype/raeume.js`). Im Treppenhaus 020 kann man bis zur (geschlossenen)
 Tür ins 1. Obergeschoss hinaufgehen und in den Keller hinunter. Raum 019 ist nach einem Foto eingerichtet
 (Fenster, Arbeitstische, Leuchten).
+
+Licht und Grafik der Räume steuert `prototype/grafik.js`: Die Deckenleuchten beleuchten ihren Raum (wenige wandernde Lichtquellen
+folgen dem Spieler), das Hallenlicht bleibt in der Halle, und unbewegliche Teile der Räume werden zu wenigen Objekten
+zusammengefasst, damit es auch auf Onboard-Grafik flüssig läuft. Die Rechenauflösung ist je Grafikstufe begrenzt.
+Ab Stufe „hoch“ bekommen alle Oberflächen je nach Materialklasse Struktur, Glanzunterschiede und Relief
+(Texturen von ambientCG.com, CC0, aus drei Richtungen projiziert; Klasse von Hand per `material.userData.jgKlasse` oder geschätzt).
 
 ### Testmodi
 
@@ -76,6 +82,7 @@ Alle Aufrufe gehen vom Repo-Wurzelordner aus.
 | `tools/step_tess.py` | liest die tessellierten Bauteile (z. B. EMV-Kabine) direkt aus der STEP-Datei |
 | `tools/glb_opt.py` | verschlankt die GLB zu `halle_data.js` bzw. mit `lite` zu `halle_lite.js` |
 | `tools/fototex.py` | schneidet aus `docs/fotos` kachelbare Texturen für `tex_lite.js` |
+| `tools/pbrtex.py` | lädt Oberflächentexturen (ambientCG, CC0) für Metall, Lack, Putz, Beton, Boden, Holz, Kunststoff und packt sie in `tex_pbr.js` |
 | `tools/tuertex.py` | entzerrt das Foto der Türanlage am Ende von Flur 05 zur Textur `tuer05` |
 | `tools/postertex.py` | entzerrt die Poster am Ende von Flur 05 zu den Texturen `poster_*` |
 | `tools/fenstertex.py` | baut aus dem Foto von Raum 019 die Fenstertextur `fenster019` |

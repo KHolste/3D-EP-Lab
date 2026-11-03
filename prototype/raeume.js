@@ -111,20 +111,21 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // Leicht selbstleuchtende Flächen, weil die Räume keine eigenen Lampen haben und die Decke kein Licht wirft
   const mats = (color, emissive, map = null) => [new THREE.MeshLambertMaterial({color, emissive, map, emissiveMap:map}),
                                           new THREE.MeshStandardMaterial({color, emissive, map, emissiveMap:map, roughness:0.92, metalness:0})];
-  const mesh = (geo, m) => { const o = new THREE.Mesh(geo, m[1]); o.userData.mats = m; cadMeshes.push(o); scene.add(o); return o; };   // castShadow/receiveShadow bleiben aus
+  const mesh = (geo, m, k) => { if (k) for (const x of m) x.userData.jgKlasse = k;   // k: Oberflächenklasse für grafik.js (putz, boden, beton …)
+    const o = new THREE.Mesh(geo, m[1]); o.userData.mats = m; cadMeshes.push(o); scene.add(o); return o; };   // castShadow/receiveShadow bleiben aus
   // Räume: Wände wie in der Halle, weiß gestrichener, brettgeschalter Beton (Textur 'wand', Kachel 1,3 m)
   // Räume: auf allen Fotos glatt weiß gestrichen wie die Flure (früher Beton wie in der Halle), nur ohne schwarze Leiste
-  mesh(beton.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)));   // hell wie auf den Fotos, auch auf der Schattenseite
+  mesh(beton.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)), 'putz');   // hell wie auf den Fotos, auch auf der Schattenseite
   // Flure: glatter, weißer Anstrich mit leichter Struktur (Textur 'flurwand' nach dem Foto am Ende von Flur 05), schwarze Sockelleiste
-  mesh(flurW.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)));
+  mesh(flurW.geo(), mats(0xf6f7f7, 0x9a9b9b, tex('flurwand', 0.8, 1.2, true)), 'putz');
   { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#efe3c3'; g.fillRect(0, 0, 128, 128);
     for (let i = 0; i < 2500; i++) { const v = Math.random(); g.fillStyle = v < 0.5 ? 'rgba(150,130,90,0.16)' : 'rgba(255,255,245,0.3)'; g.fillRect(Math.random()*128, Math.random()*128, 1 + (v*2|0), 1 + (v*2|0)); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/0.5, 1/0.5);
     { const c2 = document.createElement('canvas'); c2.width = 256; c2.height = 128; const q = c2.getContext('2d'); q.fillStyle = '#f5f5f2'; q.fillRect(0, 0, 256, 128);
       q.fillStyle = '#dcdcd8'; for (let r = 0; r < 4; r++) { q.fillRect(0, r*32, 256, 3); for (let k = 0; k < 2; k++) q.fillRect((k*128 + (r % 2)*64) % 256, r*32, 3, 32); }
       const t2 = new THREE.CanvasTexture(c2); t2.colorSpace = THREE.SRGBColorSpace; t2.wrapS = t2.wrapT = THREE.RepeatWrapping; t2.repeat.set(1/1.0, 1/0.5);
-      mesh(gangW.geo(), [new THREE.MeshLambertMaterial({map:t2, emissive:0x6a6a68, emissiveMap:t2}), new THREE.MeshStandardMaterial({map:t2, emissive:0x6a6a68, emissiveMap:t2, roughness:0.9, metalness:0})]); }
-    mesh(treppeW.geo(), [new THREE.MeshLambertMaterial({map:t, emissive:0x5a5448, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x5a5448, emissiveMap:t, roughness:0.95, metalness:0})]); }
+      mesh(gangW.geo(), [new THREE.MeshLambertMaterial({map:t2, emissive:0x6a6a68, emissiveMap:t2}), new THREE.MeshStandardMaterial({map:t2, emissive:0x6a6a68, emissiveMap:t2, roughness:0.9, metalness:0})], 'putz'); }
+    mesh(treppeW.geo(), [new THREE.MeshLambertMaterial({map:t, emissive:0x5a5448, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x5a5448, emissiveMap:t, roughness:0.95, metalness:0})], 'putz'); }
   mesh(leiste.geo(), [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5, metalness:0})]);
   for (const [x0, x1, z0, z1] of R.walls) cols.push({x0, x1, z0, z1, y0:-1, y1:HR});
 
@@ -146,24 +147,24 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const bodenFl = (F, y, rects) => { for (const r of rects) for (const [x0, x1, z0, z1] of ohneLoch(r)) F.add([0,1,0], [[x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0]]); };
   { const F = flaechen(); bodenFl(F, 0.002, [[bx0, bx1, bz0, bz1]]);
     if (bodenM[0].map) { bodenM[0].map.repeat.set(1/0.7, 1/1.6); }       // Flächen haben UV in Metern
-    mesh(F.geo(), bodenM); }
+    mesh(F.geo(), bodenM, 'boden'); }
   // Flurboden: hellgrauer Belag mit dunklen Sprenkeln (Textur 'flurboden', Kachel 1,0 x 0,5 m), knapp über dem Raumboden
   const FLg = FL.filter(r => (r[2] + r[3])/2 > 19.65), FLs = FL.filter(r => (r[2] + r[3])/2 <= 19.65);
   { const F = flaechen(); bodenFl(F, 0.005, FLg.concat([[-15.54, -10.37, 36.41, 61.08]]));
     const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#a7abad'; g.fillRect(0, 0, 64, 64);
     for (let i = 0; i < 300; i++) { g.fillStyle = 'rgba(70,70,70,0.08)'; g.fillRect(Math.random()*64, Math.random()*64, 2, 2); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/1.5, 1/1.5);
-    mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x6c6e70}), new THREE.MeshStandardMaterial({map:t, color:0x5e6062, roughness:0.55, metalness:0.05})]); }
+    mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x6c6e70}), new THREE.MeshStandardMaterial({map:t, color:0x5e6062, roughness:0.38, metalness:0.05})], 'boden'); }
   { const F = flaechen(); bodenFl(F, 0.004, FLs);
     const t = tex('flurboden', 1.0, 0.5, true);
-    mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x9a9a9a}), new THREE.MeshStandardMaterial({map:t, color:0x8c8c8c, roughness:0.75, metalness:0})]); }
+    mesh(F.geo(), [new THREE.MeshLambertMaterial({map:t, color:0x9a9a9a}), new THREE.MeshStandardMaterial({map:t, color:0x8c8c8c, roughness:0.5, metalness:0})], 'boden'); }
   // Eingerichtete Räume (019): heller, glatter Beschichtungsboden wie auf dem Foto
-  { const F = flaechen(); bodenFl(F, 0.004, WS); mesh(F.geo(), [new THREE.MeshLambertMaterial({color:0xcfcdc4}), new THREE.MeshStandardMaterial({color:0xcfcdc4, roughness:0.55, metalness:0})]); }
+  { const F = flaechen(); bodenFl(F, 0.004, WS); mesh(F.geo(), [new THREE.MeshLambertMaterial({color:0xcfcdc4}), new THREE.MeshStandardMaterial({color:0xcfcdc4, roughness:0.3, metalness:0})], 'boden'); }
   // Decke: überall auf 3 m, über dem Treppenhaus offen; der Treppenraum hat seine Decke auf 6,8 m
   { const F = flaechen(), unten = (x0, x1, y, z0, z1) => F.add([0,-1,0], [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]]);
     unten(bx0, bx1, HR, bz0, T.zN); unten(bx0, bx1, HR, T.zS, bz1); unten(bx0, T.xW, HR, T.zN, T.zS); unten(T.xO, bx1, HR, T.zN, T.zS);
     unten(T.xW, T.xO, T.oben, T.zN, T.zS);
-    mesh(F.geo(), mats(0xe6e6e2, 0x9a9a96)); }
+    mesh(F.geo(), mats(0xe6e6e2, 0x9a9a96), 'putz'); }
   // Deckenverkleidung nach den Fotos: in den Fluren weiße Paneele quer zur Laufrichtung, in 09 eine Rasterdecke (62,5 cm) mit Leuchtpaneel
   { const R09 = [-10.15, -7.44, 6.513, 12.82], innen = (r, q) => (r[0] + r[1])/2 > q[0] && (r[0] + r[1])/2 < q[1] && (r[2] + r[3])/2 > q[2] && (r[2] + r[3])/2 < q[3];
     const loch = [T.xW, T.xO, T.zN, T.zS];
@@ -181,7 +182,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const unten = (F, [x0, x1, z0, z1]) => F.add([0,-1,0], [[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]]);
     for (const r of FLs) for (const q of clip(r, loch)) { if (innen(q, R09)) unten(F9, q); else unten(q[1] - q[0] > q[3] - q[2] ? Fx : Fz, q); }
     const mm = t => [new THREE.MeshLambertMaterial({map:t, emissive:0x8a8a88, emissiveMap:t}), new THREE.MeshStandardMaterial({map:t, emissive:0x8a8a88, emissiveMap:t, roughness:0.9, metalness:0})];
-    mesh(Fx.geo(), mm(linien(true))); mesh(Fz.geo(), mm(linien(false))); mesh(F9.geo(), mm(raster));
+    mesh(Fx.geo(), mm(linien(true)), 'kunststoff'); mesh(Fz.geo(), mm(linien(false)), 'kunststoff'); mesh(F9.geo(), mm(raster), 'putz');
     const panel = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.01, 0.6), new THREE.MeshBasicMaterial({color:0xffffff})); panel.position.set(-8.8, HR - 0.01, 8.7); scene.add(panel);
     const panel2 = panel.clone(); panel2.position.z = 11.2; scene.add(panel2); }
   // Stufen und Podeste: Beton mit dunklem Belag. Nach oben frei liegende Stufen (30 cm stark), in den Keller massiv bis zur Kellersohle
@@ -205,7 +206,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const x2 = T.xP + (T.xB - T.xP)*(i)/n; kasten(N, x2 - 0.012, x2 + 0.012, T.h + (T.H - T.h)*(i+1)/n - 0.05, T.h + (T.H - T.h)*(i+1)/n + 0.003, T.zT1, T.zS);
       const x3 = T.xA - (T.xA - T.xP)*i/n; kasten(N, x3 - 0.012, x3 + 0.012, -T.h*(i+1)/n - 0.05, -T.h*(i+1)/n + 0.003, T.zT1, T.zS);
       const x4 = T.xP + (T.xA - T.xP)*i/n; kasten(N, x4 - 0.012, x4 + 0.012, -T.h + (T.K + T.h)*(i+1)/n - 0.05, -T.h + (T.K + T.h)*(i+1)/n + 0.003, T.zN, T.zT0); }
-    mesh(K.geo(), mats(0xe2d6b6, 0x3a362c)); mesh(B.geo(), [new THREE.MeshLambertMaterial({map:sp}), new THREE.MeshStandardMaterial({map:sp, roughness:0.5, metalness:0})]);
+    mesh(K.geo(), mats(0xe2d6b6, 0x3a362c), 'beton'); mesh(B.geo(), [new THREE.MeshLambertMaterial({map:sp}), new THREE.MeshStandardMaterial({map:sp, roughness:0.5, metalness:0})]);
     mesh(N.geo(), mats(0x141414, 0)); }
   // Handläufe aus Stahlrohr an beiden Seiten der Trennwand, 0,9 m über den Stufen, und ein Geländer oben am Austritt
   { const stahl = mats(0x9aa0a6, 0x1a1c1e), R0 = 0.02;
@@ -1021,7 +1022,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // Flur 05 vor der Flügeltür nach 08b: links und rechts ein Wandvorsprung (verkleideter Installationsschacht), weiß mit schwarzer Leiste
   { const w = [new THREE.MeshLambertMaterial({color:0xf3f3f1, emissive:0x5a5a58}), new THREE.MeshStandardMaterial({color:0xf3f3f1, emissive:0x5a5a58, roughness:0.9, metalness:0})];
     const sw = [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5})];
-    for (const [x0, x1, z0] of [[-10.05, -9.95, 16.2], [-7.77, -7.65, 15.75]]) { const z1 = 19.18;     // flach (30 % der früheren Tiefe), dreimal so breit, 20 cm vor der Tür
+    for (const [x0, x1, z0] of [[-10.05, -9.95, 18.6], [-7.77, -7.65, 18.6]]) { const z1 = 19.18;     // nur ein kleiner Absatz direkt vor der Tür (60 cm), der Weg zum Vorplatz an der Treppe und zum Querflur bleibt frei
       const o = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, HR, z1 - z0), w[1]); o.userData.mats = w; cadMeshes.push(o); o.position.set((x0 + x1)/2, HR/2, (z0 + z1)/2); scene.add(o);
       const l = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.02, 0.07, z1 - z0 + 0.02), sw[1]); l.userData.mats = sw; cadMeshes.push(l); l.position.set((x0 + x1)/2, 0.035, (z0 + z1)/2); scene.add(l);
       cols.push({x0, x1, z0, z1, y0:-1, y1:HR}); } }
