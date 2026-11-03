@@ -123,7 +123,8 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
   // Oberflächentexturen je Materialklasse (cad/tex_pbr.js, erzeugt von tools/pbrtex.py):
   // skala = Kachelgröße in Metern, staerke = (Helligkeitsstruktur, Glanzunterschiede, Relief)
   const PBR = {}, PBR_ART = {metall:[1.0, [0.15, 0.35, 0.35]], lack:[0.5, [0.45, 0.6, 0.5]], putz:[1.2, [1.2, 0.6, 0.8]], beton:[1.5, [1.0, 0.6, 0.8]],
-                              boden:[1.2, [1.8, 0.8, 0.6]], holz:[0.9, [2.4, 0.6, 0.0]], kunststoff:[0.4, [0.45, 0.6, 0.45]]};
+                              boden:[1.2, [1.8, 0.8, 0.6]], holz:[0.9, [2.4, 0.6, 0.0]], kunststoff:[0.4, [0.45, 0.6, 0.45]],
+                              stoff:[0.12, [0.7, 0.5, 0.9]]};
   if (window.TEX_PBR) for (const [k, [skala, st]] of Object.entries(PBR_ART)) { const e = window.TEX_PBR[k]; if (!e) continue;
     const t = new THREE.TextureLoader().load(e.bild || e); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;   // Daten, kein sRGB
     PBR[k] = {tex:t, skala, staerke:new THREE.Vector3(...st), farbe:e.art === 'farbe'}; }

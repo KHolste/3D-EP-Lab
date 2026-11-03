@@ -19,6 +19,7 @@ KLASSEN = {                          # Klasse: (ambientCG-Asset, Art)
     'boden':     ('Concrete046', 'struktur'),       # glatter Bodenbelag
     'holz':      ('Wood095', 'farbe'),              # helles Holz mit Maserung (Tischplatten)
     'kunststoff':('Plastic010', 'struktur'),        # glatter Kunststoff
+    'stoff':     ('Fabric082A', 'struktur'),       # feines Gewebe (Stuhlpolster)
 }
 DL = sys.argv[1] if len(sys.argv) > 1 else os.path.join('tools', '_pbr_download')
 DST = os.path.join('prototype', 'cad', 'tex_pbr.js')

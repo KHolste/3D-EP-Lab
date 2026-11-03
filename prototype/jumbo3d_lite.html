@@ -72,7 +72,10 @@
 <script src="cad/tex_lite.js"></script>
 <script src="cad/musik.js"></script>
 <script src="cad/raeume_data.js"></script>
+<script src="details.js"></script>
 <script src="raeume.js"></script>
+<script src="cad/tex_aussen.js"></script>
+<script src="aussen.js"></script>
 <script src="cad/tex_pbr.js"></script>
 <script src="cad/licht_data.js"></script>
 <script src="grafik.js"></script>
@@ -407,7 +410,8 @@ function add(m, parent, shadow=true){ m.castShadow = m.receiveShadow = shadow; (
 // Kästen mit leicht gerundeten Kanten (1,2 cm): die schmalen Rundungen fangen Licht wie bei echten Gegenständen; sehr dünne Teile bleiben eckig
 function RundBox(w = 1, h = 1, d = 1, ...rest){ const m = Math.min(w, h, d);
   return m < 0.02 || rest.length ? new THREE.BoxGeometry(w, h, d, ...rest) : new RoundedBoxGeometry(w, h, d, 1, Math.min(0.012, m*0.2)); }
-const THREE_R = {...THREE, BoxGeometry:RundBox};       // für raeume.js: dort werden alle Kästen über THREE.BoxGeometry gebaut
+const THREE_R = {...THREE, BoxGeometry:RundBox};
+window.DETAIL.RoundedBoxGeometry = RoundedBoxGeometry;          // für die Bauteile in details.js (Stühle, Griffe)       // für raeume.js: dort werden alle Kästen über THREE.BoxGeometry gebaut
 function box(w,h,d,mat,x,y,z,parent){ const m = new THREE.Mesh(new RundBox(w,h,d), mat); m.position.set(x,y,z); return add(m, parent); }
 function cyl(r,len,mat,x,y,z,axis='y',parent,seg=24){ const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg), mat); m.position.set(x,y,z);
   if (axis === 'x') m.rotation.z = Math.PI/2; if (axis === 'z') m.rotation.x = Math.PI/2; return add(m, parent); }
@@ -657,6 +661,7 @@ const doorCol = {x0:0, x1:0, z0:TZ-1.25, z1:TZ+1.42, y0:DY-0.1, y1:5.4}, doorCol
 
 /* ---- Nachbarräume nach dem Grundriss (raeume.js, Daten aus tools/grundriss.py); bringt auch die Hallenwände als Kollision mit ---- */
 { const vorher = new Set(scene.children); window.baueRaeume(THREE_R, scene, cols, cadMeshes); G.raeume(scene.children.filter(o => !vorher.has(o)), cadMeshes); }
+if (window.baueAussen) window.baueAussen(THREE_R, scene);      // Umgebung vor den Fenstern (aussen.js), nach den Räumen: wird nicht zusammengefasst und nicht vorberechnet
 for (const d of window.raeumeTueren || []) {                     // Türen der Nachbarräume: mit E öffnen und schließen
   hit(d.id, null, ...(d.hit || [(d.x0 + d.x1)/2, 1.05, d.z, d.x1 - d.x0, 2.0, 0.4]));
   def(d.id, () => d.name + (d.offen ? ' schließen' : ' öffnen'), () => { d.offen = !d.offen; sfx('knock'); });
@@ -784,8 +789,7 @@ function tisch(x,y,z,w,d,ry=0,legs=schwarz,top=lackW,h=0.74){ const g = grp(x,y,
 const geraet = (t,x,z,w,h,d,mat=lackG) => box(w, h, d, mat, x, t.userData.h+h/2, z, t);       // Kasten auf einem Tisch
 // Bürostuhl (rot gepolstert wie in der Halle), Sitzfläche zeigt nach vorn
 function stuhl(x,y,z,ry=0,stoff=rot){ const g = grp(x,y,z,ry);
-  for (let i = 0; i < 5; i++) { const a = i*Math.PI*0.4; bar([0,0.07,0], [Math.sin(a)*0.3,0.05,Math.cos(a)*0.3], 0.02, schwarz, g); }
-  cyl(0.03, 0.36, schwarz, 0, 0.25, 0, 'y', g, 10); box(0.46, 0.07, 0.46, stoff, 0, 0.47, 0, g); box(0.05, 0.3, 0.03, schwarz, 0, 0.6, -0.24, g); box(0.42, 0.48, 0.06, stoff, 0, 0.9, -0.23, g);
+  g.add(window.DETAIL.buerostuhl(THREE, {polster:stoff, schale:schwarz, armlehnen:true}));     // gepolstert, Fünfsternfuß mit Rollen (details.js)
   foot(x, z, 0.46, 0.46, 0, y-0.1, y+1.1); return g; }
 function hocker(x,y,z){ const g = grp(x,y,z); cyl(0.17, 0.04, holz, 0, 0.6, 0, 'y', g, 18); cyl(0.02, 0.56, alu, 0, 0.3, 0, 'y', g, 8); cyl(0.2, 0.02, alu, 0, 0.03, 0, 'y', g, 5); foot(x, z, 0.34, 0.34, 0, y-0.1, y+0.7); }
 function monitor(parent,x,y,z,ry,map,w=0.56,h=0.34){ const g = new THREE.Group(); g.position.set(x,y,z); g.rotation.y = ry; parent.add(g);

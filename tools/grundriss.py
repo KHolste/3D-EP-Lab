@@ -81,11 +81,12 @@ def to_game(r, minsize=0.0):
 walls = [w for w in (to_game(r, 0.02) for r in rects(wall)) if w]
 doors = [d for d in (to_game(r, 0.04) for r in rects(door)) if d]
 # Tuer von 09 in die Halle: Lage und Hoehe nach der Oeffnung in der CAD-Wand, nicht nach dem Plan
-HD = (-10.15, -8.2, 6.6)                                   # x von .. bis, Wandbereich bis z
+HD = (-9.77, -7.82, 6.6)                                   # x von .. bis, Wandbereich bis z; mittig in 09 (Raum -10.15 .. -7.44), wie in Wirklichkeit
+XC = (min(HD[0], -10.15), HD[1])                           # freigeschnitten wird auch die im Plan eingezeichnete (ältere) Türlage
 def cut(r):
     x0, x1, z0, z1 = r
-    if z0 >= HD[2] or x1 <= HD[0] or x0 >= HD[1]: return [r]
-    return [p for p in ([x0, min(x1, HD[0]), z0, z1], [max(x0, HD[1]), x1, z0, z1]) if p[1] - p[0] > 0.02]
+    if z0 >= HD[2] or x1 <= XC[0] or x0 >= XC[1]: return [r]
+    return [p for p in ([x0, min(x1, XC[0]), z0, z1], [max(x0, XC[1]), x1, z0, z1]) if p[1] - p[0] > 0.02]
 walls = [p for w in walls for p in cut(w)]
 ZW = round(gz(HALLE_PX), 3)                                 # Wand zur Halle: im Plan breiter offen als im CAD, Reste schliessen
 walls += [[HD[0] - 0.6, HD[0], Z_MIN, ZW], [HD[1], HD[1] + 0.6, Z_MIN, ZW]]

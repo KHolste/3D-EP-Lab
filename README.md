@@ -54,6 +54,9 @@ Ab Stufe „hoch“ bekommen alle Oberflächen je nach Materialklasse Struktur, 
 Das Licht der Räume und der Halle ist vorberechnet (`prototype/cad/licht_data.js`, erzeugt mit `python tools\lichtbake.py`, braucht Blender):
 Wände, Böden und Decken haben eine Lightmap, kleinere Teile das Licht an ihren Eckpunkten. Figuren, bewegliche Raumtüren und Metall
 bekommen weiter Echtzeitlicht. Kästen haben leicht gerundete Kanten (`RundBox` in den HTML-Dateien). Teile, die sich seit dem Vorberechnen geändert haben, fallen automatisch auf Echtzeitlicht zurück.
+Wiederkehrende Gegenstände mit mehr Details (Bürostühle mit Polstern, Bügelgriffe, Papierkörbe, Kartons, belebte und
+unordentliche Schreibtische wie Rodrigos in 06) baut `prototype/details.js`. Vor den Fenstern von Raum 06 liegt eine
+einfache 3D-Umgebung (`prototype/aussen.js`): Rasen, Hecke, Bäume und das Nachbargebäude in etwa 15 m Abstand.
 
 ### Testmodi
 
@@ -87,6 +90,7 @@ Alle Aufrufe gehen vom Repo-Wurzelordner aus.
 | `tools/fototex.py` | schneidet aus `docs/fotos` kachelbare Texturen für `tex_lite.js` |
 | `tools/pbrtex.py` | lädt Oberflächentexturen (ambientCG, CC0) für Metall, Lack, Putz, Beton, Boden, Holz, Kunststoff und packt sie in `tex_pbr.js` |
 | `tools/lichtbake.py` | berechnet das Licht der Nachbarräume vor (exportiert die Räume aus dem Spiel, Blender/Cycles mit `tools/blender_licht.py`) und schreibt `licht_data.js`; nach Änderungen an den Räumen neu ausführen |
+| `tools/aussentex.py` | Texturen für die Umgebung vor den Fenstern (Rasen von ambientCG, Hecke und Fassade aus dem Fensterfoto) -> `tex_aussen.js` |
 | `tools/tuertex.py` | entzerrt das Foto der Türanlage am Ende von Flur 05 zur Textur `tuer05` |
 | `tools/postertex.py` | entzerrt die Poster am Ende von Flur 05 zu den Texturen `poster_*` |
 | `tools/fenstertex.py` | baut aus dem Foto von Raum 019 die Fenstertextur `fenster019` |
