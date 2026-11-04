@@ -38,6 +38,9 @@ Die Spiele selbst liegen in `prototype/` und lassen sich auch direkt öffnen:
 | `N` | Musik an/aus |
 | `Esc` | Pause |
 
+Im Doktorandenzimmer 06 liegt eine **Nerf-Gun** (mit `E` aufnehmen): linke Maustaste oder `X` = schießen, rechte Maustaste
+halten oder `C` = anlegen, `F` = ziehen/wegstecken. Verschossene Pfeile sammelt man ein, indem man drüberläuft.
+
 Anna (oben auf der Bühne) und Kalle (unten in der Halle) helfen weiter, wenn man sie anspricht.
 
 Das Spiel beginnt im Vorraum 09 vor der Tür in die Halle. Neben der Halle (Raum 07) ist das übrige Gebäude nach dem Grundriss begehbar: Durch die Tür an der Längswand
