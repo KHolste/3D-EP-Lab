@@ -54,7 +54,7 @@
   <kbd>E</kbd> / <kbd>Enter</kbd> bedienen<br>
   <kbd>M</kbd> Maus an/aus: <b id="kMode"></b><br>
   <kbd>H</kbd> Anleitung · <kbd>Tab</kbd> Übersicht<br>
-  <kbd>T</kbd> Zeitraffer · <kbd>G</kbd> Grafik · <kbd>B</kbd> Boden · <kbd>N</kbd> Musik · <kbd>Esc</kbd> Pause
+  <kbd>T</kbd> Zeitraffer · <kbd>G</kbd> Grafik · <kbd>B</kbd> Boden · <kbd>N</kbd> Musik · <kbd>V</kbd> Stimmen · <kbd>Esc</kbd> Pause
 </div>
 <div id="chartbox" class="hud box"><canvas id="chart" width="300" height="160"></canvas></div>
 <div id="cross" class="hud"></div>
@@ -79,6 +79,7 @@
 <script src="figurmodell.js"></script>
 <script src="raeume.js"></script>
 <script src="nerf.js"></script>
+<script src="stimme.js"></script>
 <script src="cad/tex_aussen.js"></script>
 <script src="aussen.js"></script>
 <script src="cad/tex_pbr.js"></script>
@@ -264,7 +265,7 @@ const fmtT = t => { const m = Math.floor(t); return (m >= 60 ? Math.floor(m/60)+
    ===================================================================== */
 const LOG = [];
 function msg(text){
-  LOG.push(text);
+  LOG.push(text); if (window.stimme) window.stimme.ausText(text);   // wörtliche Rede der Figuren vorlesen (stimme.js)
   const d = document.createElement('div'); d.className = 'toast'; d.textContent = text; $('toasts').appendChild(d);
   while ($('toasts').children.length > 4) $('toasts').firstChild.remove();
   setTimeout(() => d.remove(), 5000 + text.length*45);
@@ -1073,6 +1074,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyN') { musikAn = !musikAn; if (musG) musG.gain.setTargetAtTime(musikAn ? MUS_VOL : 0, AC.currentTime, 0.15);
     try { localStorage.setItem('jumboMusik', musikAn ? '1' : '0'); } catch(e) {} msg(musikAn ? 'Musik an.' : 'Musik aus.'); }
   if (e.code === 'KeyG') { quality = (quality + 3) % 4; qAuto = false; applyQuality(true); msg('Grafik: ' + QN[quality] + '.'); }
+  if (e.code === 'KeyV' && window.stimme) msg(window.stimme.umschalten() ? 'Stimmen an.' : 'Stimmen aus.');
   if (e.code === 'KeyT') { speed = speed === 1 ? 8 : 1; $('gS').textContent = '×' + speed; }
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
@@ -1234,7 +1236,7 @@ function start(m){ setMouse(m); started = true; paused = false; hideOverlay(); i
 overlay(`<h1>Jumbo-Pumpdown 3D</h1><p class="small">Prototyp mit CAD-Halle · Spiellogik nach dem RPG-Maker-Original</p>
 <p>Der Jumbo muss evakuiert werden. Alle, die es sonst machen, sind nicht da. Doch das Schicksal des Neutralisators hängt davon ab – und nur du kannst ihn jetzt noch retten.</p>
 <p>Es gibt eine Anleitung zum Evakuieren des Tanks (rote Mappe am Steuerrechner unter der Bühne oder Taste <b>H</b>). Du solltest einen Blick hineinwerfen. Im Labor sind außerdem Anna (oben auf der Bühne) und Kalle (unten in der Halle) unterwegs – sprich sie an, wenn du nicht weiterweißt.</p>
-<p class="small"><b>Steuerung:</b> W/A/S/D = gehen · Shift = laufen · Pfeiltasten = drehen und hoch/runter sehen (oder Maus) · E oder Enter = bedienen · H = Anleitung · Tab = Übersicht · T = Zeitraffer · G = Grafikstufe · M = Maus an/aus · Esc = Pause<br>
+<p class="small"><b>Steuerung:</b> W/A/S/D = gehen · Shift = laufen · Pfeiltasten = drehen und hoch/runter sehen (oder Maus) · E oder Enter = bedienen · H = Anleitung · Tab = Übersicht · T = Zeitraffer · G = Grafikstufe · M = Maus an/aus · V = Stimmen an/aus · Esc = Pause<br>
 Ziel: Tankdruck 1E-7 mbar, dann unten mit Udo sprechen. 1 Sekunde = 15 Sekunden Anlagenzeit.</p>
 <button id="kbtn">Start – nur Tastatur</button> &nbsp;`, 'Start – mit Maus', () => start(true));
 $('kbtn').onclick = () => start(false); setMouse(mouseLook);

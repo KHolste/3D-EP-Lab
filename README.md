@@ -36,6 +36,7 @@ Die Spiele selbst liegen in `prototype/` und lassen sich auch direkt öffnen:
 | `G` | Grafikqualität: niedrig, mittel, hoch, sehr hoch (Schatten der Raumlampen, Eckenabdunkelung; nur für eigene Grafikkarten) |
 | `B` | Boden |
 | `N` | Musik an/aus |
+| `V` | Stimmen der Figuren an/aus (Sprachausgabe des Browsers) |
 | `Esc` | Pause |
 
 Im Doktorandenzimmer 06 liegt eine **Nerf-Gun** (mit `E` aufnehmen): linke Maustaste oder `X` = schießen, rechte Maustaste
