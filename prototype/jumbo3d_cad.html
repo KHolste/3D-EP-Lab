@@ -26,6 +26,7 @@
   #help{left:14px;width:min(430px,44vw)} #help ol{margin:6px 0 0;padding-left:22px} #help h3,#status h3{margin:0 0 4px;font-size:15px;color:#f2c200}
   #status{right:14px;width:300px} #status table{border-collapse:collapse;width:100%} #status td{padding:1px 4px} #status td:last-child{text-align:right;font-family:Consolas,monospace}
   .on{color:#5dffa0}.off{color:#8794a3}
+  #kompass{position:fixed;left:50%;top:12px;transform:translateX(-50%);width:280px;height:40px;pointer-events:none;background:rgba(10,16,24,.62);border:1px solid rgba(140,180,220,.35);border-radius:8px}
   #overlay{position:fixed;inset:0;background:rgba(5,8,12,.78);display:flex;align-items:center;justify-content:center;z-index:10}
   #card{background:#141c26;border:1px solid #3b5673;border-radius:12px;padding:26px 32px;max-width:640px;max-height:86vh;overflow:auto;line-height:1.5}
   #card h1{margin:0 0 10px;font-size:26px;color:#f2c200} #card h2{margin:0 0 10px;color:#f2c200}
@@ -61,6 +62,7 @@
 <div id="toasts" class="hud"></div>
 <div id="help" class="panel box"></div>
 <div id="status" class="panel box"></div>
+<canvas id="kompass" width="280" height="40"></canvas>
 <div id="overlay"><div id="card"></div></div>
 <div id="err"></div>
 <pre id="testout" style="display:none"></pre>
@@ -1158,6 +1160,22 @@ function drawChart(){
 }
 
 let last = performance.now(), slow = 1, knockT = 3, shSig = NaN, fAcc = 0, fN = 0, fBad = 0, fps = 0;
+// Kompass oben in der Mitte: x zeigt nach Osten, z nach Süden; Blickrichtung bei yaw = 0 ist Norden (-z)
+const kompassC = document.getElementById('kompass'), kompassG = kompassC.getContext('2d');
+function drawKompass(){
+  const g = kompassG, W = kompassC.width, H = kompassC.height, px = 1.6;              // Pixel pro Grad
+  const kurs = ((-P.yaw*180/Math.PI) % 360 + 360) % 360;
+  g.clearRect(0, 0, W, H); g.textAlign = 'center'; g.textBaseline = 'middle';
+  const namen = {0:'N', 45:'NO', 90:'O', 135:'SO', 180:'S', 225:'SW', 270:'W', 315:'NW'};
+  for (let d = Math.ceil((kurs - 90)/15)*15; d <= kurs + 90; d += 15) {
+    const x = W/2 + (d - kurs)*px, w = ((d % 360) + 360) % 360, n = namen[w];
+    if (x < 6 || x > W - 6) continue;
+    if (n) { g.fillStyle = n === 'N' ? '#ff5a4a' : n.length === 1 ? '#f2c200' : '#c9d6e3'; g.font = (n.length === 1 ? 'bold 17px' : '13px') + ' system-ui'; g.fillText(n, x, 17); }
+    else { g.fillStyle = 'rgba(200,215,230,.7)'; g.fillRect(x - 0.5, 12, 1, 9); }
+  }
+  g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(W/2 - 6, H); g.lineTo(W/2 + 6, H); g.lineTo(W/2, H - 8); g.closePath(); g.fill();
+  g.font = '11px Consolas,monospace'; g.fillStyle = '#9db0c4'; g.fillText(Math.round(kurs) % 360 + '°', W/2, 33);
+}
 function frame(now){
   const raw = (now-last)/1000, dt = Math.min(0.05, raw); last = now;
   const live = started && !paused && !ended;
@@ -1190,7 +1208,7 @@ function frame(now){
   shakeT = Math.max(0, shakeT - dt);
   const sh = shakeT > 0 ? 0.04*Math.min(1, shakeT) : 0;
   camera.position.set(P.x + (Math.random()-0.5)*sh, P.feet + 1.7 + (Math.random()-0.5)*sh, P.z);
-  camera.rotation.set(P.pitch, P.yaw, 0);
+  camera.rotation.set(P.pitch, P.yaw, 0); drawKompass();
   slow += dt;
   if (slow > 0.2) { slow = 0; drawDisplay(); drawChart(); audioUpdate();
     if (fps) $('gQ').textContent = QN[quality] + (qAuto ? ' (auto)' : '') + ' · ' + Math.round(fps) + ' B/s';

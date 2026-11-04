@@ -83,7 +83,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   { const pf = R.walls.filter(([x0, x1, z0, z1]) => x1 > 0.4 && x1 < 0.5 && x0 > -0.2 && z0 > 36.41 && z1 < 49.333).map(w => [w[2], w[3]]).sort((a, b) => a[0] - b[0]);
     let z = 36.41; for (const [a, b] of pf.concat([[49.333, 49.333]])) { const zm = (z + a)/2, w = (a - z - 0.5)/2; OEFF.O.push([zm - w, zm + w, 1.55, 2.55]); z = b; } }
   OEFF.W.push([10.05, 12.65, 0.95, 2.75]);
-  OEFF.O.push([7.6, 9.0, 1.6, 2.55], [10.6, 12.0, 1.6, 2.55]);                      // Raum 017: zwei Fenster über dem Brüstungskanal
+  OEFF.O.push([6.75, 9.45, 1.75, 2.55], [10.05, 12.3, 1.75, 2.55]);                      // Raum 017: zwei Fenster über dem Brüstungskanal
   const seite = (x0, x1) => x1 < -15.5 ? OEFF.W : x0 > 0.44 ? OEFF.O : null;
   function wandO(x0, x1, ya, yb, z0, z1, sockel){                  // Wand mit Aussparungen für die Öffnungen ihrer Seite
     const L = (seite(x0, x1) || []).filter(([a, b, c, d]) => b > z0 && a < z1 && d > ya && c < yb);
@@ -1331,10 +1331,10 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   }
 
   // Raum 017 (zwischen Teeküche 016 / Getränkelager 015 und der Außenwand), nach den Fotos IMG_1031-1051: Büro mit Besprechungstisch.
-  // Ostwand: zwei Fenster über einem weißen Brüstungskanal mit Steckdosen, alte Rippenheizkörper, in der Ecke zur Halle ein Ahorn-Sideboard
+  // Ostwand: zwei breite, niedrige Fensterbänder mit Pfeiler dazwischen, Brüstungskanal, alte Rippenheizkörper, in der Ecke zur Halle ein Ahorn-Sideboard
   // voller Laborkram (Kunststoffboxen, Druckminderer, Flansch, Kabelrolle, Handschuhkarton). Hallenwand: Tischgruppe aus drei Schreibtischen,
-  // daneben der HRZ-Wandkalender mit Taschen darunter. Im Süden ein ovaler
-  // Besprechungstisch mit Holzstühlen, an der Wand zu 014 Ordnerregale. Neben der Tür zur Teeküche ein hoher Regalschrank mit Plüsch-Lama.
+  // daneben der HRZ-Wandkalender mit Taschen darunter. Am Fenster Udos Schreibtisch, an der
+  // Westwand zwischen den Türen ein ovaler Besprechungstisch, an der Wand zu 014 Ordnerregale. Neben der Tür zur Teeküche ein hoher Regalschrank mit Plüsch-Lama.
   { const XW = -4.403, XO = 0.446, ZN = 6.513, ZS = 12.821;
     const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1}),
                                   new THREE.MeshStandardMaterial({color, roughness:0.6, metalness:0.1, ...o})];
@@ -1361,23 +1361,50 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set((XO - XW)/0.625, (ZS - ZN)/0.625);
       const m = new THREE.Mesh(new THREE.PlaneGeometry(XO - XW, ZS - ZN), new THREE.MeshLambertMaterial({map:t, emissive:0x8a8a88, emissiveMap:t})); m.rotation.x = Math.PI/2; m.position.set((XW + XO)/2, HR - 0.006, (ZN + ZS)/2); scene.add(m);
       for (const [x, z] of [[-2.9, 8.3], [-2.9, 11.1], [-0.7, 8.3], [-0.7, 11.1]]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.01, 0.6), new THREE.MeshBasicMaterial({color:0xffffff})); l.position.set(x, HR - 0.012, z); scene.add(l); } }
-    // Fenster (Öffnungen siehe OEFF.O): Glas in der Wand, dunkle Rahmen mit Mittelpfosten, weiße Fensterbank
-    for (const [z0, z1] of [[7.6, 9.0], [10.6, 12.0]]) { const y0 = 1.6, y1 = 2.55, zm = (z0 + z1)/2;
-      for (const [a, b] of [[z0, zm], [zm, z1]]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(b - a - 0.06, y1 - y0 - 0.06), GLAS); m.rotation.y = -Math.PI/2; m.position.set(XO + 0.12, (y0 + y1)/2, (a + b)/2); scene.add(m); }
-      for (const z of [z0, zm, z1]) kiste(dunkel, 0.08, y1 - y0, 0.07, XO - 0.02, (y0 + y1)/2, z);
-      for (const y of [y0, y1]) kiste(dunkel, 0.08, 0.07, z1 - z0, XO - 0.02, y, zm);
-      kiste(weiss, 0.2, 0.03, z1 - z0 + 0.1, XO - 0.1, y0 - 0.03, zm); }
-    // Brüstungskanal (weiß) über die ganze Ostwand, mit Steckdosen und Datendose; darunter zwei alte Rippenheizkörper
-    kiste(weiss, 0.07, 0.17, ZS - ZN - 0.04, XO - 0.035, 1.1, (ZN + ZS)/2);
-    for (const z of [6.75, 6.9, 7.9, 8.6, 8.75, 9.9, 10.8, 10.95, 12.2]) { kiste(M(0xf0eee4), 0.012, 0.09, 0.09, XO - 0.075, 1.1, z); zyl(M(0x9a988e), 0.02, 0.006, XO - 0.082, 1.1, z, 'x', 10); }
-    kiste(M(0xece6d6), 0.015, 0.11, 0.13, XO - 0.075, 1.1, 7.4);
-    for (const [z0, z1] of [[8.55, 9.75], [10.9, 12.1]]) { const n = Math.round((z1 - z0)/0.06);
+    // Fensterwand nach den Fotos IMG_1013/1019/1020: zwei breite, niedrige Fensterbänder in tiefer Laibung (dunkler Rahmen, rechte Hälfte
+    // ein weißer Drehkippflügel), dazwischen ein breiter Pfeiler mit grauem Fallrohr und roter Alarmglocke unter der Decke
+    for (const [z0, z1] of [[6.75, 9.45], [10.05, 12.3]]) { const y0 = 1.75, y1 = 2.55, zm = (z0 + z1)/2, xr = XO + 0.12;
+      const gl = new THREE.Mesh(new THREE.PlaneGeometry(z1 - z0 - 0.08, y1 - y0 - 0.08), GLAS); gl.rotation.y = -Math.PI/2; gl.position.set(xr + 0.02, (y0 + y1)/2, zm); scene.add(gl);
+      for (const z of [z0 + 0.03, z1 - 0.03]) kiste(dunkel, 0.07, y1 - y0, 0.06, xr, (y0 + y1)/2, z);
+      for (const y of [y0 + 0.03, y1 - 0.03]) kiste(dunkel, 0.07, 0.06, z1 - z0, xr, y, zm);
+      kiste(dunkel, 0.07, y1 - y0, 0.05, xr, (y0 + y1)/2, zm);
+      for (const z of [zm + 0.05, z1 - 0.08]) kiste(weiss, 0.06, y1 - y0 - 0.12, 0.05, xr - 0.03, (y0 + y1)/2, z);       // weißer Flügel
+      for (const y of [y0 + 0.08, y1 - 0.08]) kiste(weiss, 0.06, 0.05, z1 - zm - 0.13, xr - 0.03, y, (zm + z1)/2 - 0.015);
+      kiste(alu, 0.06, 0.02, 0.02, xr - 0.07, (y0 + y1)/2, zm + 0.12);                                                  // Griff
+      kiste(weiss, 0.32, 0.03, z1 - z0, XO + 0.02, y0 - 0.015, zm);                                                     // Fensterbank in der Laibung
+      kiste(weiss, 0.02, 0.03, z1 - z0 + 0.1, XO - 0.01, y1 + 0.15, zm); }                                              // Rollo-Leiste oben
+    { const zp = 9.75; kiste(weiss, 0.15, HR, 0.4, XO - 0.075, HR/2, zp); cols.push({x0:XO - 0.15, x1:XO, z0:zp - 0.2, z1:zp + 0.2, y0:-1, y1:HR});
+      zyl(M(0xb5b8ba, {roughness:0.5}), 0.04, HR, XO - 0.2, HR/2, zp - 0.24, 'y', 12);                                  // Fallrohr
+      const gl = zyl(M(0xc4201c, {roughness:0.4}), 0.08, 0.06, XO - 0.18, HR - 0.25, zp, 'x', 20); }                     // Alarmglocke
+    // Brüstungskanal (weiß) auf 1,25 m mit Steckdosen und Datendosen; darunter zwei alte Rippenheizkörper
+    for (const [a, b] of [[ZN + 0.02, 9.55], [9.95, ZS - 0.02]]) kiste(weiss, 0.08, 0.17, b - a, XO - 0.04, 1.25, (a + b)/2);
+    for (const z of [6.75, 6.9, 7.9, 8.6, 8.75, 10.4, 10.55, 11.2, 11.95, 12.1]) { kiste(M(0xf0eee4), 0.012, 0.09, 0.09, XO - 0.085, 1.25, z); zyl(M(0x9a988e), 0.02, 0.006, XO - 0.092, 1.25, z, 'x', 10); }
+    for (const z of [7.4, 10.9, 11.6]) kiste(M(0xece6d6), 0.015, 0.11, 0.13, XO - 0.085, 1.25, z);
+    for (const [z0, z1] of [[8.4, 9.45], [10.1, 11.1]]) { const n = Math.round((z1 - z0)/0.06);
       for (let k = 0; k < n; k++) kiste(weiss, 0.16, 0.62, 0.045, XO - 0.14, 0.46, z0 + 0.03 + k*0.06);
       kiste(weiss, 0.05, 0.05, z1 - z0, XO - 0.14, 0.8, (z0 + z1)/2); kiste(weiss, 0.05, 0.05, z1 - z0, XO - 0.14, 0.13, (z0 + z1)/2);
-      zyl(M(0xb08a50, {metalness:0.6, roughness:0.4}), 0.03, 0.06, XO - 0.14, 0.7, z0 - 0.04, 'z', 10);
+      zyl(M(0xf0f0ee), 0.03, 0.08, XO - 0.14, 0.72, z1 + 0.05, 'z', 10);
       cols.push({x0:XO - 0.24, x1:XO, z0, z1, y0:-1, y1:0.85}); }
+    // Fensterbänke: links Plüschfiguren und eine Pflanze im weißen Topf, rechts Grünpflanzen in alten Turbopumpen-Gehäusen, grüne Gießkanne
+    { const fb = 1.75, pf = (z, h, r) => { zyl(stahl, 0.09, 0.14, XO + 0.07, fb + 0.07, z, 'y', 18);
+        for (let k = 0; k < 7; k++) { const b = new THREE.Mesh(new THREE.ConeGeometry(0.025, h, 4), M(0x3f7a35, {roughness:0.8})[1]); b.position.set(XO + 0.07 + Math.cos(k)*0.04, fb + 0.14 + h/2, z + Math.sin(k*1.7)*0.05); b.rotation.set(Math.sin(k)*r, 0, Math.cos(k)*r); scene.add(b); } };
+      pf(10.6, 0.3, 0.5); pf(11.05, 0.25, 0.3); pf(11.5, 0.32, 0.6);
+      zyl(M(0x2fa88a, {roughness:0.6}), 0.06, 0.16, XO + 0.07, fb + 0.08, 12.15, 'y', 12);
+      zyl(M(0xf2f2ef), 0.07, 0.12, XO + 0.07, fb + 0.06, 8.3, 'y', 14); for (let k = 0; k < 6; k++) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), M(0x4f8a3c)[1]); b.position.set(XO + 0.07, fb + 0.2 + k*0.05, 8.3 + Math.sin(k*2)*0.06); scene.add(b); }
+      kiste(M(0x3a7fd0), 0.1, 0.16, 0.12, XO + 0.06, fb + 0.08, 7.6); kiste(M(0xc8302a), 0.1, 0.12, 0.14, XO + 0.06, fb + 0.06, 7.85); kiste(M(0xf4f4f0), 0.08, 0.13, 0.08, XO + 0.06, fb + 0.065, 8.75); }
+    // auf dem Kanal rechts: Batterien, Spekulatius, Saft, Wasserflaschen, Saftflasche; Handfeger und Bürste
+    { const y = 1.335; for (let k = 0; k < 3; k++) zyl(M(0xdde8ee, {transparent:true, opacity:0.75}), 0.04, 0.26, XO - 0.04, y + 0.13, 11.75 + k*0.09, 'y', 10);
+      zyl(M(0x8a1a2a), 0.035, 0.3, XO - 0.04, y + 0.15, 12.05, 'y', 10); zyl(M(0xf0a020), 0.035, 0.18, XO - 0.04, y + 0.09, 11.62, 'y', 10);
+      kiste(M(0xa83a2a), 0.06, 0.18, 0.13, XO - 0.04, y + 0.09, 11.45); for (let k = 0; k < 9; k++) zyl(M(k % 2 ? 0x2a2a2a : 0xc8a040), 0.008, 0.05, XO - 0.04, y + 0.025, 11.1 + k*0.025, 'y', 6);
+      kiste(M(0x5a3a22), 0.05, 0.03, 0.25, XO - 0.04, y + 0.015, 10.35); kiste(M(0x111111), 0.05, 0.04, 0.22, XO - 0.04, y + 0.045, 10.35);
+      kiste(M(0xc8a46e), 0.05, 0.03, 0.22, XO - 0.04, y + 0.015, 10.65); kiste(M(0xe8e0c8), 0.05, 0.03, 0.2, XO - 0.04, y + 0.04, 10.65); }
+    // Hocker (Holzsitz, Fußring) vor dem ersten Heizkörper
+    { const g = new THREE.Group(); g.position.set(0.0, 0, 9.0); scene.add(g); zyl(M(0xd2b07a), 0.17, 0.04, 0, 0.62, 0, 'y', 20, g); zyl(alu, 0.025, 0.55, 0, 0.33, 0, 'y', 10, g);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.01, 6, 20), alu[1]); ring.rotation.x = Math.PI/2; ring.position.y = 0.3; g.add(ring);
+      for (let k = 0; k < 5; k++) { const b = kiste(alu, 0.25, 0.02, 0.03, Math.cos(k*1.2566)*0.12, 0.04, Math.sin(k*1.2566)*0.12, g); b.rotation.y = -k*1.2566; }
+      cols.push({x0:-0.2, x1:0.2, z0:8.8, z1:9.2, y0:-1, y1:0.65}); }
     // Sideboard in der Ecke Ost/Hallenwand mit Laborkram (Fotos IMG_1031/1032)
-    { const x0 = XO - 0.47, z0 = ZN + 0.03, z1 = 8.45, xm = (x0 + XO)/2, zm = (z0 + z1)/2, h = 0.74;
+    { const x0 = XO - 0.47, z0 = ZN + 0.03, z1 = 8.3, xm = (x0 + XO)/2, zm = (z0 + z1)/2, h = 0.74;
       kiste(ahorn, XO - x0, h, z1 - z0, xm, h/2, zm); kiste(M(0xcdbb92), 0.004, h - 0.06, 0.004, x0 - 0.001, h/2, zm);
       zyl(alu, 0.015, 0.02, x0 - 0.01, 0.6, zm - 0.1, 'x', 10); zyl(alu, 0.015, 0.02, x0 - 0.01, 0.6, zm + 0.1, 'x', 10);
       for (const [x, z, w, d, hh, y] of [[xm, z0 + 0.25, 0.4, 0.36, 0.22, h], [xm, z0 + 0.25, 0.38, 0.34, 0.2, h + 0.22], [xm, z0 + 0.62, 0.3, 0.28, 0.15, h], [xm, z0 + 0.62, 0.28, 0.26, 0.13, h + 0.15]]) {
@@ -1423,15 +1450,50 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     zyl(M(0x2c3e6a), 0.11, 0.004, -1.18, 0.758, 7.95, 'y', 24);                                                      // Mauspad mit Erdbild
     { const t = kiste(M(0xf4f4f0), 0.02, 0.16, 0.13, -1.2, 0.84, ZN + 0.55); t.rotation.z = 0.25; }                   // Tischkalender
     // C
-    monitor(-1.95, 8.35, 0.1, 0.55, true); monitor(-1.4, 8.35, -0.1, 0.55, true); stuhl(-1.7, 9.35, 0);
+    monitor(-1.95, 8.35, 0.1, 0.55, true); monitor(-1.4, 8.35, -0.1, 0.55, true); stuhl(-1.7, 9.2, 0);
     { const g = new THREE.Group(); g.position.set(-1.0, 0.755, 8.2); scene.add(g); kiste(M(0x2a2c30), 0.24, 0.03, 0.32, 0, 0.015, 0, g); kiste(M(0xb52a2a), 0.22, 0.01, 0.3, 0, 0.035, 0, g);
       kiste(box, 0.18, 0.12, 0.26, 0, 0.1, 0, g); kiste(griffblau, 0.02, 0.02, 0.18, -0.1, 0.15, 0, g); }
     { const t = kiste(M(0xe2e6ea), 0.24, 0.004, 0.2, -1.55, 0.758, 8.75); t.rotation.y = 0.2; }                     // DLR-Mauspad
     pc(-0.98, 9.2); kiste(M(0x2a2c30), 0.2, 0.42, 0.34, XB1 - 0.15, 0.25, ZT + 0.4);                                // Rechnerhalter unter der Ecke
-    { const k = new THREE.Group(); k.position.set(-2.0, 0, 8.6); scene.add(k); kiste(schwarz, 0.36, 0.08, 0.3, 0, 0.04, 0, k); kiste(M(0xc0c4c8), 0.3, 0.02, 0.24, 0, 0.09, 0, k); }   // Fußstütze (Foto IMG_1051)
     const mfrei = (x0, x1, z0, z1) => [[x0, x1, z0, z1]];
     scene.add(window.DETAIL.belebt(THREE, {x0:XA0, x1:XM, z0:ZN + 0.25, z1:ZT, y:0.755, seed:51, frei:mfrei(-2.3, -1.7, 6.9, 8.13)}));
     scene.add(window.DETAIL.belebt(THREE, {x0:XA0, x1:XB1, z0:ZT, z1:ZC, y:0.755, seed:63, frei:mfrei(-2.3, -0.75, ZT, 8.9)}));
+    // Udos Schreibtisch in der Südost-Ecke (Fotos IMG_1012/1013/1017/1023/1024): Winkeltisch, der lange Schenkel parallel zum Fenster,
+    // der kurze, abgeschrägte Schenkel zum Heizkörper hin; Udo sitzt dazwischen mit dem Rücken zum Fenster. Dell-Monitor auf silberner
+    // Säule, weiße Tastatur, Telefon, Stifteköcher mit Schraubendrehern, Briefablage aus Drahtgitter, blauer Kasten, Bohrmaschine,
+    // Ordner und Notizblock mit Brille; runde graue Beine, Container links und rechts, darunter die Fußstütze. Leiter und Werkzeugkoffer
+    // an der Fensterwand.
+    { const h = 0.74, beinM = M(0x4a5060, {metalness:0.4, roughness:0.4});
+      kiste(ahorn, 0.8, 0.03, 1.15, -1.15, h, 11.475);                                                                    // langer Schenkel x -1.55..-0.75, z 10.9..12.05
+      const sch = kiste(ahorn, 1.1, 0.03, 0.75, -0.95, h, 10.55); sch.rotation.y = 0.25;                                   // kurzer Schenkel, leicht abgeschrägt
+      const bo = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.03, 24, 1, false, Math.PI/2, Math.PI/2), ahorn[1]); bo.userData.mats = ahorn; cadMeshes.push(bo); bo.position.set(-1.15, h, 10.9); scene.add(bo);   // Rundung in der Ecke
+      for (const [x, z] of [[-1.48, 10.25], [-0.5, 10.3], [-1.48, 11.98]]) zyl(beinM, 0.035, h - 0.02, x, (h - 0.02)/2, z, 'y', 14);
+      kiste(ahorn, 0.42, 0.6, 0.45, -1.2, 0.31, 10.55); kiste(ahorn, 0.45, 0.6, 0.42, -1.1, 0.31, 11.75);
+      for (let k = 0; k < 3; k++) { kiste(griffblau, 0.12, 0.012, 0.012, -1.2, 0.18 + k*0.18, 10.79); kiste(griffblau, 0.012, 0.012, 0.12, -0.865, 0.18 + k*0.18, 11.75); }
+      cols.push({x0:-1.55, x1:-0.75, z0:10.9, z1:12.05, y0:-1, y1:0.9}, {x0:-1.5, x1:-0.45, z0:10.15, z1:10.95, y0:-1, y1:0.9});
+      // Monitor auf Säule, zum Stuhl gedreht
+      { const g = new THREE.Group(); g.position.set(-1.3, h + 0.015, 10.95); g.rotation.y = 1.0; scene.add(g);
+        kiste(M(0x2a2c30), 0.24, 0.02, 0.2, 0, 0, 0, g); zyl(alu, 0.03, 0.55, 0, 0.29, -0.03, 'y', 12, g);
+        kiste(dunkel, 0.6, 0.36, 0.035, 0, 0.42, 0.01, g); kiste(M(0x14161a), 0.57, 0.33, 0.005, 0, 0.42, 0.03, g); }
+      kiste(M(0xeeeeec), 0.15, 0.02, 0.44, -0.95, h + 0.025, 11.15).rotation.y = 0.5; kiste(M(0xe8e8e6), 0.06, 0.03, 0.1, -0.85, h + 0.03, 10.75);   // weiße Tastatur, Maus
+      kiste(M(0x2a2c30), 0.2, 0.06, 0.22, -0.65, h + 0.045, 10.35); kiste(M(0x1a1a1a), 0.08, 0.05, 0.12, -0.5, h + 0.04, 10.5);   // Telefon
+      zyl(M(0x2a5fd0), 0.04, 0.11, -0.75, h + 0.07, 10.2, 'y', 12); for (let k = 0; k < 6; k++) zyl(M(0xf0c020), 0.006, 0.18, -0.9 + k*0.03, h + 0.1, 10.15, 'y', 6);   // Stifte, Schraubendreher
+      // Briefablage (Drahtgitter, drei Etagen), blauer Kasten, Bohrmaschine, Ordner mit Visitenkarten, Notizblock mit Brille
+      { const tr = M(0x1a1a1a, {metalness:0.5, roughness:0.4}); for (let k = 0; k < 3; k++) { kiste(tr, 0.36, 0.008, 0.3, -1.25, h + 0.04 + k*0.09, 11.85); kiste(M(0xf4f4f0), 0.3, 0.03, 0.25, -1.25, h + 0.06 + k*0.09, 11.85); }
+        kiste(M(0x1f4fa8), 0.12, 0.1, 0.16, -1.45, h + 0.065, 11.5); kiste(M(0x1f3a7a), 0.2, 0.04, 0.3, -1.3, h + 0.035, 12.0);
+        const bm = new THREE.Group(); bm.position.set(-0.95, h + 0.07, 11.7); bm.rotation.y = 0.6; scene.add(bm); kiste(M(0xb83a2a), 0.25, 0.09, 0.08, 0, 0, 0, bm); kiste(M(0x2a2a2a), 0.06, 0.14, 0.06, 0.07, -0.02, 0, bm);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.012, 6, 20), M(0x111111)[1]); ring.rotation.x = Math.PI/2; ring.position.set(-0.9, h + 0.03, 11.55); scene.add(ring);
+        kiste(M(0xe6e2d0), 0.32, 0.015, 0.42, -0.95, h + 0.025, 11.9).rotation.y = 0.15; kiste(M(0xf6f6f2), 0.22, 0.01, 0.3, -1.05, h + 0.02, 11.05).rotation.y = 0.4; }
+      // Fußstütze (Foto IMG_1051) unter dem Tisch
+      { const k = new THREE.Group(); k.position.set(-0.85, 0, 11.25); k.rotation.y = 0.3; scene.add(k);
+        kiste(M(0x3a3d42), 0.36, 0.08, 0.3, 0, 0.04, 0, k); kiste(M(0xc0c4c8), 0.38, 0.05, 0.32, 0, 0.03, 0, k); kiste(M(0x2a2c30), 0.3, 0.01, 0.24, 0, 0.085, 0, k); }
+      stuhl(-0.3, 11.45, -Math.PI/2 + 0.4);
+      // weiße Leiter an der Fensterwand, rotes Schlüsselband; Werkzeugkoffer (schwarz/gelb) davor
+      { const g = new THREE.Group(); g.position.set(XO - 0.12, 0, 11.6); g.rotation.z = -0.08; scene.add(g);
+        for (const dz of [-0.22, 0.22]) kiste(weiss, 0.04, 1.95, 0.05, 0, 0.98, dz, g); for (let k = 0; k < 6; k++) kiste(weiss, 0.03, 0.03, 0.44, 0, 0.3 + k*0.3, 0, g);
+        kiste(M(0xc4201c), 0.01, 0.5, 0.025, -0.03, 1.6, -0.24, g); }
+      kiste(M(0x1a1a1a), 0.3, 0.2, 0.5, 0.15, 0.1, 12.05); kiste(M(0xf2c200), 0.31, 0.06, 0.12, 0.15, 0.17, 12.05);
+      cols.push({x0:0.0, x1:XO, z0:11.35, z1:12.3, y0:-1, y1:2.0}); }
     // Hoher Regalschrank neben der Tür zur Teeküche (Fotos IMG_1040/1042-1044): unten Türen, oben drei offene Fächer; Papierkorb daneben
     { const x0 = XW + 0.02, d = 0.42, z0 = ZN + 0.12, z1 = z0 + 0.82, xm = x0 + d/2, zm = (z0 + z1)/2, H = 2.0;
       for (const z of [z0, z1]) kiste(ahorn, d, H, 0.025, xm, H/2, z);
@@ -1444,43 +1506,61 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       for (let k = 0; k < 3; k++) kiste(k < 2 ? schwarz : M(0xe0c020), 0.3, 0.32, 0.06, xm, 0.97, z0 + 0.08 + k*0.065);
       cols.push({x0, x1:x0 + d, z0, z1, y0:-1, y1:H});
       const mu = window.DETAIL.muelleimer(THREE, {voll:true, seed:29}); mu.position.set(XW + 0.22, 0, z1 + 0.25); scene.add(mu); cols.push({x0:XW, x1:XW + 0.4, z0:z1 + 0.08, z1:z1 + 0.42, y0:-1, y1:0.4}); }
-    // Ovaler Besprechungstisch (Ahorn, zwei Säulen) mit sechs Holzstühlen; Küchenrolle, Tassen, Papiere (Foto IMG_1036)
-    { const tx = -2.05, tz = 11.2, A = 0.95, B = 0.55;
+    // Ovaler Besprechungstisch vor dem Fernseher an der Westwand (Fotos IMG_1009-1011, IMG_1015), längs zur Wand, mit Holzstühlen
+    // (Schalensitze, schwarzes Gestell); Küchenrolle, Tasse, Holzschale mit Süßem, Taschentücher, Papiere. Fünf Stühle statt sechs,
+    // damit man von der Küchentür zur Tür 015, zu Udo und zu den Regalen durchkommt (geprüft mit Spielerradius 0,3 m).
+    { const tx = -3.25, tz = 10.8, A = 0.5, B = 0.75;
       const pl = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.03, 40), ahorn[1]); pl.userData.mats = ahorn; cadMeshes.push(pl); pl.scale.set(A, 1, B); pl.position.set(tx, 0.735, tz); scene.add(pl);
-      for (const dx of [-0.45, 0.45]) { zyl(anthrazit, 0.035, 0.7, tx + dx, 0.36, tz); kiste(anthrazit, 0.06, 0.03, 0.7, tx + dx, 0.015, tz); }
-      zyl(weiss, 0.06, 0.24, tx - 0.35, 0.87, tz - 0.1, 'y', 14); zyl(M(0xf6f6f2), 0.04, 0.09, tx + 0.1, 0.795, tz - 0.25); zyl(M(0x2a4fa0), 0.04, 0.09, tx + 0.5, 0.795, tz + 0.15);
-      kiste(M(0xfafaf6), 0.21, 0.004, 0.3, tx + 0.25, 0.752, tz - 0.05).rotation.y = 0.3; kiste(M(0x8a6a3a), 0.3, 0.04, 0.12, tx - 0.05, 0.77, tz + 0.12);
+      for (const dz of [-0.35, 0.35]) { zyl(dunkel, 0.03, 0.7, tx, 0.36, tz + dz); kiste(dunkel, 0.65, 0.03, 0.06, tx, 0.015, tz + dz); }
+      zyl(weiss, 0.06, 0.24, tx - 0.05, 0.87, tz - 0.3, 'y', 14); zyl(M(0xf6f6f2), 0.04, 0.09, tx + 0.2, 0.795, tz + 0.15);
+      { const s = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.04, 20), M(0x8a5a32)[1]); s.scale.set(0.09, 1, 0.22); s.position.set(tx - 0.05, 0.77, tz + 0.05); scene.add(s); }
+      kiste(M(0x2a4fb0), 0.06, 0.03, 0.1, tx + 0.15, 0.765, tz - 0.05); kiste(M(0xf4f4f8), 0.06, 0.03, 0.1, tx + 0.2, 0.765, tz + 0.4);
+      kiste(M(0xfafaf6), 0.21, 0.004, 0.3, tx + 0.15, 0.752, tz + 0.35).rotation.y = 0.3; kiste(M(0xfafaf6), 0.21, 0.004, 0.3, tx - 0.15, 0.752, tz - 0.4).rotation.y = -0.2;
       cols.push({x0:tx - A*0.85, x1:tx + A*0.85, z0:tz - B*0.85, z1:tz + B*0.85, y0:-1, y1:0.8});
       const holzstuhl = (x, z, ry) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g);
-        kiste(buche, 0.42, 0.02, 0.4, 0, 0.45, 0, g); const r = kiste(buche, 0.42, 0.3, 0.02, 0, 0.72, -0.2, g); r.rotation.x = -0.12;
-        for (const [a, b] of [[-0.18, -0.17], [0.18, -0.17], [-0.18, 0.17], [0.18, 0.17]]) kiste(dunkel, 0.02, 0.45, 0.02, a, 0.225, b, g);
-        for (const a of [-0.18, 0.18]) kiste(dunkel, 0.02, 0.38, 0.02, a, 0.64, -0.19, g);
+        kiste(buche, 0.42, 0.025, 0.4, 0, 0.46, 0.02, g); const r = kiste(buche, 0.42, 0.42, 0.02, 0, 0.74, -0.2, g); r.rotation.x = -0.15;
+        kiste(M(0x8a6a40), 0.12, 0.03, 0.025, 0, 0.88, -0.215, g);                                                    // Griffloch
+        for (const a of [-0.19, 0.19]) { kiste(dunkel, 0.02, 0.46, 0.02, a, 0.23, 0.17, g); kiste(dunkel, 0.02, 0.5, 0.02, a, 0.25, -0.17, g); kiste(dunkel, 0.02, 0.02, 0.36, a, 0.02, 0, g); }
         cols.push({x0:x - 0.21, x1:x + 0.21, z0:z - 0.21, z1:z + 0.21, y0:-1, y1:0.95}); };
-      holzstuhl(tx - 0.4, tz - B - 0.22, 0); holzstuhl(tx + 0.4, tz - B - 0.22, 0.15); holzstuhl(tx - 0.4, tz + B + 0.22, Math.PI); holzstuhl(tx + 0.4, tz + B + 0.2, Math.PI - 0.2);
-      holzstuhl(tx - A - 0.25, tz, Math.PI/2); holzstuhl(tx + A + 0.25, tz + 0.05, -Math.PI/2 - 0.1); }
-    // Ordnerregale an der Wand zu 014 (Fotos IMG_1045, IMG_1047-1050). regalfach (details.js) steht an einer Wand bei z = wand und
-    // zeigt nach +z, deshalb in einer um 180° gedrehten Gruppe an der Südwand.
+      holzstuhl(tx - A - 0.25, tz - 0.55, Math.PI/2); holzstuhl(tx - A - 0.25, tz + 0.1, Math.PI/2 - 0.1);
+      holzstuhl(tx + A + 0.25, tz - 0.35, -Math.PI/2); holzstuhl(tx + A + 0.25, tz + 0.4, -Math.PI/2 + 0.15); holzstuhl(tx, tz - B - 0.2, 0); }
+    // Westwand zwischen den Türen: LG-Fernseher, darunter ein Kanal mit Steckdosen, Hängeregistratur, Spritzflasche, Fernbedienung
+    { const zt = 10.05; kiste(dunkel, 0.07, 0.72, 1.25, XW + 0.05, 2.05, zt); kiste(M(0x0c0d10), 0.005, 0.68, 1.2, XW + 0.087, 2.05, zt);
+      kiste(weiss, 0.08, 0.17, 1.75, XW + 0.04, 1.0, zt); for (const z of [9.5, 9.65, 10.2, 10.35, 10.75]) kiste(M(0xf0eee4), 0.012, 0.09, 0.09, XW + 0.085, 1.0, z);
+      kiste(M(0xc8a46e), 0.01, 0.3, 0.33, XW + 0.06, 1.25, 9.55); kiste(M(0xf2f2ee, {transparent:true, opacity:0.8}), 0.07, 0.17, 0.07, XW + 0.04, 1.17, 10.8); kiste(M(0xf2c200), 0.072, 0.04, 0.072, XW + 0.04, 1.27, 10.8);
+      kiste(dunkel, 0.05, 0.02, 0.18, XW + 0.05, 1.095, 10.4); }
+    // Südwand (zu 014) nach den Fotos IMG_1011/1012/1016/1018/1021/1022: in der Ecke am Fenster ein niedriger Ahornschrank mit Kartons,
+    // daneben zwei hohe Ordnerregale mit grauen Böden (Ordner, Kataloge, Kleidung, Kleinteile; Motorradhelm und Plexiglashaube obendrauf),
+    // dann zwei Ahornschränke mit drei Schubladen und offenen Fächern (Ordner, Tassen, Messgeräte; Scanner und Tablet-Ständer obendrauf).
+    // regalfach (details.js) steht an einer Wand bei z = wand und zeigt nach +z, deshalb in einer um 180° gedrehten Gruppe.
     const sued = (xm, fn) => { const g = new THREE.Group(); g.position.set(xm, 0, ZS); g.rotation.y = Math.PI; scene.add(g); fn(g); };
-    // niedriges Ordnerregal mit grauen Böden, zwei Felder; obendrauf Motorradhelm und Plexiglashaube mit Bauteil
-    sued(-3.35, g => { const w = 1.8, d = 0.38, H = 1.2;
+    sued(-0.015, g => { const w = 0.87, d = 0.45, H = 0.75; kiste(ahorn, w, H, d, 0, H/2, d/2, g); kiste(M(0xcdbb92), 0.004, H - 0.06, 0.004, 0, H/2, d + 0.001, g);
+      for (const x of [-0.06, 0.06]) zyl(alu, 0.012, 0.02, x, 0.55, d + 0.01, 'z', 8, g);
+      kiste(M(0xb08a5a), 0.3, 0.2, 0.3, -0.2, H + 0.1, 0.2, g); kiste(M(0xa8804e), 0.25, 0.15, 0.25, 0.15, H + 0.075, 0.25, g); kiste(M(0x3a3c40), 0.3, 0.06, 0.25, 0.12, H + 0.18, 0.2, g);
+      zyl(stahl, 0.11, 0.08, -0.25, H + 0.24, 0.15, 'y', 20, g); });
+    cols.push({x0:-0.45, x1:0.42, z0:ZS - 0.45, z1:ZS, y0:-1, y1:1.0});
+    { const k = new THREE.Group(); k.position.set(-0.2, 0, 12.2); scene.add(k);                                         // Wäschekorb aus Draht (Papierkorb) vor dem Schrank
+      const mk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.35, 16, 1, true), new THREE.MeshLambertMaterial({color:0x1a1a1a, side:THREE.DoubleSide, transparent:true, opacity:0.7})); mk.position.y = 0.175; k.add(mk); }
+    const fach = (g, x0, x1, ys, d, seed) => { for (let r = 0; r < ys.length - 1; r++) g.add(window.DETAIL.regalfach(THREE, {x0:x0 + 0.0125, x1:x1 - 0.0125, y:ys[r] + 0.012, wand:0, hoehe:ys[r + 1] - ys[r] - 0.02, seed:seed + r*7})); };
+    // zwei Ordnerregale (graue Böden)
+    sued(-1.33, g => { const w = 1.7, d = 0.4, H = 2.1, ys = [0.06, 0.48, 0.9, 1.3, 1.7, 2.08];
       for (const x of [-w/2, 0, w/2]) kiste(ahorn, 0.025, H, d, x, H/2, d/2, g); kiste(ahorn, w, 0.025, d, 0, H, d/2, g);
-      for (const y of [0.02, 0.4, 0.8]) kiste(grau, w, 0.02, d, 0, y, d/2, g);
-      for (const [a, b] of [[-w/2, 0], [0, w/2]]) for (let r = 0; r < 3; r++) g.add(window.DETAIL.regalfach(THREE, {x0:a + 0.0125, x1:b - 0.0125, y:0.03 + r*0.39, wand:0, hoehe:0.37, seed:71 + r*5 + (a < 0 ? 0 : 3)}));
+      for (const y of ys.slice(0, -1)) kiste(grau, w, 0.02, d - 0.02, 0, y, d/2, g);
+      fach(g, -w/2, 0, ys, d, 211); fach(g, 0, w/2, ys, d, 223);
       const helm = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), M(0x1a1c1e, {roughness:0.3})[1]); helm.scale.y = 0.85; helm.position.set(0.6, H + 0.13, 0.2); g.add(helm);
-      kiste(M(0x36b04a), 0.2, 0.04, 0.2, 0.6, H + 0.05, 0.2, g);
-      kiste(M(0xeef4f6, {transparent:true, opacity:0.35, roughness:0.1}), 0.5, 0.3, 0.3, -0.5, H + 0.165, 0.2, g); zyl(stahl, 0.07, 0.15, -0.5, H + 0.09, 0.2, 'x', 16, g);
-      kiste(weiss, 0.5, 0.05, 0.12, 0.0, H + 0.04, 0.2, g); });
-    cols.push({x0:-4.25, x1:-2.45, z0:ZS - 0.38, z1:ZS, y0:-1, y1:1.5});
-    // hohes Ahornregal, zwei Felder: unten Schubladen, darüber drei offene Fächer (Ordner, Kartons, Kleinteile), Tassen obendrauf
-    sued(-1.05, g => { const w = 1.6, d = 0.42, H = 2.0;
-      for (const x of [-w/2, 0, w/2]) kiste(ahorn, 0.025, H, d, x, H/2, d/2, g);
-      for (const y of [0.72, 1.14, 1.56, H]) kiste(ahorn, w, 0.025, d, 0, y, d/2, g);
-      for (const xm of [-w/4, w/4]) { kiste(ahorn, w/2 - 0.03, 0.34, 0.02, xm, 0.53, d - 0.01, g); kiste(ahorn, w/2 - 0.03, 0.34, 0.02, xm, 0.18, d - 0.01, g);
-        kiste(griffblau, 0.14, 0.012, 0.012, xm, 0.6, d + 0.01, g); kiste(griffblau, 0.14, 0.012, 0.012, xm, 0.25, d + 0.01, g); }
-      for (const [a, b] of [[-w/2, 0], [0, w/2]]) for (let r = 0; r < 3; r++) g.add(window.DETAIL.regalfach(THREE, {x0:a + 0.0125, x1:b - 0.0125, y:0.735 + r*0.42, wand:0, hoehe:0.4, seed:91 + r*7 + (a < 0 ? 0 : 2)}));
-      for (let k = 0; k < 4; k++) zyl(M([0xf4f4f0, 0x2a4fa0, 0xf4f4f0, 0xb32d2d][k]), 0.04, 0.1, -0.15 + k*0.1, 2.075, 0.2, 'y', 12, g);
-      kiste(schwarz, 0.4, 0.08, 0.3, 0.45, 2.05, 0.2, g); });
-    cols.push({x0:-1.85, x1:-0.25, z0:ZS - 0.42, z1:ZS, y0:-1, y1:2.1});
+      kiste(M(0x36b04a), 0.22, 0.05, 0.2, 0.6, H + 0.05, 0.2, g);
+      kiste(weiss, 0.6, 0.05, 0.3, 0.05, H + 0.04, 0.2, g); kiste(M(0x8a7050), 0.3, 0.04, 0.2, 0.05, H + 0.085, 0.2, g).rotation.y = 0.3;
+      kiste(M(0xeef4f6, {transparent:true, opacity:0.3, roughness:0.1}), 0.5, 0.35, 0.35, -0.55, H + 0.19, 0.2, g); zyl(stahl, 0.08, 0.18, -0.55, H + 0.1, 0.2, 'x', 16, g); });
+    cols.push({x0:-2.2, x1:-0.47, z0:ZS - 0.4, z1:ZS, y0:-1, y1:2.3});
+    // zwei Ahornschränke: unten drei Schubladen, oben drei offene Fächer
+    sued(-3.06, g => { const w = 1.7, d = 0.42, H = 2.1, ys = [0.9, 1.3, 1.7, 2.08];
+      for (const x of [-w/2, 0, w/2]) kiste(ahorn, 0.025, H, d, x, H/2, d/2, g); kiste(ahorn, w, 0.025, d, 0, H, d/2, g);
+      for (const y of ys.slice(0, -1)) kiste(ahorn, w, 0.022, d, 0, y, d/2, g);
+      for (const xm of [-w/4, w/4]) for (let k = 0; k < 3; k++) { kiste(ahorn, w/2 - 0.03, 0.27, 0.02, xm, 0.18 + k*0.28, d - 0.01, g); kiste(M(0x2a2a2a), 0.12, 0.012, 0.012, xm, 0.27 + k*0.28, d + 0.01, g); }
+      fach(g, -w/2, 0, ys, d, 241); fach(g, 0, w/2, ys, d, 257);
+      for (let k = 0; k < 4; k++) zyl(M([0xf4f4f0, 0x2a4fa0, 0xf4f4f0, 0xf4f4f0][k]), 0.04, 0.1, -0.7 + k*0.1, 1.76, 0.25, 'y', 12, g);
+      kiste(schwarz, 0.6, 0.08, 0.15, -0.45, H + 0.05, 0.2, g); kiste(schwarz, 0.4, 0.04, 0.25, 0.4, H + 0.03, 0.2, g); kiste(schwarz, 0.3, 0.2, 0.03, 0.4, H + 0.14, 0.12, g).rotation.x = 0.4; });
+    cols.push({x0:-3.92, x1:-2.2, z0:ZS - 0.42, z1:ZS, y0:-1, y1:2.3});
   }
 
   // 015: Getränkelager. Kästen an West-, Süd- und Nordwand gestapelt (Wasser, Licher Bier in grünen, Cola 0,33 in gelben Kästen),
