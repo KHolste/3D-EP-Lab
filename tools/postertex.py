@@ -21,6 +21,25 @@ POSTER = {
     'fenster06a': ('raum06_fenster_a.jpg', [(125, 90), (1075, 90), (1075, 1560), (125, 1560)], (380, 590)),   # Blick aus Raum 06 (Einzelbild aus videos/IMG_0946.MOV)
     'fenster06b': ('raum06_fenster_b.jpg', [(330, 200), (1075, 200), (1075, 1130), (330, 1130)], (380, 470)),
     'pinnwand': ('pinnwand.JPEG', [(287, 252), (1645, 366), (1650, 1112), (338, 1312)], (840, 560)),   # Meme-Whiteboard im Übergangsraum (Foto 2048 x 1536)
+    # Westteil von Flur 05 (Fotos IMG_0976/77/79/80): rechts FEEP und Xe, links Thermal und Plasma
+    'feep':    ('poster_feep.JPEG',    [(209, 154), (1453, 147), (1352, 1760), (276, 1751)], (400, 560)),
+    'xe':      ('poster_xe.JPEG',      [(144, 154), (1468, 186), (1428, 2028), (193, 1981)], (400, 560)),
+    'plasma':  ('poster_plasma.JPEG',  [(101, 114), (1500, 114), (1459, 2028), (123, 1941)], (400, 560)),
+    'thermal': ('poster_thermal.JPEG', [(384, 323), (1398, 332), (1321, 1674), (415, 1659)], (400, 560)),
+    # Flur 05, Wand zu 014a/014 links der Tür 014 (Fotos IMG_0984-0986); bei den Klapprahmen gehört der Rahmen zur Textur
+    'notfall':    ('aushang_notfall.JPEG',    [(282, 184), (1321, 215), (1265, 1541), (348, 1592)], (420, 560)),
+    'fluchtplan': ('aushang_fluchtplan.JPEG', [(381, 415), (1313, 415), (1292, 1649), (401, 1671)], (360, 500)),
+    'erstehilfe': ('aushang_erstehilfe.JPEG', [(287, 532), (1306, 527), (1285, 1208), (328, 1213)], (600, 400)),
+    'hautschutz': ('aushang_erstehilfe.JPEG', [(473, 1213), (1121, 1213), (1114, 1654), (492, 1656)], (480, 330)),
+    'schild014':  ('aushang_erstehilfe.JPEG', [(1169, 1239), (1398, 1244), (1388, 1452), (1167, 1449)], (240, 220)),
+    # Treppenvorplatz von Flur 05 (Fotos IMG_0989-0995): Schilder, Feuermelder, LOEWE-Urkunde, Schilder an der Tür 09/05
+    'loewe':        ('loewe.JPEG',              [(77, 138), (1521, 184), (1423, 1848), (118, 1874)], (400, 520)),
+    'poststelle':   ('poststelle.JPEG',         [(138, 579), (1203, 561), (1188, 1582), (195, 1587)], (260, 250)),
+    'feuermelder':  ('feuermelder.JPEG',        [(268, 804), (1206, 809), (1200, 1802), (276, 1797)], (240, 250)),
+    'ag_schild':    ('ag_schild.JPEG',          [(159, 707), (1224, 691), (1213, 1690), (282, 1850)], (260, 320)),
+    'technikum':    ('schild_technikum.JPEG',   [(189, 584), (1408, 594), (1377, 1428), (200, 1423)], (420, 290)),
+    'brandschutz':  ('schild_brandschutz.JPEG', [(195, 778), (1321, 778), (1316, 1172), (200, 1167)], (360, 125)),
+    'kalender017':  ('kalender017.JPEG',        [(443, 168), (1125, 192), (1095, 628), (485, 600)], (560, 370)),   # HRZ-Wandkalender in 017 (Foto IMG_1033)
 }
 RAND = 0.025                      # Anteil, der an jeder Seite wegfaellt (Alurahmen)
 

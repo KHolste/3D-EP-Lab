@@ -212,10 +212,11 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
     // Bewegliche Teile finden: alle Raumtüren einmal ganz öffnen; was sich dabei bewegt, bleibt einzeln
     scene.updateMatrixWorld(true);
     const vorher = new Map(alle.map(m => [m, m.matrixWorld.clone()])), T = window.raeumeTueren || [];
-    for (const d of T) { d.offen = true; for (let i = 0; i < 500 && d.schritt(); i++); }
+    const start = T.map(d => d.offen);                                   // jede Tür einmal in die andere Stellung bringen (manche stehen anfangs offen)
+    for (const d of T) { d.offen = !d.offen; for (let i = 0; i < 500 && d.schritt(); i++); }
     scene.updateMatrixWorld(true);
     const beweglich = new Set(alle.filter(m => !m.matrixWorld.equals(vorher.get(m))));
-    for (const d of T) { d.offen = false; for (let i = 0; i < 500 && d.schritt(); i++); }
+    T.forEach((d, i) => { d.offen = start[i]; for (let k = 0; k < 500 && d.schritt(); k++); });
     scene.updateMatrixWorld(true);
     // gleich aussehende Materialien zusammenlegen (viele sind mehrfach angelegt)
     const kanon = new Map(), hex = c => c ? c.getHexString() : '';

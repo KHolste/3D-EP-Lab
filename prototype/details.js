@@ -378,7 +378,8 @@ window.DETAIL = (() => {
         for (let i = 0; i < n; i++) { const kk = i === 0 || rnd() < 0.7 ? k : sorte();                                  // Stapel meist sortenrein
           y += kasten(kk, cx + zw(-0.02, 0.02), y, cz + zw(-0.02, 0.02), ry + zw(-0.05, 0.05), i === n - 1 ? rnd() < 0.85 : false) + 0.003; }
         // leere Flaschen obendrauf, die nicht mehr in die Kästen gepasst haben
-        if (rnd() < 0.45) for (let i = 0; i < 2 + Math.floor(rnd()*4); i++) flasche(sorte(), cx + zw(-0.12, 0.12), y + 0.23, cz + zw(-0.08, 0.08));
+        if (rnd() < 0.45) { const oben = y - 0.003;                                     // auf dem Rand des obersten Kastens: stehend in einer Lücke oder quer liegend
+          for (let i = 0; i < 2 + Math.floor(rnd()*4); i++) flasche(sorte(), cx + zw(-0.14, 0.14), oben - (rnd() < 0.5 ? 0.18 : 0), cz + zw(-0.08, 0.08), g, rnd() < 0.4); }
         u += breit + zw(0.0, 0.05); } }
     // Reihen leerer Flaschen am Boden vor den Stapeln, ein paar umgekippt
     for (const [ax, az, bx, bz] of o.flaschen || []) { const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax)/L, uz = (bz - az)/L;

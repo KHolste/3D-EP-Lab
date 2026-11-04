@@ -73,6 +73,8 @@
 <script src="cad/musik.js"></script>
 <script src="cad/raeume_data.js"></script>
 <script src="details.js"></script>
+<script src="cad/figuren_data.js"></script>
+<script src="figurmodell.js"></script>
 <script src="raeume.js"></script>
 <script src="cad/tex_aussen.js"></script>
 <script src="aussen.js"></script>
@@ -89,6 +91,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const Q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -538,6 +541,7 @@ function pose(g, ph, amt, t=0){
     r.arm[i].rotation.x = s*0.42*amt + Math.sin(q*0.9 + i)*0.02*still; r.elbow[i].rotation.x = -0.16 - Math.max(0, -s)*0.35*amt; }
   r.body.position.y = Math.abs(Math.sin(ph))*0.022*amt + Math.sin(q*1.6)*0.003*still; r.body.rotation.z = Math.sin(ph)*0.025*amt; r.body.rotation.x = 0.04*amt;
   r.head.rotation.y = (Math.sin(q*0.37) + Math.sin(q*0.83)*0.5)*0.22*still; r.head.rotation.x = Math.sin(q*0.29)*0.05*still;
+  if (g.userData.sync) g.userData.sync();             // realistisches Modell (figurmodell.js) folgt dem Steuergerüst
 }
 
 /* ---- Halle aus dem CAD-Modell (cad/halle_data.js, erzeugt aus der STEP-Datei) ----
@@ -950,9 +954,9 @@ function drawDisplay(){
   stuhl(-11.25, U, 2.7, -Math.PI/2 + 0.3); hocker(-12.1, U, 4.1);
 }
 /* ---- Figuren ---- */
-const dok = figure(0x6d7f8f, {coat:true, hair:0x1f1a17, glasses:true}); dok.position.set(TXD-1.4, TY-0.93, TZ+0.25); dok.rotation.y = 1.2;
+const dok = figure(0x6d7f8f, {coat:true, hair:0x1f1a17, glasses:true}); window.figurModell(THREE, GLTFLoader, dok, 'dok');   /* MakeHuman-Modell */ dok.position.set(TXD-1.4, TY-0.93, TZ+0.25); dok.rotation.y = 1.2;
 const DOKPATH = [[TXD-1.4,TY-0.93,TZ+0.25],[-3.1,DY,TZ],[-3.1,DY,-5.0],[-0.9,DY,-5.0],[-0.7,DY,-5.62],[-3.3,0,-5.62],[-4.5,0,-2.5]]; let dokSeg = 0, dokF = 0;
-const udo = figure(0x8a2440, {hair:0x5a4634, pants:0x30333a, belly:true}); udo.position.set(-5.1, 0, 4.1); udo.rotation.y = -0.5;
+const udo = figure(0x8a2440, {hair:0x5a4634, pants:0x30333a, belly:true}); window.figurModell(THREE, GLTFLoader, udo, 'udo');   /* MakeHuman-Modell (tools/figuren.py) */ udo.position.set(-5.1, 0, 4.1); udo.rotation.y = -0.5;
 hit('udo', null, -5.1, 1.0, 4.1, 0.7, 2.0, 0.7);
 plate('UDO', 0.26, 0.08, udo, 0, 1.95, 0);
 
@@ -990,13 +994,25 @@ const NPCS = [
   {id:'npc2', name:'KALLE', shirt:0x35608f, look:{hair:0x2a211c, pants:0x4a4f58, tucked:true, glasses:true}, speed:1.2, say:() => FACTS[factI++ % FACTS.length] + ' Der Tank steht gerade bei ' + fmtP(S.p) + ' mbar.',
    path:[[-9.2,0,1.4, 5, -10,2.5], [-4.3,0,1.4, 3, -4.3,-1], [-4.3,0,4.9, 5, -3.2,2.4], [-9.2,0,4.9, 3, -7.6,3.4]]}];
 for (const n of NPCS) {
-  const g = n.g = figure(n.shirt, n.look), w = n.path[0]; n.ph = 0; n.amt = 0; g.position.set(w[0], w[1], w[2]); n.i = 0; n.f = 0; n.wait = w[3];
+  const g = n.g = figure(n.shirt, n.look), w = n.path[0]; window.figurModell(THREE, GLTFLoader, g, n.name.toLowerCase());   /* MakeHuman-Modell, falls vorhanden */ n.ph = 0; n.amt = 0; g.position.set(w[0], w[1], w[2]); n.i = 0; n.f = 0; n.wait = w[3];
   g.traverse(o => { o.castShadow = false; });            // kein Schattenwurf: sonst müsste der Schatten der ganzen Halle in jedem Bild neu gerechnet werden
   const blob = new THREE.Mesh(new THREE.CircleGeometry(0.3, 20), new THREE.MeshBasicMaterial({color:0, transparent:true, opacity:0.28, depthWrite:false}));
   blob.rotation.x = -Math.PI/2; blob.position.y = 0.02; g.add(blob);
   const label = n.name[0] + n.name.slice(1).toLowerCase();
   plate(n.name, 0.26, 0.08, g, 0, 1.95, 0); hit(n.id, g, 0, 1.0, 0, 0.7, 2.0, 0.7);
   def(n.id, () => 'Mit ' + label + ' sprechen', () => msg(label + ': „' + n.say() + '“'));
+}
+/* ---- Kollege in Flur 05: an die Wand gelehnt (Foto). Steht still. ---- */
+for (const [name, z, dreh] of [['kollege_karo', 16.9, -0.15]]) {
+  if (!window.FIGUREN || !window.FIGUREN[name]) continue;
+  const g = figure(0x666666, {}), r = g.userData.rig;
+  g.position.set(-7.93, 0, z); g.rotation.y = -Math.PI/2 + dreh;           // Rücken zur Ostwand von Flur 05, Blick in den Flur
+  r.body.rotation.x = -0.07;                                              // angelehnt
+  r.arm[0].rotation.x = 0.05; r.elbow[0].rotation.x = -0.2;             // Arme locker
+  r.arm[1].rotation.x = 0.05; r.elbow[1].rotation.x = -0.25;
+  r.head.rotation.y = name === 'kollege_blond' ? 0.35 : -0.25; r.head.rotation.x = 0.12;   // schauen zueinander bzw. leicht nach unten
+  window.figurModell(THREE, GLTFLoader, g, name);
+  cols.push({x0:-7.95 - 0.25, x1:-7.6, z0:z - 0.28, z1:z + 0.28, y0:-1, y1:2});
 }
 function moveNpcs(dt, now){
   for (const n of NPCS) {
@@ -1091,6 +1107,7 @@ const HAND = {dur:1.5, rest:new THREE.Vector3(0.3, -0.52, -0.28), reach:new THRE
   mk(new THREE.CylinderGeometry(0.052, 0.043, 0.4, 14), slv, handG, 0, 0, 0.32).rotation.x = Math.PI/2;                       // Ärmel
   mk(new THREE.TorusGeometry(0.043, 0.006, 8, 16), slv, handG, 0, 0, 0.122);                                                  // Bündchen
 }
+let handFinger = null; window.spielerHand(THREE, GLTFLoader, handG, f => { handFinger = f; });   // realistische Hand mit Hemdärmel (MakeHuman, figurmodell.js)
 const sstep = v => { v = Math.max(0, Math.min(1, v)); return v*v*(3 - 2*v); };
 function moveHand(dt){
   if (handT <= 0 && !handFix) { handG.visible = false; return; }
@@ -1100,11 +1117,13 @@ function moveHand(dt){
   handG.rotateZ(-0.25 - tw*0.55); handG.visible = true;
   HAND.fingers.forEach((js, i) => { const a = 0.22 + i*0.04; js[0].rotation.x = -(a + c*(0.75 + i*0.05)); js[1].rotation.x = -(a + c*1.05); js[2].rotation.x = -(a*0.8 + c*0.7); });
   HAND.thumbRoot.rotation.set(-0.25 - c*0.35, 0.95 - c*0.55, 0); HAND.thumb[1].rotation.x = -0.2 - c*0.6;
+  if (handFinger) handFinger([0, 1, 2, 3].map(i => { const a = 0.12 + i*0.05; return [a + c*(0.8 + i*0.05), a*0.8 + c*1.05, a*0.6 + c*0.7]; }), 0.1 + c*0.5);
 }
 function handStart(){                                                                       // läuft die Hand schon, greift sie von dort aus erneut zu
   const p = 1 - handT; handT = handT <= 0 ? 1 : p < 0.3 ? handT : p < 0.7 ? 0.76 : 1 - 0.3*(1 - sstep((p - 0.7)/0.3));
 }
-function interact(){ if (paused || ended || !aim) return; sfx('click'); handStart(); ACT[aim].do(); }
+function interact(){ if (paused || ended || !aim) return; const reden = /^(npc|udo|dok)/.test(aim);   // beim Ansprechen keine Hand, kein Klick
+  if (!reden) { sfx('click'); handStart(); } ACT[aim].do(); }
 
 function movePlayer(dt){
   const f = (keys.KeyW?1:0) - (keys.KeyS?1:0), s = (keys.KeyD?1:0) - (keys.KeyA?1:0);

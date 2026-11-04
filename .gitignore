@@ -23,3 +23,7 @@ Bilder f*r 3D-Kamera/
 tools/_pbr_download/
 # Zwischenstaende von tools/lichtbake.py
 tools/_bake/
+# MakeHuman-Arbeitsordner (Downloads, Zwischenstände)
+tools/_mh/
+# Figurdaten (44 MB), erzeugt von tools/figuren.py
+prototype/cad/figuren_data.js

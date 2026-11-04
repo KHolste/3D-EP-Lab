@@ -5,6 +5,8 @@
    Spielkoordinaten: x nach Osten (Hallentor), z nach Süden zu den Räumen hin, y nach oben; Meter. */
 window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   const R = window.RAEUME; if (!R) return;
+  // Glas für Fenster und Türen mit Blick nach draußen (aussen.js): leicht getönt, spiegelnd, durchsichtig
+  const GLAS = new THREE.MeshStandardMaterial({color:0xd8e4e6, transparent:true, opacity:0.12, roughness:0.05, metalness:0, depthWrite:false, side:THREE.DoubleSide});
   // Bügelgriff aus details.js bei (x, y, z); ry dreht die Abstehrichtung (0 = nach +z), senkrecht: Griffstange steht aufrecht
   const buegel = (m, L, x, y, z, ry = 0, senkrecht = false, parent = scene) => { const g = window.DETAIL.buegelgriff(THREE, m, L);
     g.position.set(x, y, z); g.rotation.set(0, ry, senkrecht ? Math.PI/2 : 0); parent.add(g); return g; };
@@ -75,15 +77,23 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       let x = (a+b)/2, z = z1 + 0.05, f = imFlur(x, z); (imTreppe(x, z) ? treppeW : imGang(x, z) ? gangW : f || imWeiss(x, z) ? flurW : beton).add([0,0,1], [[a,y0,z1],[b,y0,z1],[b,y1,z1],[a,y1,z1]]); if (f && sockel && !imGang(x, z)) kasten(leiste, a, b, 0, SH, z1, z1+SD);
       z = z0 - 0.05; f = imFlur(x, z); (imTreppe(x, z) ? treppeW : imGang(x, z) ? gangW : f || imWeiss(x, z) ? flurW : beton).add([0,0,-1], [[b,y0,z0],[a,y0,z0],[a,y1,z0],[b,y1,z0]]); if (f && sockel && !imGang(x, z)) kasten(leiste, a, b, 0, SH, z0-SD, z0); });
   }
-  // Fensteröffnungen in der Außenwand (Westseite) von Raum 06: Brüstung bis 0,95 m, Sturz ab 2,75 m; dahinter liegt die Umgebung (aussen.js)
-  const OEFFNUNG = [[6.85, 9.45], [10.05, 12.65]], BR = 0.95, ST = 2.75;
-  for (const [x0, x1, z0, z1] of R.walls) {
-    if (x1 > -15.5) { wand(x0, x1, 0, HR, z0, z1, true); continue; }
-    let z = z0;
-    for (const [a, b] of OEFFNUNG) { if (b <= z0 || a >= z1) continue;
-      if (a > z) wand(x0, x1, 0, HR, z, a, true);
-      wand(x0, x1, 0, BR, a, b, true); wand(x0, x1, ST, HR, a, b, false); z = b; }
-    if (z < z1) wand(x0, x1, 0, HR, z, z1, true); }
+  // Öffnungen in den Außenwänden; dahinter liegt die Umgebung (aussen.js). Je Öffnung [z0, z1, y0, y1].
+  // West: Fenster von 06, oberes Treppenhausfenster (020). Ost: verglaste Tür am Ende von Flur 05, Fenster der Alten Schreinerei (019).
+  const OEFF = {W:[[6.85, 9.45, 0.95, 2.75], [13.517, 15.817, 2.69, 3.21]], O:[[16.9, 18.99, 0.17, 2.23]]};
+  { const pf = R.walls.filter(([x0, x1, z0, z1]) => x1 > 0.4 && x1 < 0.5 && x0 > -0.2 && z0 > 36.41 && z1 < 49.333).map(w => [w[2], w[3]]).sort((a, b) => a[0] - b[0]);
+    let z = 36.41; for (const [a, b] of pf.concat([[49.333, 49.333]])) { const zm = (z + a)/2, w = (a - z - 0.5)/2; OEFF.O.push([zm - w, zm + w, 1.55, 2.55]); z = b; } }
+  OEFF.W.push([10.05, 12.65, 0.95, 2.75]);
+  OEFF.O.push([7.6, 9.0, 1.6, 2.55], [10.6, 12.0, 1.6, 2.55]);                      // Raum 017: zwei Fenster über dem Brüstungskanal
+  const seite = (x0, x1) => x1 < -15.5 ? OEFF.W : x0 > 0.44 ? OEFF.O : null;
+  function wandO(x0, x1, ya, yb, z0, z1, sockel){                  // Wand mit Aussparungen für die Öffnungen ihrer Seite
+    const L = (seite(x0, x1) || []).filter(([a, b, c, d]) => b > z0 && a < z1 && d > ya && c < yb);
+    if (!L.length) return wand(x0, x1, ya, yb, z0, z1, sockel);
+    const zs = [...new Set([z0, z1, ...L.flatMap(([a, b]) => [Math.max(z0, a), Math.min(z1, b)])])].sort((p, q) => p - q);
+    for (let i = 0; i < zs.length - 1; i++) { const a = zs[i], b = zs[i + 1]; if (b - a < 1e-4) continue;
+      const o = L.find(([p, q]) => p <= a + 1e-6 && q >= b - 1e-6);
+      if (!o) { wand(x0, x1, ya, yb, a, b, sockel); continue; }
+      if (o[2] > ya) wand(x0, x1, ya, Math.min(yb, o[2]), a, b, sockel); if (o[3] < yb) wand(x0, x1, Math.max(ya, o[3]), yb, a, b, false); } }
+  for (const [x0, x1, z0, z1] of R.walls) wandO(x0, x1, 0, HR, z0, z1, true);
   for (const [x0, x1, z0, z1, u] of R.doors) wand(x0, x1, u || 2.1, HR, z0, z1, false);
   // 014a ist vom Raum 014 durch eine Trennwand abgeteilt (etwa ein Drittel der Fläche, im Grundriss nicht eingezeichnet)
   wand(-4.72, -4.62, 0, HR, 13.231, 16.103, true); cols.push({x0:-4.72, x1:-4.62, z0:13.231, z1:16.103, y0:-1, y1:HR});
@@ -109,7 +119,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     if (z > T.zT1 && z < T.zS && x >= T.xB && x <= T.xO) v.push(T.H);                                       // Austritt oben
     return v;
   };
-  wand(T.xW - 0.27, T.xW, HR, T.oben, T.zN - 0.41, T.zS + 0.41, false);          // Treppenraum über der Decke: Westen,
+  wandO(T.xW - 0.27, T.xW, HR, T.oben, T.zN - 0.41, T.zS + 0.41, false);         // Treppenraum über der Decke: Westen (mit dem oberen Teil des Fensters),
   wand(T.xW, T.xO + 0.17, HR, T.oben, T.zN - 0.41, T.zN, false);                 // Norden (06),
   wand(T.xW, T.xO + 0.17, HR, T.oben, T.zS, T.zS + 0.41, false);                 // Süden (05)
   wand(T.xO, T.xO + 0.17, HR, T.oben, T.zN, T.zS, false);                        // und Osten über dem Vorplatz, darin oben die Tür
@@ -248,9 +258,12 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     for (const o of cadMeshes.slice(-30)) if (o.geometry && o.geometry.type === 'CylinderGeometry' && o.geometry.parameters.radiusTop === 0.02 && Math.abs(o.position.z - (T.zT0 + T.zT1)/2) < 0.2) {
       o.geometry = new THREE.BoxGeometry(0.06, o.geometry.parameters.height, 0.045); o.userData.mats = holzG; o.material = holzG[1]; } }
   { const fe = window.TEX && window.TEX.poster_fenster020 ? (t => { t.colorSpace = THREE.SRGBColorSpace; return t; })(new THREE.TextureLoader().load(window.TEX.poster_fenster020)) : null;
-    const zc = (T.zN + T.zS)/2, weissM = mats(0xf4f4f1, 0x3a3a38);
+    const zc = (T.zN + T.zS)/2, weissM = mats(0xf4f4f1, 0x3a3a38), rahmenM = mats(0x2a2d30, 0);
     for (const y of [T.h, -T.h]) {                                  // langes, liegendes Fenster an der Außenwand über den Podesten
-      if (fe) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.52), new THREE.MeshBasicMaterial({map:fe, toneMapped:false})); m.rotation.y = Math.PI/2; m.position.set(T.xW + 0.006, y + 1.25, zc); scene.add(m); }
+      if (y > 0 && window.TEX_AUSSEN) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.52), GLAS); m.rotation.y = Math.PI/2; m.position.set(T.xW - 0.12, y + 1.25, zc); scene.add(m);   // oben: echter Blick auf den Hof
+        for (const [w, h, dy, dz] of [[2.36, 0.04, 0.28, 0], [2.36, 0.04, -0.28, 0], [0.04, 0.6, 0, -1.17], [0.04, 0.6, 0, 1.17], [0.04, 0.6, 0, 0]]) {     // Rahmen
+          const r = new THREE.Mesh(new THREE.BoxGeometry(0.06, h, w), rahmenM[1]); r.userData.mats = rahmenM; cadMeshes.push(r); r.position.set(T.xW + 0.01, y + 1.25 + dy, zc + dz); scene.add(r); } }
+      else if (fe) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.52), new THREE.MeshBasicMaterial({map:fe, toneMapped:false})); m.rotation.y = Math.PI/2; m.position.set(T.xW + 0.006, y + 1.25, zc); scene.add(m); }
       const sb = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, 2.4), weissM[1]); sb.userData.mats = weissM; cadMeshes.push(sb); sb.position.set(T.xW + 0.08, y + 0.98, zc); scene.add(sb);
       if (y > 0) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 1.0), new THREE.MeshBasicMaterial({color:0xfffbe8})); l.position.set(T.xW + 0.04, y + 2.1, zc); scene.add(l); } }   // (die Leuchte für unten stand versehentlich auf dem Vorplatz)
     // gelbes Warnschild „Rutschgefahr“ am Treppenkopf zwischen den Läufen
@@ -310,7 +323,10 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     felder.forEach(([za, zb], i) => {
       const L = zb - za, zm = (za + zb)/2;
       // Fenster: Brüstung 1,5 m, Fensterhöhe 1,0 m; weiße Laibung als Rahmen, Fensterbank
-      if (ft) { const f = new THREE.Mesh(new THREE.PlaneGeometry(L - 0.5, 1.0), new THREE.MeshBasicMaterial({map:ft, toneMapped:false}));
+      if (window.TEX_AUSSEN) { const W = L - 0.5;                     // echter Ausblick: zwei Scheiben in dunklem Rahmen, Glas in der Wand
+        const f = new THREE.Mesh(new THREE.PlaneGeometry(W, 1.0), GLAS); f.rotation.y = -Math.PI/2; f.position.set(XW + 0.12, 2.05, zm); scene.add(f);
+        for (const [h, d, dy, dz] of [[0.05, W + 0.06, 0.5, 0], [0.05, W + 0.06, -0.5, 0], [1.06, 0.05, 0, -W/2], [1.06, 0.05, 0, W/2], [1.06, 0.06, 0, 0]]) box(dunkel, 0.07, h, d, XW + 0.01, 2.05 + dy, zm + dz); }
+      else if (ft) { const f = new THREE.Mesh(new THREE.PlaneGeometry(L - 0.5, 1.0), new THREE.MeshBasicMaterial({map:ft, toneMapped:false}));
         f.rotation.y = -Math.PI/2; f.position.set(XW - 0.004, 2.05, zm); scene.add(f); }
       box(weiss, 0.16, 0.03, L - 0.4, XW - 0.08, 1.535, zm);
       // Werkbänke wie auf den Panoramen: Holzplatte, Gestell grau, rote Schubladenblöcke links und rechts
@@ -670,8 +686,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const gs = bildTex(128, 64, (g, w, hh) => { g.fillStyle = '#f2c200'; g.fillRect(0, 0, w, hh); g.fillStyle = '#b3261e'; g.font = 'bold 12px system-ui'; g.fillText('Gesperrt bei', 12, 20); g.fillText('Technikbetrieb', 12, 36); g.fillText('Raum nicht betreten', 6, 52); });
       flach(gs, 0.3, 0.15, -8.25 + dv, 2.5, ZH + 0.006, 0, false); }
     // rechte Wand: Zarge der offenen Tür in den Übergangsraum, Türschild
-    zarge(XR, 9.436, 10.462, 2.05, -1); kiste(rot, 0.98, 2.0, 0.045, XR - 0.52, 1.0, 9.42);   // Türblatt steht offen in den Raum
-    cols.push({x0:XR - 1.02, x1:XR, z0:9.39, z1:9.45, y0:-1, y1:2.05});
+    zarge(XR, 9.436, 10.462, 2.05, -1);                             // Türblatt: bei den Türen zum Öffnen (raumtuer_016)
     // Schwerlastregal an der rechten Wand vor der Hallentür: Stahl, fünf Böden, oben weiße Schutzhelme, Kartons, blaue Box mit Gebotszeichen
     { const rz0 = 8.25, rz1 = 9.33, rd = 0.45, rx = XR - rd/2, st = M(0x9da3a8, {roughness:0.45, metalness:0.6});
       for (const z of [rz0 + 0.02, rz1 - 0.02]) for (const x of [XR - rd + 0.02, XR - 0.02]) kiste(st, 0.035, 2.0, 0.035, x, 1.0, z);
@@ -779,7 +794,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const y0 = 0.95, y1 = 2.75, zm = (z0 + z1)/2;
       // Glasscheiben (leicht getönt und spiegelnd); dahinter die Umgebung aus aussen.js. Ohne Umgebung bleibt das Foto vom Hof.
       [[z0, zm], [zm, z1]].forEach(([a, b]) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(b - a - 0.06, y1 - y0 - 0.06),
-          window.TEX_AUSSEN ? new THREE.MeshStandardMaterial({color:0xd8e4e6, transparent:true, opacity:0.12, roughness:0.05, metalness:0, depthWrite:false, side:THREE.DoubleSide})
+          window.TEX_AUSSEN ? GLAS
                             : new THREE.MeshBasicMaterial({map:ta, toneMapped:false}));
         m.rotation.y = Math.PI/2; m.position.set(XW - 0.12, (y0 + y1)/2, (a + b)/2); scene.add(m); });
       for (const z of [z0, zm, z1]) kiste(dunkel, 0.08, y1 - y0, 0.07, XW + 0.04, (y0 + y1)/2, z);
@@ -1056,10 +1071,15 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
   // Flur 05 vor der Flügeltür nach 08b: links und rechts ein Wandvorsprung (verkleideter Installationsschacht), weiß mit schwarzer Leiste
   { const w = [new THREE.MeshLambertMaterial({color:0xf3f3f1, emissive:0x5a5a58}), new THREE.MeshStandardMaterial({color:0xf3f3f1, emissive:0x5a5a58, roughness:0.9, metalness:0})];
     const sw = [new THREE.MeshLambertMaterial({color:0x161616}), new THREE.MeshStandardMaterial({color:0x161616, roughness:0.5})];
-    for (const [x0, x1, z0] of [[-10.05, -9.95, 18.6], [-7.77, -7.65, 18.6]]) { const z1 = 19.18;     // nur ein kleiner Absatz direkt vor der Tür (60 cm), der Weg zum Vorplatz an der Treppe und zum Querflur bleibt frei
+    // beidseits der Tür ein langer, flacher Vorsprung (1,4 m breit, 30 cm tief) mit Revisionsklappe (Fotos IMG_0981/82)
+    for (const [x0, x1, z0, z1] of [[-11.35, -9.945, 19.085, 19.385], [-7.813, -6.408, 19.085, 19.385]]) {
       const o = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, HR, z1 - z0), w[1]); o.userData.mats = w; cadMeshes.push(o); o.position.set((x0 + x1)/2, HR/2, (z0 + z1)/2); scene.add(o);
       const l = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.02, 0.07, z1 - z0 + 0.02), sw[1]); l.userData.mats = sw; cadMeshes.push(l); l.position.set((x0 + x1)/2, 0.035, (z0 + z1)/2); scene.add(l);
-      cols.push({x0, x1, z0, z1, y0:-1, y1:HR}); } }
+      cols.push({x0, x1, z0, z1, y0:-1, y1:HR}); }
+    // Revisionsklappen auf der Flurseite der Vorsprünge: nur die feine Fuge (0,55 x 0,62 m, Unterkante 0,38 m)
+    const fuge = new THREE.MeshLambertMaterial({color:0x9a9a96}), zf = 19.083;
+    for (const xm of [-10.6, -7.16]) for (const [w, h, x, y] of [[0.55, 0.004, xm, 0.38], [0.55, 0.004, xm, 1.0], [0.004, 0.62, xm - 0.275, 0.69], [0.004, 0.62, xm + 0.275, 0.69]]) {
+      const f = new THREE.Mesh(new THREE.PlaneGeometry(w, h), fuge); f.rotation.y = Math.PI; f.position.set(x, y, zf); scene.add(f); } }
 
   // Rote Doppeltüren, die man mit E öffnet und schließt (das Spiel liest window.raeumeTueren): Halle/09 mit den Warnschildern vom Foto,
   // 09/05 und 05/08b schlicht mit Klinke und Türschließer. Zu Spielbeginn sind sie zu.
@@ -1084,7 +1104,7 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       const t = {id, name, x0, x1, z:zw, offen:false, a:0,
         schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
           fl[0].rotation.y = -s*1.55*this.a; fl[1].rotation.y = s*1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } };
-      window.raeumeTueren.push(t); };
+      window.raeumeTueren.push(t); return fl; };
     // vorn = Seite +z, hinten = Seite -z
     const blau = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 512; const g = c.getContext('2d');
       g.fillStyle = '#1f3fae'; g.fillRect(0, 0, 256, 512); g.strokeStyle = 'rgba(10,20,60,0.5)'; g.lineWidth = 3; g.strokeRect(2, 2, 252, 508);
@@ -1094,7 +1114,11 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       g.font = 'bold 60px system-ui'; g.fillText('↓', 30, 70); g.fillRect(150, 22, 56, 54); g.fillStyle = '#18a558'; g.fillRect(158, 28, 40, 42);
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.15), new THREE.MeshBasicMaterial({map:t, toneMapped:false}));
       m.rotation.y = Math.PI; m.position.set(-9.2, 2.5, 5.99); scene.add(m); }
-    tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht);
+    // Flurseite (+z) nach den Fotos IMG_0994/0995: links das Schild „Technikumshalle“, rechts „Brandschutztür – stets geschlossen halten“
+    { const fl = tuer('raumtuer_0905', 'Tür in den Flur', -9.838, -7.707, 13.03, 1, schlicht, schlicht), w = (-7.707 + 9.838)/2;
+      const schild = (g, key, x, y, b, h) => { if (!window.TEX || !window.TEX['poster_' + key]) return; const t = new THREE.TextureLoader().load(window.TEX['poster_' + key]); t.colorSpace = THREE.SRGBColorSpace;
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(b, h), new THREE.MeshBasicMaterial({map:t, color:0xe2e2e2})); m.position.set(x, y, 0.027); g.add(m); };
+      schild(fl[0], 'technikum', w/2, 1.5, 0.3, 0.21); schild(fl[1], 'brandschutz', -w/2, 1.62, 0.21, 0.075); }
     tuer('raumtuer_0508b', 'Tür zum Flur 08b', -9.945, -7.813, 19.59, 1, laborTuerTex(5, true), schlicht);
     // Labor 018: Türen in der Wand zum Flur 08 (Wand entlang z): links und rechts je ein Flügel, in der Mitte die Doppeltür mit den
     // Warnschildern wie an der Hallentür; alle öffnen ins Labor
@@ -1158,6 +1182,14 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
       window.raeumeTueren.push({id:'raumtuer_06', name:'Tür zu Raum 06', x0:xw - 0.1, x1:xw + 0.1, z:(z0 + z1)/2, offen:false, a:0, hit:[xw, 1.05, (z0 + z1)/2, 0.4, 2.0, z1 - z0],
         schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
           g.rotation.y = -1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); }
+    // einflügelige Tür in der rechten Wand von 09 zum Vorraum der Teeküche 016: Scharnier zur Hallenseite, öffnet nach 09 hinein; steht anfangs offen
+    { const xw = -7.42, z0 = 9.436, z1 = 10.462, h = 2.0, g = new THREE.Group(); g.position.set(xw, 0, z0 + 0.01); scene.add(g);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.045, h, z1 - z0 - 0.02), rotM[1]); m.position.set(0, h/2, (z1 - z0 - 0.02)/2); g.add(m);
+      for (const sx of [-1, 1]) { const kl = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.14), edelM[1]); kl.position.set(sx*0.04, 1.05, z1 - z0 - 0.15); g.add(kl); }
+      const col = {x0:xw - 0.1, x1:xw + 0.1, z0, z1, y0:-1, y1:-1}; cols.push(col); g.rotation.y = -1.55;
+      window.raeumeTueren.push({id:'raumtuer_016', name:'Tür zur Teeküche', x0:xw - 0.1, x1:xw + 0.1, z:(z0 + z1)/2, offen:true, a:1, hit:[xw, 1.05, (z0 + z1)/2, 0.4, 2.0, z1 - z0],
+        schritt(){ const ziel = this.offen ? 1 : 0; if (this.a === ziel) return false; this.a += Math.sign(ziel - this.a)*Math.min(Math.abs(ziel - this.a), 0.03);
+          g.rotation.y = -1.55*this.a; col.y1 = this.a > 0.5 ? -1 : h; return true; } }); }
   }
 
   // Ostende von Flur 05 (vor 014), nach den Fotos docs/fotos/tuer_flur05 und poster_*: dunkle Türanlage über die ganze Flurbreite mit
@@ -1168,7 +1200,15 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     const kiste = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
     const bild = key => { if (!window.TEX || !window.TEX[key]) return null; const t = new THREE.TextureLoader().load(window.TEX[key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
     const tt = bild('tuer05');
-    if (tt) { const tuer = new THREE.Mesh(new THREE.PlaneGeometry(B, Ht), new THREE.MeshBasicMaterial({map:tt, toneMapped:false}));
+    if (tt && window.TEX_AUSSEN) {        // Glasflächen aus dem Foto ausschneiden (Pixel im 804 x 672-Foto), dahinter Glas und der echte Ausblick
+      const c = document.createElement('canvas'); c.width = 804; c.height = 672; const ct = new THREE.CanvasTexture(c); ct.colorSpace = THREE.SRGBColorSpace; ct.anisotropy = 8;
+      const im = new Image(); im.onload = () => { const x = c.getContext('2d'); x.drawImage(im, 0, 0, 804, 672);
+        for (const [a, b, w, h] of [[113, 52, 267, 310], [428, 52, 262, 314], [113, 390, 267, 230], [428, 392, 260, 228]]) x.clearRect(a, b, w, h);
+        ct.needsUpdate = true; }; im.src = window.TEX.tuer05;
+      const tuer = new THREE.Mesh(new THREE.PlaneGeometry(B, Ht), new THREE.MeshBasicMaterial({map:ct, toneMapped:false, alphaTest:0.5}));
+      tuer.rotation.y = -Math.PI/2; tuer.position.set(XW - 0.015, Ht/2, (ZL + ZR)/2); scene.add(tuer);
+      const gl = new THREE.Mesh(new THREE.PlaneGeometry(B, Ht), GLAS); gl.rotation.y = -Math.PI/2; gl.position.set(XW + 0.1, Ht/2, (ZL + ZR)/2); scene.add(gl); }
+    else if (tt) { const tuer = new THREE.Mesh(new THREE.PlaneGeometry(B, Ht), new THREE.MeshBasicMaterial({map:tt, toneMapped:false}));
       tuer.rotation.y = -Math.PI/2; tuer.position.set(XW - 0.015, Ht/2, (ZL + ZR)/2); scene.add(tuer); }                  // vor der Sockelleiste
     kiste(M(0x3a3c3f, {roughness:0.95, metalness:0}), 0.85, 0.012, 1.3, XW - 0.6, 0.006, ZL + 0.95);                   // Fußmatte
     // Poster im Alurahmen; an der rechten Wand zeigen sie nach -z, an der linken nach +z
@@ -1192,6 +1232,264 @@ window.baueRaeume = function(THREE, scene, cols, cadMeshes){
     kiste(M(0xb9bcbf), 0.04, 0.08, 0.04, -2.4, 1.74, ZL + 0.07); kiste(M(0xf2f2ef), 0.06, 0.06, 0.06, -2.4, 1.81, ZL + 0.07);
     cols.push({x0:-2.45, x1:-1.65, z0:ZL, z1:ZL + 0.12, y0:-1, y1:1.7});
   }
+
+  // Westteil von Flur 05 (zwischen der Tür nach 08b und der Außenwand), nach den Fotos IMG_0974-0980: am Ende eine rote Doppeltür
+  // (geschlossen), rechts davon ein Lichtschalter. In der Ecke rechts hinten der graue Dreifach-Mülltrenner (Papier, Verpackung, Restmüll),
+  // darüber ein verkleideter Kasten unter der Decke. An der Ecke zum Treppenvorplatz ein Kantenschutz aus Edelstahl.
+  // Poster im Alurahmen: rechts „Kolloid-FEEP-Antriebe“ und „Xe-Ionisation“, links „3D Thermal Simulation“ und „Plasmamodellierung“.
+  { const XW = -15.54, XO = -10.105, ZN = 16.513, ZS = 19.385, ZV = ZN, XN = -14.32;   // XN: Ende des Deckenkastens über dem Mülltrenner
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, ...(o.e ? {emissive:o.e} : {})}), new THREE.MeshStandardMaterial({color, roughness:o.r ?? 0.5, metalness:o.m ?? 0.1, ...(o.e ? {emissive:o.e} : {})})];
+    const kiste = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const weiss = M(0xf3f3f1, {e:0x5a5a58, r:0.9, m:0}), rot = M(0x8e1c1c, {r:0.45}), alu = M(0xc3c7ca, {r:0.35, m:0.7});
+    kiste(weiss, XN - XW, HR - 1.9, 0.35, (XW + XN)/2, (HR + 1.9)/2, ZN + 0.175);                                  // Deckenkasten über dem Mülltrenner
+    // Kantenschutz (Winkel aus Edelstahl, 0,75 m hoch) an der Außenecke
+    const edel = M(0xb4b8bb, {r:0.3, m:0.8});
+    kiste(edel, 0.07, 0.75, 0.004, XO - 0.035, 0.4, ZV + 0.002); kiste(edel, 0.004, 0.75, 0.07, XO + 0.002, 0.4, ZV - 0.035);
+    // rote Doppeltür in der Stirnwand (vom Flur aus gesehen links bündig), mit Zarge und zwei Türschließern
+    { const z0 = 17.33, z1 = ZS - 0.03, h = 2.2, t = laborTuerTex(31, true);
+      const o = new THREE.Mesh(new THREE.BoxGeometry(0.05, h, z1 - z0), [new THREE.MeshLambertMaterial({map:t}), rot[0], rot[0], rot[0], rot[0], rot[0]]);   // +x zeigt in den Flur
+      o.position.set(XW + 0.02, h/2, (z0 + z1)/2); scene.add(o);
+      kiste(rot, 0.08, 0.06, z1 - z0 + 0.12, XW + 0.04, h + 0.03, (z0 + z1)/2); for (const z of [z0 - 0.03, z1 + 0.03]) kiste(rot, 0.08, h, 0.06, XW + 0.04, h/2, z);
+      const grau = M(0xc9cbcc, {r:0.4, m:0.5}); for (const z of [z0 + 0.4, z1 - 0.4]) kiste(grau, 0.05, 0.05, 0.4, XW + 0.07, h - 0.08, z);
+      kiste(grau, 0.03, 0.03, z1 - z0 - 0.2, XW + 0.06, h + 0.09, (z0 + z1)/2);                                       // Schließfolgeregler über der Tür
+      kiste(M(0xeeeeea), 0.02, 0.08, 0.15, XW + 0.01, 1.05, z0 - 0.35);                                               // Lichtschalter
+      kiste(grau, 0.12, 0.05, 0.05, XW + 0.5, 0.3, ZS - 0.025); }                                                     // Türstopper an der linken Wand
+    // Mülltrenner GEMOS: drei graue Fächer mit schräger Haube, farbige Einwurfklappen, Fußpedale; obendrauf eine Rolle Müllbeutel
+    { const grau = M(0x86888a, {r:0.6, m:0.3}), B = 0.36, T = 0.4, H = 0.88, z = ZN + T/2 + 0.01;
+      [0x1d3a7a, 0xf2d000, 0x2b2d30].forEach((farbe, i) => { const x = XW + 0.12 + B/2 + i*(B + 0.01);
+        kiste(grau, B, H, T, x, H/2, z);
+        const haube = kiste(grau, B, 0.04, T*1.05, x, H + 0.06, z); haube.rotation.x = 0.32;
+        const klappe = kiste(M(farbe, {r:0.4}), B*0.75, 0.01, T*0.6, x, H + 0.085, z + 0.03); klappe.rotation.x = 0.32;
+        kiste(M(0x9a9c9e, {r:0.4, m:0.4}), B*0.7, 0.03, 0.07, x, 0.03, z + T/2 + 0.03);
+        kiste(M(0xd0d2d4, {r:0.3, m:0.7}), 0.02, 0.02, 0.01, x, 0.55, z + T/2 + 0.005); });
+      const rolle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3, 12), new THREE.MeshLambertMaterial({color:0xd8d8cc}));
+      rolle.rotation.z = Math.PI/2; rolle.position.set(XW + 0.12 + 1.5*B + 0.01, H + 0.17, ZN + 0.08); scene.add(rolle);
+      cols.push({x0:XW, x1:XW + 0.12 + 3*B + 0.03, z0:ZN, z1:ZN + T + 0.06, y0:-1, y1:1.1}); }
+    // Deckenleuchte quer zum Flur
+    { const l = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.05, 1.25), new THREE.MeshBasicMaterial({color:0xffffff})); l.position.set(-13.4, HR - 0.03, (ZV + ZS)/2); scene.add(l); }
+    // Poster: rechts zeigen sie nach +z (Vorderkante der vorstehenden Wand), links nach -z
+    const bild = key => { if (!window.TEX || !window.TEX[key]) return null; const t = new THREE.TextureLoader().load(window.TEX[key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+    const poster = (key, x, rechts, w = 0.84, h = 1.16, y = 1.55) => { const t = bild('poster_' + key); if (!t) return;
+      const z = rechts ? ZV + 0.016 : ZS - 0.016, s = rechts ? 1 : -1;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:t, color:0xdedede})); m.rotation.y = rechts ? 0 : Math.PI;
+      m.position.set(x, y, z); scene.add(m);
+      const r = 0.025, d = 0.02, zr = z - s*0.004;
+      kiste(alu, w + 2*r, r, d, x, y + h/2 + r/2, zr); kiste(alu, w + 2*r, r, d, x, y - h/2 - r/2, zr);
+      kiste(alu, r, h, d, x - w/2 - r/2, y, zr); kiste(alu, r, h, d, x + w/2 + r/2, y, zr); };
+    poster('feep', -11.55, true); poster('xe', -13.05, true);
+    poster('thermal', -12.0, false); poster('plasma', -13.45, false);
+  }
+
+  // Flur 05, Wand zu 014a links der Tür 014 (Fotos IMG_0984-0986), von der Ecke am Treppenvorplatz zur Tür: großer Alurahmen mit
+  // „Verhalten im Brandfall“ und „Erste Hilfe“, Flucht- und Rettungsplan, zwei Klapprahmen (Brandfall/Notruf, Erste Hilfe) mit dem
+  // Hautschutzplan darunter, direkt neben der Tür das Raumschild 014 (Hausmeister/Poststelle). An der Ecke ein Kantenschutz.
+  { const ZW = 16.513, XE = -7.44;
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color}), new THREE.MeshStandardMaterial({color, roughness:o.r ?? 0.35, metalness:o.m ?? 0.7})];
+    const kiste = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const alu = M(0xc3c7ca), edel = M(0xb4b8bb, {r:0.3, m:0.8});
+    const bild = key => { if (!window.TEX || !window.TEX[key]) return null; const t = new THREE.TextureLoader().load(window.TEX[key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+    // rahmen: Alurahmen als Leisten bauen (sonst ist er schon im Foto), hell: Helligkeit der Fototextur
+    const aushang = (key, x, y, w, h, rahmen, hell = 0xdedede) => { const t = bild('poster_' + key); if (!t) return;
+      const z = ZW + (rahmen ? 0.016 : 0.012), m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:t, color:hell}));
+      m.position.set(x, y, z); scene.add(m);
+      if (rahmen) { const r = 0.025, d = 0.02, zr = z - 0.004;
+        kiste(alu, w + 2*r, r, d, x, y + h/2 + r/2, zr); kiste(alu, w + 2*r, r, d, x, y - h/2 - r/2, zr);
+        kiste(alu, r, h, d, x - w/2 - r/2, y, zr); kiste(alu, r, h, d, x + w/2 + r/2, y, zr); }
+      else kiste(alu, w - 0.01, h - 0.01, 0.01, x, y, ZW + 0.005); };
+    aushang('notfall', -6.78, 1.5, 0.72, 0.96, true, 0xeeeeee);
+    aushang('fluchtplan', -5.92, 1.5, 0.42, 0.58, false);
+    aushang('erstehilfe', -5.0, 1.62, 0.9, 0.6, false, 0xe8e8e8);
+    aushang('hautschutz', -5.0, 1.07, 0.56, 0.38, false);
+    aushang('schild014', -4.35, 1.12, 0.21, 0.19, false, 0xeeeeee);
+    kiste(edel, 0.07, 0.75, 0.004, XE + 0.035, 0.4, ZW + 0.002); kiste(edel, 0.004, 0.75, 0.07, XE - 0.002, 0.4, ZW - 0.035);
+  }
+
+  // Treppenvorplatz von Flur 05 (Fotos IMG_0987-0993). Ostwand (x = -7.44): links der Tür nach 014a die gerahmte LOEWE-Urkunde
+  // (RITSAT), rechts das Schild „Poststelle Fachbereich 07“, der schwarze Briefkasten und an der Ecke der Druckknopfmelder mit
+  // Kabelkanal bis unter die Decke und roter Alarmglocke. Rechts neben der Tür von 09 das Schild der AG Ionentriebwerke.
+  { const XO = -7.44, ZN = 13.231;
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color}), new THREE.MeshStandardMaterial({color, roughness:o.r ?? 0.5, metalness:o.m ?? 0.1})];
+    const kiste = (m, w, h, d, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); scene.add(o); return o; };
+    const bild = key => { if (!window.TEX || !window.TEX['poster_' + key]) return null; const t = new THREE.TextureLoader().load(window.TEX['poster_' + key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+    const ost = (key, z, y, b, h, d = 0.012, hell = 0xe2e2e2) => { const t = bild(key); if (!t) return;      // Bild an der Ostwand, zeigt nach -x
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(b, h), new THREE.MeshBasicMaterial({map:t, color:hell})); m.rotation.y = -Math.PI/2; m.position.set(XO - d, y, z); scene.add(m); };
+    // LOEWE-Urkunde im schmalen Alurahmen
+    const alu = M(0xb8bcbf, {r:0.35, m:0.7}); ost('loewe', 13.85, 1.5, 0.5, 0.64, 0.022, 0xe8e8e8);
+    for (const [dy, dz, h, b] of [[0.33, 0, 0.02, 0.54], [-0.33, 0, 0.02, 0.54], [0, 0.26, 0.66, 0.02], [0, -0.26, 0.66, 0.02]]) kiste(alu, 0.025, h, b, XO - 0.012, 1.5 + dy, 13.85 + dz);
+    // Schild Poststelle, Briefkasten (Burg-Wächter, schwarz, mit Dach und Namensschild)
+    ost('poststelle', 15.76, 1.45, 0.17, 0.165, 0.008);
+    const sw = M(0x1b1c1e, {r:0.6, m:0.3});
+    kiste(sw, 0.13, 0.4, 0.28, XO - 0.065, 1.2, 16.06); kiste(sw, 0.16, 0.025, 0.31, XO - 0.08, 1.41, 16.06);
+    kiste(M(0xe6e2cf), 0.012, 0.025, 0.025, XO - 0.135, 1.29, 16.03); kiste(M(0xd8d8d8), 0.006, 0.025, 0.08, XO - 0.132, 1.29, 16.13);
+    kiste(M(0xa8acb0, {r:0.3, m:0.8}), 0.012, 0.02, 0.02, XO - 0.135, 1.14, 15.95);
+    // Druckknopfmelder (Foto) auf rotem Gehäuse, cremefarbener Kabelkanal nach oben, Alarmglocke unter der Decke
+    const rot = M(0xc4201c, {r:0.45}); kiste(rot, 0.04, 0.13, 0.13, XO - 0.02, 1.4, 16.4); ost('feuermelder', 16.4, 1.4, 0.125, 0.125, 0.041, 0xeeeeee);
+    kiste(M(0xe8e3cf), 0.02, HR - 1.47, 0.035, XO - 0.01, (HR + 1.47)/2, 16.4);
+    const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.05, 20), rot[1]); gl.userData.mats = rot; cadMeshes.push(gl); gl.rotation.z = Math.PI/2; gl.position.set(XO - 0.025, HR - 0.25, 16.4); scene.add(gl);
+    // Schild der AG am schmalen Wandstück rechts neben der Tür 09/05 (zeigt nach +z)
+    { const t = bild('ag_schild'); if (t) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.19, 0.23), new THREE.MeshBasicMaterial({map:t, color:0xe2e2e2})); m.position.set(-7.57, 1.5, ZN + 0.008); scene.add(m); } }
+  }
+
+  // Raum 017 (zwischen Teeküche 016 / Getränkelager 015 und der Außenwand), nach den Fotos IMG_1031-1051: Büro mit Besprechungstisch.
+  // Ostwand: zwei Fenster über einem weißen Brüstungskanal mit Steckdosen, alte Rippenheizkörper, in der Ecke zur Halle ein Ahorn-Sideboard
+  // voller Laborkram (Kunststoffboxen, Druckminderer, Flansch, Kabelrolle, Handschuhkarton). Hallenwand: Tischgruppe aus drei Schreibtischen,
+  // daneben der HRZ-Wandkalender mit Taschen darunter. Im Süden ein ovaler
+  // Besprechungstisch mit Holzstühlen, an der Wand zu 014 Ordnerregale. Neben der Tür zur Teeküche ein hoher Regalschrank mit Plüsch-Lama.
+  { const XW = -4.403, XO = 0.446, ZN = 6.513, ZS = 12.821;
+    const M = (color, o = {}) => [new THREE.MeshLambertMaterial({color, emissive:o.emissive || 0, transparent:!!o.transparent, opacity:o.opacity ?? 1}),
+                                  new THREE.MeshStandardMaterial({color, roughness:0.6, metalness:0.1, ...o})];
+    const kiste = (m, dx, h, dz, x, y, z, p = scene) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.userData.mats = m; cadMeshes.push(o); o.position.set(x, y, z); p.add(o); return o; };
+    const zyl = (m, r, h, x, y, z, achse = 'y', seg = 16, p = scene) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m[1]); o.userData.mats = m; cadMeshes.push(o);
+      if (achse === 'x') o.rotation.z = Math.PI/2; if (achse === 'z') o.rotation.x = Math.PI/2; o.position.set(x, y, z); p.add(o); return o; };
+    const ahorn = M(0xe6d3a8, {roughness:0.65, metalness:0}), grau = M(0x8f9396, {roughness:0.6}), anthrazit = M(0x3a3d42, {roughness:0.5, metalness:0.3}),
+          weiss = M(0xf3f3f0, {roughness:0.7, metalness:0}), dunkel = M(0x1d1f22), schwarz = M(0x161719, {roughness:0.8, metalness:0}),
+          blau = M(0x1f3fa8, {roughness:0.8, metalness:0}), alu = M(0xb9bdc0, {roughness:0.35, metalness:0.7}), stahl = M(0xc8cbce, {roughness:0.3, metalness:0.85}),
+          box = M(0xe8eef2, {transparent:true, opacity:0.55, roughness:0.2, metalness:0}), griffblau = M(0x1f3c9c, {roughness:0.4}), buche = M(0xd9a35f, {roughness:0.6, metalness:0});
+    const bild = key => { if (!window.TEX || !window.TEX[key]) return null; const t = new THREE.TextureLoader().load(window.TEX[key]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+    // Boden: graubraune Vinyldielen (Fotos IMG_1040/1051), graue Sockelleisten
+    { const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+      for (let r = 0; r < 8; r++) for (let k = 0; k < 3; k++) { const v = 150 + ((r*7 + k*13) % 5)*6; g.fillStyle = 'rgb(' + v + ',' + (v - 6) + ',' + (v - 12) + ')'; const x = (k*170 + (r % 2)*85) % 512;
+        g.fillRect(x, r*64, 170, 64); if (x + 170 > 512) g.fillRect(0, r*64, x + 170 - 512, 64); }
+      for (let i = 0; i < 5000; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(70,60,50,0.08)' : 'rgba(230,225,215,0.07)'; g.fillRect(Math.random()*512, Math.random()*512, 8 + Math.random()*24, 1); }
+      g.strokeStyle = 'rgba(70,65,60,0.35)'; g.lineWidth = 1.5; for (let r = 0; r <= 8; r++) { g.beginPath(); g.moveTo(0, r*64); g.lineTo(512, r*64); g.stroke(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.repeat.set((XO - XW)/2.4, (ZS - ZN)/2.4);
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(XO - XW, ZS - ZN), new THREE.MeshLambertMaterial({map:t})); m.rotation.x = -Math.PI/2; m.position.set((XW + XO)/2, 0.006, (ZN + ZS)/2); scene.add(m);
+      kiste(grau, XO - XW, 0.06, 0.012, (XW + XO)/2, 0.03, ZS - 0.006); kiste(grau, XO - XW, 0.06, 0.012, (XW + XO)/2, 0.03, ZN + 0.006); }
+    // Rasterdecke 62,5 cm mit vier Leuchtpaneelen (Foto IMG_1045)
+    { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#f2f2ef'; g.fillRect(0, 0, 128, 128);
+      g.fillStyle = '#c9cbcc'; g.fillRect(0, 0, 128, 3); g.fillRect(0, 0, 3, 128); for (let i = 0; i < 400; i++) { g.fillStyle = 'rgba(0,0,0,0.06)'; g.fillRect(Math.random()*128, Math.random()*128, 1, 1); }
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set((XO - XW)/0.625, (ZS - ZN)/0.625);
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(XO - XW, ZS - ZN), new THREE.MeshLambertMaterial({map:t, emissive:0x8a8a88, emissiveMap:t})); m.rotation.x = Math.PI/2; m.position.set((XW + XO)/2, HR - 0.006, (ZN + ZS)/2); scene.add(m);
+      for (const [x, z] of [[-2.9, 8.3], [-2.9, 11.1], [-0.7, 8.3], [-0.7, 11.1]]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.01, 0.6), new THREE.MeshBasicMaterial({color:0xffffff})); l.position.set(x, HR - 0.012, z); scene.add(l); } }
+    // Fenster (Öffnungen siehe OEFF.O): Glas in der Wand, dunkle Rahmen mit Mittelpfosten, weiße Fensterbank
+    for (const [z0, z1] of [[7.6, 9.0], [10.6, 12.0]]) { const y0 = 1.6, y1 = 2.55, zm = (z0 + z1)/2;
+      for (const [a, b] of [[z0, zm], [zm, z1]]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(b - a - 0.06, y1 - y0 - 0.06), GLAS); m.rotation.y = -Math.PI/2; m.position.set(XO + 0.12, (y0 + y1)/2, (a + b)/2); scene.add(m); }
+      for (const z of [z0, zm, z1]) kiste(dunkel, 0.08, y1 - y0, 0.07, XO - 0.02, (y0 + y1)/2, z);
+      for (const y of [y0, y1]) kiste(dunkel, 0.08, 0.07, z1 - z0, XO - 0.02, y, zm);
+      kiste(weiss, 0.2, 0.03, z1 - z0 + 0.1, XO - 0.1, y0 - 0.03, zm); }
+    // Brüstungskanal (weiß) über die ganze Ostwand, mit Steckdosen und Datendose; darunter zwei alte Rippenheizkörper
+    kiste(weiss, 0.07, 0.17, ZS - ZN - 0.04, XO - 0.035, 1.1, (ZN + ZS)/2);
+    for (const z of [6.75, 6.9, 7.9, 8.6, 8.75, 9.9, 10.8, 10.95, 12.2]) { kiste(M(0xf0eee4), 0.012, 0.09, 0.09, XO - 0.075, 1.1, z); zyl(M(0x9a988e), 0.02, 0.006, XO - 0.082, 1.1, z, 'x', 10); }
+    kiste(M(0xece6d6), 0.015, 0.11, 0.13, XO - 0.075, 1.1, 7.4);
+    for (const [z0, z1] of [[8.55, 9.75], [10.9, 12.1]]) { const n = Math.round((z1 - z0)/0.06);
+      for (let k = 0; k < n; k++) kiste(weiss, 0.16, 0.62, 0.045, XO - 0.14, 0.46, z0 + 0.03 + k*0.06);
+      kiste(weiss, 0.05, 0.05, z1 - z0, XO - 0.14, 0.8, (z0 + z1)/2); kiste(weiss, 0.05, 0.05, z1 - z0, XO - 0.14, 0.13, (z0 + z1)/2);
+      zyl(M(0xb08a50, {metalness:0.6, roughness:0.4}), 0.03, 0.06, XO - 0.14, 0.7, z0 - 0.04, 'z', 10);
+      cols.push({x0:XO - 0.24, x1:XO, z0, z1, y0:-1, y1:0.85}); }
+    // Sideboard in der Ecke Ost/Hallenwand mit Laborkram (Fotos IMG_1031/1032)
+    { const x0 = XO - 0.47, z0 = ZN + 0.03, z1 = 8.45, xm = (x0 + XO)/2, zm = (z0 + z1)/2, h = 0.74;
+      kiste(ahorn, XO - x0, h, z1 - z0, xm, h/2, zm); kiste(M(0xcdbb92), 0.004, h - 0.06, 0.004, x0 - 0.001, h/2, zm);
+      zyl(alu, 0.015, 0.02, x0 - 0.01, 0.6, zm - 0.1, 'x', 10); zyl(alu, 0.015, 0.02, x0 - 0.01, 0.6, zm + 0.1, 'x', 10);
+      for (const [x, z, w, d, hh, y] of [[xm, z0 + 0.25, 0.4, 0.36, 0.22, h], [xm, z0 + 0.25, 0.38, 0.34, 0.2, h + 0.22], [xm, z0 + 0.62, 0.3, 0.28, 0.15, h], [xm, z0 + 0.62, 0.28, 0.26, 0.13, h + 0.15]]) {
+        kiste(box, w, hh, d, x, y + hh/2, z); kiste(griffblau, 0.02, 0.02, d*0.7, x - w/2 - 0.01, y + hh - 0.02, z); }
+      kiste(schwarz, 0.36, 0.03, 0.42, xm, h + 0.435, z0 + 0.25);                                          // Laptop obendrauf
+      kiste(M(0x1b1c1e), 0.22, 0.07, 0.3, xm, h + 0.035, 7.55); kiste(M(0x9a1f22), 0.2, 0.072, 0.13, xm - 0.01, h + 0.036, 7.62);   // Handschuhkarton
+      zyl(stahl, 0.035, 0.08, xm - 0.05, h + 0.1, 7.9, 'x', 14); zyl(stahl, 0.04, 0.02, xm - 0.1, h + 0.1, 7.9, 'x', 16); zyl(M(0x2a8a7a), 0.02, 0.07, xm, h + 0.05, 7.82, 'y', 10);   // Druckminderer
+      zyl(stahl, 0.11, 0.12, xm + 0.05, h + 0.06, 8.22, 'y', 24); zyl(stahl, 0.14, 0.02, xm + 0.05, h + 0.01, 8.22, 'y', 24);   // Flansch
+      const rolle = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.025, 8, 24), M(0x9a9da0)[1]); rolle.rotation.x = Math.PI/2; rolle.position.set(xm - 0.1, h + 0.02, 8.2); scene.add(rolle);
+      kiste(weiss, 0.12, 0.16, 0.14, XO - 0.08, h + 0.08, 7.95); kiste(M(0xf2d000), 0.002, 0.03, 0.14, XO - 0.141, h + 0.12, 7.95);   // weißes Gerät mit gelbem Warnaufkleber
+      cols.push({x0, x1:XO, z0, z1, y0:-1, y1:1.3}); }
+    // HRZ-Wandkalender an der Hallenwand (Foto IMG_1033), darunter zwei Taschen
+    { const t = bild('poster_kalender017'); if (t) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.47), new THREE.MeshBasicMaterial({map:t, color:0xe8e8e8})); m.position.set(-0.45, 1.65, ZN + 0.004); scene.add(m); }
+      const r = window.DETAIL.rucksack(THREE, M(0xc9bfa6, {roughness:0.9})); r.position.set(-0.68, 0, ZN + 0.12); r.rotation.y = -0.2; scene.add(r);
+      kiste(schwarz, 0.36, 0.28, 0.06, -0.28, 0.14, ZN + 0.1).rotation.x = -0.12; }
+    // Schreibtische: Ahornplatte, anthrazitfarbene Wangen, Container mit blauen Bügelgriffen
+    const tisch = (x0, x1, z0, z1, cont) => { const h = 0.74; kiste(ahorn, x1 - x0, 0.03, z1 - z0, (x0 + x1)/2, h, (z0 + z1)/2);
+      const lang = (x1 - x0) > (z1 - z0);
+      for (const s of [0, 1]) { if (lang) kiste(anthrazit, 0.05, h - 0.02, z1 - z0 - 0.1, s ? x1 - 0.08 : x0 + 0.08, (h - 0.02)/2, (z0 + z1)/2); else kiste(anthrazit, x1 - x0 - 0.1, h - 0.02, 0.05, (x0 + x1)/2, (h - 0.02)/2, s ? z1 - 0.08 : z0 + 0.08); }
+      if (cont) { const [cx, cz, fx, fz] = cont; kiste(ahorn, 0.42, 0.6, 0.42, cx, 0.3, cz); for (let k = 0; k < 3; k++) kiste(griffblau, fx ? 0.012 : 0.12, 0.012, fz ? 0.012 : 0.12, cx + fx*0.215, 0.12 + k*0.18, cz + fz*0.215); }
+      cols.push({x0, x1, z0, z1, y0:-1, y1:0.9}); };
+    const monitor = (x, z, ry, w = 0.58, hell = false) => { const g = new THREE.Group(); g.position.set(x, 0.755, z); g.rotation.y = ry; scene.add(g);
+      const add = (m, dx, h, dz, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(dx, h, dz), m[1]); o.position.set(px, py, pz); g.add(o); };
+      add(hell ? M(0xe4e2dc) : dunkel, w, 0.36, 0.03, 0, 0.32, 0); add(M(0x14161a), w - 0.03, 0.32, 0.005, 0, 0.32, 0.017); add(alu, 0.05, 0.22, 0.04, 0, 0.11, -0.04); add(alu, 0.22, 0.015, 0.18, 0, 0.008, -0.04);
+      add(dunkel, 0.44, 0.015, 0.14, 0, 0.008, 0.24); add(dunkel, 0.06, 0.03, 0.1, 0.32, 0.015, 0.25); };
+    const stuhl = (x, z, ry) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g);
+      g.add(window.DETAIL.buerostuhl(THREE, {polster:blau, schale:dunkel, armlehnen:true})); cols.push({x0:x - 0.23, x1:x + 0.23, z0:z - 0.23, z1:z + 0.23, y0:-1, y1:1.0}); };
+    const pc = (x, z) => { kiste(schwarz, 0.18, 0.38, 0.32, x, 0.19, z); kiste(M(0x2a2c30), 0.005, 0.3, 0.02, x + 0.092, 0.2, z - 0.1); };
+    // Tischgruppe nach den Fotos IMG_1033-1041: zwei Tische stehen mit der Stirnseite an der Hallenwand gegeneinander, ein dritter quer
+    // davor (Süden). West-Tisch A: Blick nach Osten, Dell-Rechner mit Figuren an der Wand, zwei Monitore. Ost-Tisch B: Blick nach Westen,
+    // drei Monitore (zwei schwarze, rechts ein heller), Telefon, Wasserflasche, Tischkalender, SpaceMouse und Laptop, Container an der Wand.
+    // Quertisch C: Blick zur Hallenwand, zwei helle Fujitsu-Monitore, DLR-Mauspad, Kasten „Durchführungen“ auf dem Pfeiffer-Buch an der Ecke.
+    const XA0 = -2.5, XM = -1.7, XB1 = -0.9, ZT = 8.13, ZC = 8.93;
+    tisch(XA0, XM, ZN + 0.02, ZT); tisch(XM, XB1, ZN + 0.02, ZT, [-1.12, ZN + 0.3, 1, 0]); tisch(XA0, XB1, ZT, ZC, [XA0 + 0.3, ZT + 0.4, 0, 1]);
+    // A
+    monitor(-1.95, 7.35, -Math.PI/2, 0.62); monitor(-1.97, 7.95, -Math.PI/2 + 0.25, 0.55); stuhl(-2.95, 7.4, Math.PI/2);
+    kiste(schwarz, 0.32, 0.36, 0.17, -2.1, 0.935, ZN + 0.12); for (const dx of [-0.05, 0.06]) kiste(M(dx < 0 ? 0x1a1a1a : 0xf2f2f2), 0.03, 0.08, 0.03, -2.1 + dx, 1.155, ZN + 0.12);
+    // B
+    monitor(-1.48, 7.0, Math.PI/2 + 0.25, 0.55, true); monitor(-1.5, 7.55, Math.PI/2, 0.62); monitor(-1.48, 8.0, Math.PI/2 - 0.3, 0.6); stuhl(-0.5, 7.5, -Math.PI/2);
+    kiste(M(0x202226), 0.1, 0.05, 0.12, -1.5, 1.1, 7.55);                                                            // Webcam
+    kiste(dunkel, 0.22, 0.06, 0.2, -1.2, 0.785, ZN + 0.35); zyl(M(0xd8e8e0, {transparent:true, opacity:0.7}), 0.04, 0.3, -1.05, 0.905, ZN + 0.15, 'y', 12);   // Telefon, Flasche
+    kiste(schwarz, 0.24, 0.015, 0.33, -1.15, 0.763, 7.55); zyl(M(0x2a2c30), 0.04, 0.05, -1.4, 0.78, 7.2, 'y', 14);   // Laptop, SpaceMouse
+    zyl(M(0x2c3e6a), 0.11, 0.004, -1.18, 0.758, 7.95, 'y', 24);                                                      // Mauspad mit Erdbild
+    { const t = kiste(M(0xf4f4f0), 0.02, 0.16, 0.13, -1.2, 0.84, ZN + 0.55); t.rotation.z = 0.25; }                   // Tischkalender
+    // C
+    monitor(-1.95, 8.35, 0.1, 0.55, true); monitor(-1.4, 8.35, -0.1, 0.55, true); stuhl(-1.7, 9.35, 0);
+    { const g = new THREE.Group(); g.position.set(-1.0, 0.755, 8.2); scene.add(g); kiste(M(0x2a2c30), 0.24, 0.03, 0.32, 0, 0.015, 0, g); kiste(M(0xb52a2a), 0.22, 0.01, 0.3, 0, 0.035, 0, g);
+      kiste(box, 0.18, 0.12, 0.26, 0, 0.1, 0, g); kiste(griffblau, 0.02, 0.02, 0.18, -0.1, 0.15, 0, g); }
+    { const t = kiste(M(0xe2e6ea), 0.24, 0.004, 0.2, -1.55, 0.758, 8.75); t.rotation.y = 0.2; }                     // DLR-Mauspad
+    pc(-0.98, 9.2); kiste(M(0x2a2c30), 0.2, 0.42, 0.34, XB1 - 0.15, 0.25, ZT + 0.4);                                // Rechnerhalter unter der Ecke
+    { const k = new THREE.Group(); k.position.set(-2.0, 0, 8.6); scene.add(k); kiste(schwarz, 0.36, 0.08, 0.3, 0, 0.04, 0, k); kiste(M(0xc0c4c8), 0.3, 0.02, 0.24, 0, 0.09, 0, k); }   // Fußstütze (Foto IMG_1051)
+    const mfrei = (x0, x1, z0, z1) => [[x0, x1, z0, z1]];
+    scene.add(window.DETAIL.belebt(THREE, {x0:XA0, x1:XM, z0:ZN + 0.25, z1:ZT, y:0.755, seed:51, frei:mfrei(-2.3, -1.7, 6.9, 8.13)}));
+    scene.add(window.DETAIL.belebt(THREE, {x0:XA0, x1:XB1, z0:ZT, z1:ZC, y:0.755, seed:63, frei:mfrei(-2.3, -0.75, ZT, 8.9)}));
+    // Hoher Regalschrank neben der Tür zur Teeküche (Fotos IMG_1040/1042-1044): unten Türen, oben drei offene Fächer; Papierkorb daneben
+    { const x0 = XW + 0.02, d = 0.42, z0 = ZN + 0.12, z1 = z0 + 0.82, xm = x0 + d/2, zm = (z0 + z1)/2, H = 2.0;
+      for (const z of [z0, z1]) kiste(ahorn, d, H, 0.025, xm, H/2, z);
+      kiste(ahorn, 0.02, H, z1 - z0, x0 + 0.01, H/2, zm); for (const y of [0.02, 0.8, 1.2, 1.6, H]) kiste(ahorn, d, 0.025, z1 - z0, xm, y, zm);
+      kiste(ahorn, 0.02, 0.76, z1 - z0 - 0.03, x0 + d - 0.01, 0.41, zm); kiste(M(0xcdbb92), 0.003, 0.74, 0.003, x0 + d + 0.001, 0.41, zm); zyl(alu, 0.012, 0.02, x0 + d + 0.01, 0.65, zm + 0.04, 'x', 8);
+      kiste(box, 0.3, 0.2, 0.35, xm, 1.72, zm + 0.1); kiste(griffblau, 0.3, 0.02, 0.02, xm, 1.9, zm - 0.07);
+      zyl(M(0xf3a8d0), 0.08, 0.22, xm, 1.32, zm + 0.12, 'y', 12); zyl(M(0x6ad0e0), 0.07, 0.1, xm + 0.05, 1.47, zm + 0.12, 'y', 12); zyl(M(0x111111), 0.11, 0.015, xm, 1.53, zm + 0.12, 'y', 16);   // Lama mit Hut
+      zyl(M(0x2a6fd0, {transparent:true, opacity:0.8}), 0.035, 0.25, xm + 0.05, 1.335, zm - 0.2, 'y', 10);         // Glasreiniger
+      kiste(M(0xb08a5a), 0.3, 0.2, 0.3, xm, 0.92, zm + 0.2); zyl(M(0xa08a5a, {metalness:0.7, roughness:0.4}), 0.09, 0.12, xm, 0.875, zm - 0.1, 'y', 20);
+      for (let k = 0; k < 3; k++) kiste(k < 2 ? schwarz : M(0xe0c020), 0.3, 0.32, 0.06, xm, 0.97, z0 + 0.08 + k*0.065);
+      cols.push({x0, x1:x0 + d, z0, z1, y0:-1, y1:H});
+      const mu = window.DETAIL.muelleimer(THREE, {voll:true, seed:29}); mu.position.set(XW + 0.22, 0, z1 + 0.25); scene.add(mu); cols.push({x0:XW, x1:XW + 0.4, z0:z1 + 0.08, z1:z1 + 0.42, y0:-1, y1:0.4}); }
+    // Ovaler Besprechungstisch (Ahorn, zwei Säulen) mit sechs Holzstühlen; Küchenrolle, Tassen, Papiere (Foto IMG_1036)
+    { const tx = -2.05, tz = 11.2, A = 0.95, B = 0.55;
+      const pl = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.03, 40), ahorn[1]); pl.userData.mats = ahorn; cadMeshes.push(pl); pl.scale.set(A, 1, B); pl.position.set(tx, 0.735, tz); scene.add(pl);
+      for (const dx of [-0.45, 0.45]) { zyl(anthrazit, 0.035, 0.7, tx + dx, 0.36, tz); kiste(anthrazit, 0.06, 0.03, 0.7, tx + dx, 0.015, tz); }
+      zyl(weiss, 0.06, 0.24, tx - 0.35, 0.87, tz - 0.1, 'y', 14); zyl(M(0xf6f6f2), 0.04, 0.09, tx + 0.1, 0.795, tz - 0.25); zyl(M(0x2a4fa0), 0.04, 0.09, tx + 0.5, 0.795, tz + 0.15);
+      kiste(M(0xfafaf6), 0.21, 0.004, 0.3, tx + 0.25, 0.752, tz - 0.05).rotation.y = 0.3; kiste(M(0x8a6a3a), 0.3, 0.04, 0.12, tx - 0.05, 0.77, tz + 0.12);
+      cols.push({x0:tx - A*0.85, x1:tx + A*0.85, z0:tz - B*0.85, z1:tz + B*0.85, y0:-1, y1:0.8});
+      const holzstuhl = (x, z, ry) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g);
+        kiste(buche, 0.42, 0.02, 0.4, 0, 0.45, 0, g); const r = kiste(buche, 0.42, 0.3, 0.02, 0, 0.72, -0.2, g); r.rotation.x = -0.12;
+        for (const [a, b] of [[-0.18, -0.17], [0.18, -0.17], [-0.18, 0.17], [0.18, 0.17]]) kiste(dunkel, 0.02, 0.45, 0.02, a, 0.225, b, g);
+        for (const a of [-0.18, 0.18]) kiste(dunkel, 0.02, 0.38, 0.02, a, 0.64, -0.19, g);
+        cols.push({x0:x - 0.21, x1:x + 0.21, z0:z - 0.21, z1:z + 0.21, y0:-1, y1:0.95}); };
+      holzstuhl(tx - 0.4, tz - B - 0.22, 0); holzstuhl(tx + 0.4, tz - B - 0.22, 0.15); holzstuhl(tx - 0.4, tz + B + 0.22, Math.PI); holzstuhl(tx + 0.4, tz + B + 0.2, Math.PI - 0.2);
+      holzstuhl(tx - A - 0.25, tz, Math.PI/2); holzstuhl(tx + A + 0.25, tz + 0.05, -Math.PI/2 - 0.1); }
+    // Ordnerregale an der Wand zu 014 (Fotos IMG_1045, IMG_1047-1050). regalfach (details.js) steht an einer Wand bei z = wand und
+    // zeigt nach +z, deshalb in einer um 180° gedrehten Gruppe an der Südwand.
+    const sued = (xm, fn) => { const g = new THREE.Group(); g.position.set(xm, 0, ZS); g.rotation.y = Math.PI; scene.add(g); fn(g); };
+    // niedriges Ordnerregal mit grauen Böden, zwei Felder; obendrauf Motorradhelm und Plexiglashaube mit Bauteil
+    sued(-3.35, g => { const w = 1.8, d = 0.38, H = 1.2;
+      for (const x of [-w/2, 0, w/2]) kiste(ahorn, 0.025, H, d, x, H/2, d/2, g); kiste(ahorn, w, 0.025, d, 0, H, d/2, g);
+      for (const y of [0.02, 0.4, 0.8]) kiste(grau, w, 0.02, d, 0, y, d/2, g);
+      for (const [a, b] of [[-w/2, 0], [0, w/2]]) for (let r = 0; r < 3; r++) g.add(window.DETAIL.regalfach(THREE, {x0:a + 0.0125, x1:b - 0.0125, y:0.03 + r*0.39, wand:0, hoehe:0.37, seed:71 + r*5 + (a < 0 ? 0 : 3)}));
+      const helm = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), M(0x1a1c1e, {roughness:0.3})[1]); helm.scale.y = 0.85; helm.position.set(0.6, H + 0.13, 0.2); g.add(helm);
+      kiste(M(0x36b04a), 0.2, 0.04, 0.2, 0.6, H + 0.05, 0.2, g);
+      kiste(M(0xeef4f6, {transparent:true, opacity:0.35, roughness:0.1}), 0.5, 0.3, 0.3, -0.5, H + 0.165, 0.2, g); zyl(stahl, 0.07, 0.15, -0.5, H + 0.09, 0.2, 'x', 16, g);
+      kiste(weiss, 0.5, 0.05, 0.12, 0.0, H + 0.04, 0.2, g); });
+    cols.push({x0:-4.25, x1:-2.45, z0:ZS - 0.38, z1:ZS, y0:-1, y1:1.5});
+    // hohes Ahornregal, zwei Felder: unten Schubladen, darüber drei offene Fächer (Ordner, Kartons, Kleinteile), Tassen obendrauf
+    sued(-1.05, g => { const w = 1.6, d = 0.42, H = 2.0;
+      for (const x of [-w/2, 0, w/2]) kiste(ahorn, 0.025, H, d, x, H/2, d/2, g);
+      for (const y of [0.72, 1.14, 1.56, H]) kiste(ahorn, w, 0.025, d, 0, y, d/2, g);
+      for (const xm of [-w/4, w/4]) { kiste(ahorn, w/2 - 0.03, 0.34, 0.02, xm, 0.53, d - 0.01, g); kiste(ahorn, w/2 - 0.03, 0.34, 0.02, xm, 0.18, d - 0.01, g);
+        kiste(griffblau, 0.14, 0.012, 0.012, xm, 0.6, d + 0.01, g); kiste(griffblau, 0.14, 0.012, 0.012, xm, 0.25, d + 0.01, g); }
+      for (const [a, b] of [[-w/2, 0], [0, w/2]]) for (let r = 0; r < 3; r++) g.add(window.DETAIL.regalfach(THREE, {x0:a + 0.0125, x1:b - 0.0125, y:0.735 + r*0.42, wand:0, hoehe:0.4, seed:91 + r*7 + (a < 0 ? 0 : 2)}));
+      for (let k = 0; k < 4; k++) zyl(M([0xf4f4f0, 0x2a4fa0, 0xf4f4f0, 0xb32d2d][k]), 0.04, 0.1, -0.15 + k*0.1, 2.075, 0.2, 'y', 12, g);
+      kiste(schwarz, 0.4, 0.08, 0.3, 0.45, 2.05, 0.2, g); });
+    cols.push({x0:-1.85, x1:-0.25, z0:ZS - 0.42, z1:ZS, y0:-1, y1:2.1});
+  }
+
+  // 015: Getränkelager. Kästen an West-, Süd- und Nordwand gestapelt (Wasser, Licher Bier in grünen, Cola 0,33 in gelben Kästen),
+  // leere Flaschen, die nicht mehr in die Kästen gepasst haben, obendrauf, in Reihen am Boden und verstreut. Weg von der Tür (Ost, zu 017) bleibt frei.
+  { const X0 = -6.961, X1 = -4.776, Z0 = 11.026, Z1 = 12.821;
+    scene.add(window.DETAIL.getraenkelager(THREE, {x0:-6.45, x1:-5.75, z0:11.5, z1:12.3, seed:15, verstreut:7,
+      reihen:[[X0 + 0.17, Z0 + 0.02, X0 + 0.17, Z1 - 0.02, Math.PI/2], [X0 + 0.38, Z1 - 0.17, X1 - 0.02, Z1 - 0.17, 0], [X0 + 0.38, Z0 + 0.17, -5.75, Z0 + 0.17, 0]],
+      flaschen:[[X0 + 0.38, Z1 - 0.38, -5.05, Z1 - 0.38], [X0 + 0.4, Z0 + 0.42, X0 + 0.4, Z1 - 0.45], [X0 + 0.45, Z0 + 0.4, -5.85, Z0 + 0.4]]}));
+    cols.push({x0:X0, x1:X0 + 0.48, z0:Z0, z1:Z1, y0:-1, y1:1.8}, {x0:X0, x1:X1, z0:Z1 - 0.45, z1:Z1, y0:-1, y1:1.8}, {x0:X0, x1:-5.7, z0:Z0, z1:Z0 + 0.45, y0:-1, y1:1.8}); }
 
   // Raumnummern auf dem Boden, lesbar beim Blick von der Halle aus (nach +z, im Plan: nach links)
   for (let [nr, [x, z]] of Object.entries(R.labels)) {
