@@ -334,6 +334,10 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
     gtao.blendIntensity = 1.0;
     composer.addPass(gtao);
     bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.28, 0.55, 1.05);
+    // Ungültige Pixel (NaN/unendlich, z. B. aus einem extremen Glanzlicht) nicht in den Bloom lassen: Die Unschärfe über die
+    // verkleinerten Zwischenbilder würde sie sonst zu großen schwarzen Blöcken aufblähen.
+    { const m = bloom.materialHighPassFilter, alt = 'vec4 texel = texture2D( tDiffuse, vUv );';
+      if (m.fragmentShader.includes(alt)) { m.fragmentShader = m.fragmentShader.replace(alt, alt + '\n if (any(isnan(texel)) || any(isinf(texel))) texel = vec4(0.0); texel = min(texel, vec4(32.0));'); m.needsUpdate = true; } }
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     resize();
