@@ -332,6 +332,10 @@ window.grafik = function(THREE, renderer, scene, camera, {EffectComposer, Render
     gtao.updateGtaoMaterial({radius:0.8, distanceExponent:1.5, thickness:1.5, scale:1.0, samples:16});
     gtao.updatePdMaterial({lumaPhi:10, depthPhi:2, normalPhi:3, radius:6, rings:2, samples:16});
     gtao.blendIntensity = 1.0;
+    // Die Abdunkelung liefert an Kanten vereinzelt ungültige oder zu große Werte; beim Mischen würde die Farbe dort vervielfacht
+    // (leuchtende Striche an allen Kanten). Nur Werte zwischen 0 und 1 zulassen, ungültige als „nicht abgedunkelt“ werten.
+    { const m = gtao.blendMaterial, alt = 'vec4 texel = texture2D( tDiffuse, vUv );';
+      if (m.fragmentShader.includes(alt)) { m.fragmentShader = m.fragmentShader.replace(alt, alt + '\n if (any(isnan(texel)) || any(isinf(texel))) texel = vec4(1.0); texel = clamp(texel, 0.0, 1.0);'); m.needsUpdate = true; } }
     composer.addPass(gtao);
     bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.28, 0.55, 1.05);
     // Ungültige Pixel (NaN/unendlich, z. B. aus einem extremen Glanzlicht) nicht in den Bloom lassen: Die Unschärfe über die
