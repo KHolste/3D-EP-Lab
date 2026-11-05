@@ -1059,6 +1059,18 @@ for (const n of NPCS) {
   def(n.id, () => 'Mit ' + label + ' sprechen', () => msg(label + ': „' + n.say() + '“'));
 }
 /* ---- Yan Ravil in Flur 05: an die Wand gelehnt (Foto). Steht still, lässt sich ansprechen. ---- */
+/* Lokale Tonschnipsel für Yan Ravil (prototype/lokal/, nicht im Repo, weil fremde Rechte): „Oder wat?“ nach seinen Sätzen,
+   „Tschau“, wenn man nach dem Gespräch weggeht. Fehlen die Dateien (z. B. online), spricht er nur mit der Browserstimme. */
+const YANTON = {};
+for (const [k, f] of [['oderwat', 'lokal/yan_oderwat.mp3'], ['tschau', 'lokal/yan_tschau.mp3']]) {
+  const a = new Audio(); a.preload = 'auto'; a.addEventListener('loadedmetadata', () => { YANTON[k] = a; }, {once:true}); a.src = f; a.load(); }
+function yanTon(k){ const a = YANTON[k]; if (!a || (window.stimme && !window.stimme.an)) return;
+  a.currentTime = 0; a.play().catch(() => {}); if (window.stimme) window.stimme.markiere('Yan Ravil', a.duration*1000 + 200); }
+let yanGespraech = -1e9, yanNah = false;
+function yanUpdate(){                                  // nach dem Gespräch weggegangen: „Tschau“
+  if (!yanNah || !KOLLEGEN.length) return; const g = KOLLEGEN[0].g;
+  if (performance.now() - yanGespraech > 30000) { yanNah = false; return; }
+  if (Math.hypot(P.x - g.position.x, P.z - g.position.z) > 3.5) { yanNah = false; yanTon('tschau'); } }
 const YAN = ['Hallo! Ich waade hee nur ens koot.', 'Dä Jumbo steiht en dä Hall – durch de 09 un dann de ruude Dür.', 'Vill Jlöck beim Avpumpe! Et hätt noch immer jot jejange.']; let yanI = 0;   // Kölsch
 const KOLLEGEN = [];
 for (const [name, z, dreh] of [['kollege_karo', 16.9, -0.15]]) {
@@ -1069,7 +1081,9 @@ for (const [name, z, dreh] of [['kollege_karo', 16.9, -0.15]]) {
   g.userData.name = 'Yan Ravil'; pose(g, 0, 0, 0);
   window.figurModell(THREE, GLTFLoader, g, name); KOLLEGEN.push({g, name:'Yan Ravil'});
   plate('YAN RAVIL', 0.4, 0.08, g, 0, 1.95, 0); hit('yan', g, 0, 1.0, 0, 0.7, 2.0, 0.7);
-  def('yan', () => 'Mit Yan Ravil sprechen', () => msg('Yan Ravil: „' + YAN[yanI++ % YAN.length] + '“'));
+  def('yan', () => 'Mit Yan Ravil sprechen', () => { msg('Yan Ravil: „' + YAN[yanI++ % YAN.length] + '“');
+    if (YANTON.oderwat && window.stimme) window.stimme.nachRede('Yan Ravil', () => yanTon('oderwat'));
+    yanGespraech = performance.now(); yanNah = !!YANTON.tschau; });
   cols.push({x0:-7.95 - 0.25, x1:-7.6, z0:z - 0.28, z1:z + 0.28, y0:-1, y1:2});
 }
 function moveNpcs(dt, now){
@@ -1265,7 +1279,7 @@ function frame(now){
   const sig = doorAnim*7 + (dok.visible ? dok.position.x + dok.position.z*3 : 50) + 0;
   if (sig !== shSig) { shSig = sig; renderer.shadowMap.needsUpdate = true; }
   for (const u of upd) u();
-  moveHand(dt); NERF.update(dt, live);
+  moveHand(dt); NERF.update(dt, live); if (live) yanUpdate();
   // Kamera
   shakeT = Math.max(0, shakeT - dt);
   const sh = shakeT > 0 ? 0.04*Math.min(1, shakeT) : 0;

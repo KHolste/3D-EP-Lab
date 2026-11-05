@@ -27,3 +27,8 @@ tools/_bake/
 tools/_mh/
 # Figurdaten (44 MB), erzeugt von tools/figuren.py
 prototype/cad/figuren_data.js
+# Piper-Sprachausgabe (Umgebung, Stimmen, Hörproben)
+tools/_piper/
+
+# Lokale Tonschnipsel (fremde Rechte, nicht veroeffentlichen)
+prototype/lokal/
