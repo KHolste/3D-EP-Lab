@@ -9,7 +9,7 @@ window.stimme = (() => {
     'Anna':      {pitch:1.15, rate:1.05, frau:true,  wunsch:/katja|seraphina|hedda/i},
     'Kalle':     {pitch:0.95, rate:1.12, frau:false, wunsch:/killian/i},
     'Doktorand': {pitch:1.1,  rate:1.18, frau:false, wunsch:/jonas|jan\b/i},
-    'Yan Ravil': {pitch:1.0,  rate:1.0,  frau:false, stumm:true}};   // spricht nicht mit der Browserstimme, nur lokale Tonschnipsel (Spielseite)
+    'Yan Ravil': {pitch:1.0,  rate:1.0,  frau:false, stumm:true}};   // spricht nicht mit der Browserstimme (nur Text und Gesten)
   const FRAU = /katja|hedda|amala|seraphina|louisa|ingrid|elke|gisela|klarissa|maja|tanja|ketty|christel|petra|anna|marlene|vicki|female|weiblich/i;
   const MANN = /conrad|stefan|killian|florian|jonas|jan\b|kasper|ralf|bernd|christoph|klaus|lars|hans|markus|male|männlich/i;
   let an = true; try { an = localStorage.getItem('jumboStimmen') !== '0'; } catch(e) {}
@@ -50,11 +50,6 @@ window.stimme = (() => {
         const id = an && S && !f.stumm ? sprich(m[1], m[2]) : ++nr; bis[m[1]] = {t:t0 + dauer, id}; t0 += dauer; }   // stumme Figuren: nur Gesten
     },
     redet: name => !!bis[name] && performance.now() < bis[name].t,
-    // Figur spricht für ms Millisekunden (z. B. während ein Tonschnipsel läuft), damit sie dabei gestikuliert
-    markiere(name, ms){ bis[name] = {t:performance.now() + ms, id:++nr}; },
-    // fn ausführen, sobald die Figur mit ihrer aktuellen Rede fertig ist (höchstens nach 20 s)
-    nachRede(name, fn){ const t0 = performance.now(), warte = () => {
-      if (!(bis[name] && performance.now() < bis[name].t) || performance.now() - t0 > 20000) fn(); else setTimeout(warte, 100); }; setTimeout(warte, 150); },
     sprich,
     umschalten(){ an = !an; try { localStorage.setItem('jumboStimmen', an ? '1' : '0'); } catch(e) {} if (!an && S) S.cancel(); return an; },
     get an(){ return an; },
