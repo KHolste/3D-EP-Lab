@@ -8,10 +8,17 @@ window.stimme = (() => {
     'Udo':       {pitch:0.75, rate:0.95, frau:false, wunsch:/conrad|stefan/i},
     'Anna':      {pitch:1.15, rate:1.05, frau:true,  wunsch:/katja|seraphina|hedda/i},
     'Kalle':     {pitch:0.95, rate:1.12, frau:false, wunsch:/killian/i},
-    'Doktorand': {pitch:1.1,  rate:1.18, frau:false, wunsch:/jonas|jan/i},
-    'Yan Ravil': {pitch:1.0,  rate:1.0,  frau:false, wunsch:/florian/i}};
+    'Doktorand': {pitch:1.1,  rate:1.18, frau:false, wunsch:/jonas|jan\b/i},
+    'Yan Ravil': {pitch:1.0,  rate:1.05, frau:false, wunsch:/florian/i, aussprache:'koelsch'}};
+  // Kölsch: Auf dem Bildschirm steht die kölsche Schreibweise; die hochdeutsche Browserstimme bekommt eine lautnähere Fassung,
+  // damit sie nicht buchstabengetreu „Hochdeutsch mit Tippfehlern“ vorliest
+  const AUSSPRACHE = {koelsch:[
+    [/\bsteiht\b/g, 'schteit'], [/\bhee\b/g, 'heh'], [/\bkoot\b/g, 'koht'], [/\bruude\b/g, 'ruhde'], [/\bVill\b/g, 'Fill'],
+    [/\bAvpumpe\b/g, 'Afpumpe'], [/\bjot\b/g, 'joht'], [/\bjejange\b/g, 'jejangeh'], [/\bDat\b/g, 'Datt'], [/\brüümst\b/g, 'rühmst'],
+    [/\bävver\b/g, 'äwwer'], [/\bop\b/g, 'opp'], [/\bem\b/g, 'emm'], [/\bzoröck\b/g, 'zo röck'], [/\baan\b/g, 'ahn'],
+    [/\bwaade\b/g, 'wahde'], [/\bun\b/g, 'unn'], [/\b09\b/g, 'null nüng'], [/\bJlöck\b/g, 'Jlöck'], [/\bDä\b/g, 'Dä']]};
   const FRAU = /katja|hedda|amala|seraphina|louisa|ingrid|elke|gisela|klarissa|maja|tanja|ketty|christel|petra|anna|marlene|vicki|female|weiblich/i;
-  const MANN = /conrad|stefan|killian|florian|jonas|jan|kasper|ralf|bernd|christoph|klaus|lars|hans|markus|male|männlich/i;
+  const MANN = /conrad|stefan|killian|florian|jonas|jan\b|kasper|ralf|bernd|christoph|klaus|lars|hans|markus|male|männlich/i;
   let an = true; try { an = localStorage.getItem('jumboStimmen') !== '0'; } catch(e) {}
   let stimmen = [], nr = 0;
   const bis = {};                                       // Name -> {t: Ende der Rede in ms, id}; für die Gesten der Figuren (pose)
@@ -34,7 +41,9 @@ window.stimme = (() => {
   }
   function sprich(name, text){
     if (!an || !S || !text) return;
-    const f = FIG[name] || {pitch:1, rate:1, frau:false, wunsch:null}, u = new SpeechSynthesisUtterance(sprechbar(text)), v = wahl(f);
+    const f = FIG[name] || {pitch:1, rate:1, frau:false, wunsch:null};
+    let t = text; for (const [re, ers] of AUSSPRACHE[f.aussprache] || []) t = t.replace(re, ers);
+    const u = new SpeechSynthesisUtterance(sprechbar(t)), v = wahl(f);
     if (v) u.voice = v; u.lang = v ? v.lang : 'de-DE'; u.pitch = f.pitch; u.rate = f.rate; u.volume = 1;
     const id = ++nr; u.onstart = () => { bis[name] = {t:Infinity, id}; };
     u.onend = u.onerror = () => { if (bis[name] && bis[name].id === id) bis[name] = {t:performance.now() + 300, id}; };
