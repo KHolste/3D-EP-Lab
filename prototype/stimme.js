@@ -9,7 +9,7 @@ window.stimme = (() => {
     'Anna':      {pitch:1.15, rate:1.05, frau:true,  wunsch:/katja|seraphina|hedda/i},
     'Kalle':     {pitch:0.95, rate:1.12, frau:false, wunsch:/killian/i},
     'Doktorand': {pitch:1.1,  rate:1.18, frau:false, wunsch:/jonas|jan\b/i},
-    'Yan Ravil': {pitch:1.0,  rate:1.0,  frau:false, stumm:true}};   // spricht nicht mit der Browserstimme (nur Text und Gesten)
+    'Yan Ravil': {pitch:1.0,  rate:1.0,  frau:false, wunsch:/florian/i}};
   const FRAU = /katja|hedda|amala|seraphina|louisa|ingrid|elke|gisela|klarissa|maja|tanja|ketty|christel|petra|anna|marlene|vicki|female|weiblich/i;
   const MANN = /conrad|stefan|killian|florian|jonas|jan\b|kasper|ralf|bernd|christoph|klaus|lars|hans|markus|male|männlich/i;
   let an = true; try { an = localStorage.getItem('jumboStimmen') !== '0'; } catch(e) {}
@@ -45,9 +45,9 @@ window.stimme = (() => {
     ausText(text){
       const re = /(Udo|Anna|Kalle|Doktorand|Yan Ravil): „([^“"]*)[“"]/g; let m, erst = true, t0 = performance.now();
       while ((m = re.exec(text))) {
-        if (erst && an && S && !(FIG[m[1]] || {}).stumm) S.cancel(); erst = false;          // neue Rede unterbricht die alte
+        if (erst && an && S) S.cancel(); erst = false;          // neue Rede unterbricht die alte
         const f = FIG[m[1]] || {rate:1}, dauer = 400 + m[2].length*65/f.rate;   // geschätzte Sprechdauer, auch ohne Stimme (für die Gesten)
-        const id = an && S && !f.stumm ? sprich(m[1], m[2]) : ++nr; bis[m[1]] = {t:t0 + dauer, id}; t0 += dauer; }   // stumme Figuren: nur Gesten
+        const id = an && S ? sprich(m[1], m[2]) : ++nr; bis[m[1]] = {t:t0 + dauer, id}; t0 += dauer; }
     },
     redet: name => !!bis[name] && performance.now() < bis[name].t,
     sprich,
