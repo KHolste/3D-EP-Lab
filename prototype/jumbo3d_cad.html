@@ -583,11 +583,11 @@ function pose(g, ph, amt, t=0){
     r.arm[i].rotation.y = 0;
     r.elbow[i].rotation.x = (B.ellX ? B.ellX[i] : -0.2 + 0.06*amt) - Math.max(0, -sa)*0.22*amt - tk*seite*(0.45 + 0.35*ges);
     X.abd[i] = 0.05 + 0.015*atem*still + tk*seite*(0.03 + 0.03*ges2);
-    X.dreh[i] = tk*seite*0.35;                                       // Unterarm drehen: Handflächen beim Reden nach oben/innen
+    X.dreh[i] = -0.9 + tk*seite*1.25;                              // Unterarm: Handflächen zum Oberschenkel, beim Reden nach oben drehen                                       // Unterarm drehen: Handflächen beim Reden nach oben/innen
     X.clav[i] = 0.015*atem*still + tk*seite*0.04*ges;
     X.hand[i] = -0.04 + 0.04*Math.sin(q*0.8 + i*2)*still - tk*seite*0.15*ges2;
     X.hz[i] = -0.04 + tk*seite*0.08*ges;
-    X.curl[i] = 0.28 + 0.06*Math.sin(q*0.6 + i)*still - tk*0.12*ges;
+    X.curl[i] = 0.2 + 0.06*Math.sin(q*0.6 + i)*still - tk*0.12*ges;
   }
   // Rumpf: auf und ab (oben in der Standphase, unten wenn beide Beine aufsetzen), seitlich zum Standbein, leicht nach vorn beim Gehen
   r.body.position.x = 0.025*wv;

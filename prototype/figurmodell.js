@@ -58,13 +58,13 @@ window.figurModell = function(THREE, GLTFLoader, g, name){
     // Arme aus der A-Haltung des Modells an den Körper holen: Oberarm zeigt dann senkrecht nach unten, leicht nach außen
     const grund = {};
     for (const [n, s] of [['upperarm_l', 1], ['upperarm_r', -1]]) { const b = knochen[n], c = knochen[n.replace('upper', 'lower')]; if (!b || !c) continue;
-      b.getWorldPosition(V); c.getWorldPosition(W); const dir = W.sub(V).applyQuaternion(mqi).normalize();
+      b.getWorldPosition(V); c.getWorldPosition(W); const dir = W.clone().sub(V).applyQuaternion(mqi).normalize();
       grund[n] = new THREE.Quaternion().setFromUnitVectors(dir, new THREE.Vector3(s*0.1, -1, 0.02).normalize());
       // Unterarm: im Modell schon angewinkelt; eigene Grunddrehung, damit er gestreckt in Verlängerung des Oberarms hängt
-      const h = knochen[n.replace('upperarm', 'hand')]; if (h) { c.getWorldPosition(V); h.getWorldPosition(W); const d2 = W.sub(V).applyQuaternion(mqi).normalize();
+      const h = knochen[n.replace('upperarm', 'hand')]; if (h) { c.getWorldPosition(V); h.getWorldPosition(W); const d2 = W.clone().sub(V).applyQuaternion(mqi).normalize();
         grund[n.replace('upper', 'lower')] = new THREE.Quaternion().setFromUnitVectors(d2, new THREE.Vector3(s*0.1, -1, 0.02).normalize());
         // Hand: Handgelenk gerade richten (Mittelfinger-Grundgelenk in Verlängerung des Unterarms)
-        const mf = knochen[n.replace('upperarm', 'middle_01')]; if (mf) { h.getWorldPosition(V); mf.getWorldPosition(W); const d3 = W.sub(V).applyQuaternion(mqi).normalize();
+        const mf = knochen[n.replace('upperarm', 'middle_01')]; if (mf) { h.getWorldPosition(V); mf.getWorldPosition(W); const d3 = W.clone().sub(V).applyQuaternion(mqi).normalize();
           const unten = new THREE.Vector3(s*0.1, -1, 0.02).normalize(), gH = new THREE.Quaternion().setFromUnitVectors(d3, unten);
           // Handfläche zum Oberschenkel drehen (Drehung um die Armachse); der Unterarm dreht halb mit, damit die Haut am Handgelenk nicht verdrillt
           const ix = knochen[n.replace('upperarm', 'index_01')], pk = knochen[n.replace('upperarm', 'pinky_01')];
@@ -72,7 +72,8 @@ window.figurModell = function(THREE, GLTFLoader, g, name){
             const flaeche = s < 0 ? quer.clone().cross(d3) : d3.clone().cross(quer);          // Handfläche (rechte Hand: Querachse x Fingerrichtung)
             const proj = v => v.sub(unten.clone().multiplyScalar(v.dot(unten))).normalize();
             const ist = proj(flaeche.applyQuaternion(gH)), soll = proj(new THREE.Vector3(-s, 0, 0.25));
-            const dreh = new THREE.Quaternion().setFromUnitVectors(ist, soll);
+            // Winkel ausdrücklich um die Armachse (setFromUnitVectors wählt bei fast entgegengesetzten Richtungen eine beliebige Achse)
+            const dreh = new THREE.Quaternion().setFromAxisAngle(unten, Math.atan2(ist.clone().cross(soll).dot(unten), ist.dot(soll)));
             gH.premultiply(dreh); grund[n.replace('upper', 'lower')].premultiply(new THREE.Quaternion().slerp(dreh, 0.5)); }
           grund[n.replace('upperarm', 'hand')] = gH; } } }
     // Fingerkrümmung: Drehachse quer über die Fingergrundgelenke (Zeigefinger -> kleiner Finger), so gerichtet,
@@ -101,7 +102,7 @@ window.figurModell = function(THREE, GLTFLoader, g, name){
       for (const i of [0, 1]) { const s = i ? 'l' : 'r', sg = i ? 1 : -1, gr = grund['upperarm_' + s] || I, grL = grund['lowerarm_' + s] || gr, grH = grund['hand_' + s] || grL;   // Index 0 = rechte Seite (x < 0)
         const Ac = mal(A3, E(0, 0, sg*v(X.clav, i))); setz(knochen['clavicle_' + s], Ac);
         const Aa = mal(Ac, E(r.arm[i].rotation.x, r.arm[i].rotation.y, sg*v(X.abd, i))); setz(knochen['upperarm_' + s], mal(Aa, gr));
-        const Ae = mal(Aa, E(r.elbow[i].rotation.x, 0, 0), E(0, v(X.dreh, i)*sg, 0));   // erst um die eigene Achse drehen, dann beugen setz(knochen['lowerarm_' + s], mal(Ae, grL));
+        const Ae = mal(Aa, E(r.elbow[i].rotation.x, 0, 0), E(0, v(X.dreh, i)*sg, 0)); setz(knochen['lowerarm_' + s], mal(Ae, grL));   // erst um die eigene Achse drehen, dann beugen
         const Aw = mal(Ae, E(v(X.hand, i), 0, sg*v(X.hz, i)), grH); setz(knochen['hand_' + s], Aw);
         const ax = fingerAchse[s], k = v(X.curl, i);
         if (ax) { C.setFromAxisAngle(ax, k); for (const f of FINGER) { let F = Aw; for (const n of [1, 2, 3]) { F = mal(F, C); setz(knochen[f + '_0' + n + '_' + s], F); } } }
