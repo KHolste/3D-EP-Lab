@@ -59,21 +59,55 @@ window.figurModell = function(THREE, GLTFLoader, g, name){
     const grund = {};
     for (const [n, s] of [['upperarm_l', 1], ['upperarm_r', -1]]) { const b = knochen[n], c = knochen[n.replace('upper', 'lower')]; if (!b || !c) continue;
       b.getWorldPosition(V); c.getWorldPosition(W); const dir = W.sub(V).applyQuaternion(mqi).normalize();
-      grund[n] = new THREE.Quaternion().setFromUnitVectors(dir, new THREE.Vector3(s*0.1, -1, 0.02).normalize()); }
-    // Ketten: [Knochen, Liste der Gelenke des Steuergerüsts, deren Drehungen sich aufsummieren (außen zuerst), Grunddrehung]
-    const K = [];
-    for (const i of [0, 1]) { const s = i ? 'l' : 'r';           // Index 0 liegt bei x < 0: das ist die rechte Körperseite (Blick nach +z)
-      K.push([knochen['thigh_' + s], [r.leg[i]], null], [knochen['calf_' + s], [r.leg[i], r.knee[i]], null],
-             [knochen['upperarm_' + s], [r.arm[i]], grund['upperarm_' + s]], [knochen['lowerarm_' + s], [r.arm[i], r.elbow[i]], grund['upperarm_' + s]]); }
-    K.push([knochen.head, [r.head], null]);
-    const KK = K.filter(k => k[0]), neu = new Map(), q = new THREE.Quaternion(), D = new THREE.Quaternion(), e = new THREE.Euler();
+      grund[n] = new THREE.Quaternion().setFromUnitVectors(dir, new THREE.Vector3(s*0.1, -1, 0.02).normalize());
+      // Unterarm: im Modell schon angewinkelt; eigene Grunddrehung, damit er gestreckt in Verlängerung des Oberarms hängt
+      const h = knochen[n.replace('upperarm', 'hand')]; if (h) { c.getWorldPosition(V); h.getWorldPosition(W); const d2 = W.sub(V).applyQuaternion(mqi).normalize();
+        grund[n.replace('upper', 'lower')] = new THREE.Quaternion().setFromUnitVectors(d2, new THREE.Vector3(s*0.1, -1, 0.02).normalize());
+        // Hand: Handgelenk gerade richten (Mittelfinger-Grundgelenk in Verlängerung des Unterarms)
+        const mf = knochen[n.replace('upperarm', 'middle_01')]; if (mf) { h.getWorldPosition(V); mf.getWorldPosition(W); const d3 = W.sub(V).applyQuaternion(mqi).normalize();
+          const unten = new THREE.Vector3(s*0.1, -1, 0.02).normalize(), gH = new THREE.Quaternion().setFromUnitVectors(d3, unten);
+          // Handfläche zum Oberschenkel drehen (Drehung um die Armachse); der Unterarm dreht halb mit, damit die Haut am Handgelenk nicht verdrillt
+          const ix = knochen[n.replace('upperarm', 'index_01')], pk = knochen[n.replace('upperarm', 'pinky_01')];
+          if (ix && pk) { ix.getWorldPosition(V); pk.getWorldPosition(W); const quer = V.clone().sub(W).applyQuaternion(mqi).normalize();
+            const flaeche = s < 0 ? quer.clone().cross(d3) : d3.clone().cross(quer);          // Handfläche (rechte Hand: Querachse x Fingerrichtung)
+            const proj = v => v.sub(unten.clone().multiplyScalar(v.dot(unten))).normalize();
+            const ist = proj(flaeche.applyQuaternion(gH)), soll = proj(new THREE.Vector3(-s, 0, 0.25));
+            const dreh = new THREE.Quaternion().setFromUnitVectors(ist, soll);
+            gH.premultiply(dreh); grund[n.replace('upper', 'lower')].premultiply(new THREE.Quaternion().slerp(dreh, 0.5)); }
+          grund[n.replace('upperarm', 'hand')] = gH; } } }
+    // Fingerkrümmung: Drehachse quer über die Fingergrundgelenke (Zeigefinger -> kleiner Finger), so gerichtet,
+    // dass ein positiver Winkel die Finger zur Handfläche krümmt (rechte Hand: Handrücken = Fingerrichtung x Querachse)
+    const fingerAchse = {}, FINGER = ['index', 'middle', 'ring', 'pinky'];
+    for (const s of ['l', 'r']) { const ix = knochen['index_01_' + s], pk = knochen['pinky_01_' + s]; if (!ix || !pk) continue;
+      ix.getWorldPosition(V); pk.getWorldPosition(W); const quer = V.clone().sub(W).applyQuaternion(mqi).normalize();
+      fingerAchse[s] = s === 'r' ? quer : quer.negate(); }
+    // Die ganze Kette wird gesteuert: Becken -> Wirbelsäule -> Hals -> Kopf, Schlüsselbein -> Arm -> Hand -> Finger, Bein -> Fuß.
+    // Jede Drehung A ist eine Gesamtdrehung im Modellraum; ein Kind setzt die Drehung seines Elternteils fort (A_kind = A_eltern * eigene).
+    // Zusätzliche Kanäle (Becken, Wirbelsäule, Füße, Hände, Finger ...) stehen in rig.x und werden in pose() berechnet.
+    const I = new THREE.Quaternion(), e = new THREE.Euler(), neu = new Map(), C = new THREE.Quaternion();
+    const E = (x, y, z) => new THREE.Quaternion().setFromEuler(e.set(x || 0, y || 0, z || 0, 'YXZ'));
+    const mal = (...qs) => { const r = qs[0].clone(); for (let k = 1; k < qs.length; k++) r.multiply(qs[k]); return r; };
+    const setz = (b, A) => { if (!b) return; const ziel = A.clone().multiply(restM.get(b)), eltern = neu.get(b.parent) || restM.get(b.parent);
+      neu.set(b, ziel); b.quaternion.copy(eltern).invert().multiply(ziel); };
     g.userData.sync = () => {
+      const X = r.x || {}, v = (a, i) => (a ? a[i] || 0 : 0);
       m.position.copy(body.position); m.rotation.copy(body.rotation); neu.clear();
-      for (const [b, gelenke, gr] of KK) {
-        D.identity(); for (const j of gelenke) { e.set(j.rotation.x, j.rotation.y, 0, 'YXZ'); D.multiply(q.setFromEuler(e)); }
-        if (gr) D.multiply(gr);
-        const ziel = D.clone().multiply(restM.get(b)), eltern = neu.get(b.parent) || restM.get(b.parent);
-        neu.set(b, ziel); b.quaternion.copy(eltern).invert().multiply(ziel); }
+      const Ap = E(X.pX, X.pY, X.pZ); setz(knochen.pelvis, Ap);
+      const A1 = mal(Ap, E(X.s1X, X.sY, X.sZ)); setz(knochen.spine_01, A1);
+      const A2 = mal(A1, E(X.s2X, X.sY, X.sZ)); setz(knochen.spine_02, A2);
+      const A3 = mal(A2, E(X.s3X, X.sY, 0)); setz(knochen.spine_03, A3);
+      const An = mal(A3, E(X.nX, X.nY, 0)); setz(knochen.neck_01, An);
+      setz(knochen.head, mal(An, E(r.head.rotation.x, r.head.rotation.y, 0)));
+      for (const i of [0, 1]) { const s = i ? 'l' : 'r', sg = i ? 1 : -1, gr = grund['upperarm_' + s] || I, grL = grund['lowerarm_' + s] || gr, grH = grund['hand_' + s] || grL;   // Index 0 = rechte Seite (x < 0)
+        const Ac = mal(A3, E(0, 0, sg*v(X.clav, i))); setz(knochen['clavicle_' + s], Ac);
+        const Aa = mal(Ac, E(r.arm[i].rotation.x, r.arm[i].rotation.y, sg*v(X.abd, i))); setz(knochen['upperarm_' + s], mal(Aa, gr));
+        const Ae = mal(Aa, E(r.elbow[i].rotation.x, 0, 0), E(0, v(X.dreh, i)*sg, 0));   // erst um die eigene Achse drehen, dann beugen setz(knochen['lowerarm_' + s], mal(Ae, grL));
+        const Aw = mal(Ae, E(v(X.hand, i), 0, sg*v(X.hz, i)), grH); setz(knochen['hand_' + s], Aw);
+        const ax = fingerAchse[s], k = v(X.curl, i);
+        if (ax) { C.setFromAxisAngle(ax, k); for (const f of FINGER) { let F = Aw; for (const n of [1, 2, 3]) { F = mal(F, C); setz(knochen[f + '_0' + n + '_' + s], F); } } }
+        const At = mal(Ap, E(r.leg[i].rotation.x, X.legY, X.legZ)); setz(knochen['thigh_' + s], At);
+        const Ak = mal(At, E(r.knee[i].rotation.x, 0, 0)); setz(knochen['calf_' + s], Ak);
+        setz(knochen['foot_' + s], mal(Ak, E(v(X.foot, i), 0, 0))); }
     };
     g.userData.sync();
     if (g.userData.onModell) { g.updateMatrixWorld(true); g.userData.onModell(knochen); }   // z. B. Gegenstand in die Hand geben

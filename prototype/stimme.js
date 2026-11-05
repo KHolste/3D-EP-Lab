@@ -13,7 +13,8 @@ window.stimme = (() => {
   const FRAU = /katja|hedda|amala|seraphina|louisa|ingrid|elke|gisela|klarissa|maja|tanja|ketty|christel|petra|anna|marlene|vicki|female|weiblich/i;
   const MANN = /conrad|stefan|killian|florian|jonas|jan|kasper|ralf|bernd|christoph|klaus|lars|hans|markus|male|männlich/i;
   let an = true; try { an = localStorage.getItem('jumboStimmen') !== '0'; } catch(e) {}
-  let stimmen = [];
+  let stimmen = [], nr = 0;
+  const bis = {};                                       // Name -> {t: Ende der Rede in ms, id}; für die Gesten der Figuren (pose)
   const laden = () => { if (S) stimmen = S.getVoices().filter(v => /^de/i.test(v.lang)); };
   if (S) { laden(); S.addEventListener && S.addEventListener('voiceschanged', laden); }
 
@@ -35,14 +36,19 @@ window.stimme = (() => {
     if (!an || !S || !text) return;
     const f = FIG[name] || {pitch:1, rate:1, frau:false, wunsch:null}, u = new SpeechSynthesisUtterance(sprechbar(text)), v = wahl(f);
     if (v) u.voice = v; u.lang = v ? v.lang : 'de-DE'; u.pitch = f.pitch; u.rate = f.rate; u.volume = 1;
-    S.speak(u);
+    const id = ++nr; u.onstart = () => { bis[name] = {t:Infinity, id}; };
+    u.onend = u.onerror = () => { if (bis[name] && bis[name].id === id) bis[name] = {t:performance.now() + 300, id}; };
+    S.speak(u); return id;
   }
   return {
     ausText(text){
-      if (!an || !S) return;
-      const re = /(Udo|Anna|Kalle|Doktorand|Yan Ravil): „([^“"]*)[“"]/g; let m, erst = true;
-      while ((m = re.exec(text))) { if (erst) { S.cancel(); erst = false; } sprich(m[1], m[2]); }   // neue Rede unterbricht die alte
+      const re = /(Udo|Anna|Kalle|Doktorand|Yan Ravil): „([^“"]*)[“"]/g; let m, erst = true, t0 = performance.now();
+      while ((m = re.exec(text))) {
+        if (erst && an && S) S.cancel(); erst = false;          // neue Rede unterbricht die alte
+        const f = FIG[m[1]] || {rate:1}, dauer = 400 + m[2].length*65/f.rate;   // geschätzte Sprechdauer, auch ohne Stimme (für die Gesten)
+        const id = an && S ? sprich(m[1], m[2]) : ++nr; bis[m[1]] = {t:t0 + dauer, id}; t0 += dauer; }
     },
+    redet: name => !!bis[name] && performance.now() < bis[name].t,
     sprich,
     umschalten(){ an = !an; try { localStorage.setItem('jumboStimmen', an ? '1' : '0'); } catch(e) {} if (!an && S) S.cancel(); return an; },
     get an(){ return an; },

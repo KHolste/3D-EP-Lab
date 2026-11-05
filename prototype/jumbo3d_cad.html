@@ -538,13 +538,65 @@ function figure(shirt, o={}){
   scene.add(g); pose(g, 0, 0, 0); return g;
 }
 // ph = Phase des Schritts, amt = 0 (steht) bis 1 (geht), t = Zeit in s (für Atmen und Umsehen im Stand)
+// Bewegung der Figuren. ph = Schrittphase, amt = 0 (steht) .. 1 (geht), t = Zeit in s.
+// Gehen: Becken dreht und kippt mit, Oberkörper dreht dagegen, Arme pendeln verzögert, Füße rollen über Ferse und Ballen ab.
+// Stehen: Atmen, Gewicht von einem Bein aufs andere, lockeres Spielbein, Kopf sieht sich um bzw. schaut den Spieler an.
+// Sprechen (stimme.js): Gesten mit beiden Händen, leichtes Nicken. Die Werte für Becken, Wirbelsäule, Hände usw. stehen in rig.x
+// und werden von figurmodell.js auf das Skelett übertragen; die Gliederpuppe nutzt nur Beine, Arme und Kopf.
+let blickP = null;                                     // Spielerposition (P), sobald sie existiert: die Figuren schauen den Spieler an
+const glatt = (r, k, ziel, dt, tempo) => (r[k] = (r[k] ?? ziel) + (ziel - (r[k] ?? ziel))*Math.min(1, dt*tempo));
 function pose(g, ph, amt, t=0){
-  const r = g.userData.rig; if (!r) return; const still = 1 - amt, q = t + r.seed;
-  for (const i of [0, 1]) { const p = ph + i*Math.PI, s = Math.sin(p);
-    r.leg[i].rotation.x = -s*0.5*amt; r.knee[i].rotation.x = Math.max(0, Math.cos(p))*0.75*amt;
-    r.arm[i].rotation.x = s*0.42*amt + Math.sin(q*0.9 + i)*0.02*still; r.elbow[i].rotation.x = -0.16 - Math.max(0, -s)*0.35*amt; }
-  r.body.position.y = Math.abs(Math.sin(ph))*0.022*amt + Math.sin(q*1.6)*0.003*still; r.body.rotation.z = Math.sin(ph)*0.025*amt; r.body.rotation.x = 0.04*amt;
-  r.head.rotation.y = (Math.sin(q*0.37) + Math.sin(q*0.83)*0.5)*0.22*still; r.head.rotation.x = Math.sin(q*0.29)*0.05*still;
+  const r = g.userData.rig; if (!r) return;
+  const X = r.x || (r.x = {foot:[0, 0], hand:[0, 0], hz:[0, 0], clav:[0, 0], abd:[0, 0], curl:[0, 0], dreh:[0, 0]});
+  const dt = Math.min(0.1, Math.max(0, t - (r.tAlt ?? t))); r.tAlt = t;
+  const B = r.basis || {}, still = 1 - amt, q = t + r.seed, atem = Math.sin(q*1.45);
+  // spricht die Figur gerade? Gesten nur im Stehen
+  const redet = window.stimme && g.userData.name && window.stimme.redet(g.userData.name);
+  const tk = glatt(r, 'tk', redet ? 1 : 0, dt, 4)*still;
+  // Gewicht verlagern: langsame, unregelmäßige Welle (> 0: Gewicht auf dem linken Bein, Index 1)
+  const wv = B.lehnt ? 0 : Math.max(-1, Math.min(1, (Math.sin(q*0.23) + 0.6*Math.sin(q*0.41 + 2.1))*0.85))*still*(1 - tk*0.5);
+  // Blick zum Spieler, wenn er in der Nähe ist
+  let ly = 0, lx = 0;
+  if (blickP && g.parent) { const dx = blickP.x - g.position.x, dz = blickP.z - g.position.z, d = Math.hypot(dx, dz);
+    if (d < 4.5 && Math.abs(blickP.feet - g.position.y) < 2.2) { let rel = Math.atan2(dx, dz) - g.rotation.y; rel = Math.atan2(Math.sin(rel), Math.cos(rel));
+      if (Math.abs(rel) < 2.0) { ly = Math.max(-1.1, Math.min(1.1, rel)); lx = -Math.atan2(blickP.feet + 1.65 - g.position.y - 1.6, Math.max(d, 0.5))*0.8; } } }
+  const blick = glatt(r, 'blickAn', ly || lx ? 1 : 0, dt, 3); glatt(r, 'ly', ly, dt, 4); glatt(r, 'lx', lx, dt, 4);
+  // Becken und Wirbelsäule
+  const s0 = Math.sin(ph);
+  X.pY = 0.11*s0*amt; X.pZ = 0.05*wv; X.pX = 0.03*amt;
+  X.legY = -X.pY; X.legZ = -X.pZ;                     // Beine bleiben senkrecht, Füße zeigen nach vorn
+  X.sY = -X.pY*0.45; X.sZ = -X.pZ*0.55;               // Oberkörper dreht gegen das Becken, bleibt aufrecht
+  X.s1X = 0.01; X.s2X = -0.012*atem*still - tk*0.03; X.s3X = -0.01*atem*still + 0.02*amt;
+  X.nY = X.pY*0.35 + r.ly*0.35*blick; X.nX = r.lx*0.3*blick;
+  for (const i of [0, 1]) {
+    const p = ph + i*Math.PI, s = Math.sin(p), c = Math.cos(p);
+    const locker = B.lehnt ? 0 : Math.max(0, i ? -wv : wv);     // Spielbein: entlastet, Knie leicht gebeugt
+    r.leg[i].rotation.x = -s*0.46*amt - locker*0.08;
+    r.knee[i].rotation.x = amt*(0.07 + 0.8*Math.pow(Math.max(0, Math.cos(p + 0.25)), 1.4)) + locker*0.2;
+    // Fuß: Sohle flach halten, Ferse setzt auf (Zehen hoch), Abdruck über den Ballen (Ferse hoch), in der Schwungphase Zehen leicht hoch
+    const unter = r.leg[i].rotation.x + r.knee[i].rotation.x, stand = Math.max(0, Math.min(1, 0.5 - c*3));
+    X.foot[i] = -unter*0.95 + amt*(stand*(-0.15*Math.pow(Math.max(0, s), 4) + 0.45*Math.pow(Math.max(0, -s), 3)) + (1 - stand)*-0.12) + locker*0.06;
+    // Arme pendeln gegengleich zu den Beinen, etwas verzögert; Ellbogen beugt sich beim Vorschwingen
+    const sa = Math.sin(p - 0.3), seite = i ? 0.65 : 1;           // rechte Hand gestikuliert mehr
+    const ges = 0.5 + 0.5*Math.sin(q*2.1 + i*1.9 + Math.sin(q*0.7 + i)*2), ges2 = Math.sin(q*3.3 + i*2.4);
+    r.arm[i].rotation.x = (B.armX ? B.armX[i] : 0) + sa*0.3*amt + Math.sin(q*0.9 + i)*0.02*still - tk*seite*(0.12 + 0.12*ges);
+    r.arm[i].rotation.y = 0;
+    r.elbow[i].rotation.x = (B.ellX ? B.ellX[i] : -0.2 + 0.06*amt) - Math.max(0, -sa)*0.22*amt - tk*seite*(0.45 + 0.35*ges);
+    X.abd[i] = 0.05 + 0.015*atem*still + tk*seite*(0.03 + 0.03*ges2);
+    X.dreh[i] = tk*seite*0.35;                                       // Unterarm drehen: Handflächen beim Reden nach oben/innen
+    X.clav[i] = 0.015*atem*still + tk*seite*0.04*ges;
+    X.hand[i] = -0.04 + 0.04*Math.sin(q*0.8 + i*2)*still - tk*seite*0.15*ges2;
+    X.hz[i] = -0.04 + tk*seite*0.08*ges;
+    X.curl[i] = 0.28 + 0.06*Math.sin(q*0.6 + i)*still - tk*0.12*ges;
+  }
+  // Rumpf: auf und ab (oben in der Standphase, unten wenn beide Beine aufsetzen), seitlich zum Standbein, leicht nach vorn beim Gehen
+  r.body.position.x = 0.025*wv;
+  r.body.position.y = (Math.abs(Math.cos(ph)) - 0.6)*0.028*amt + atem*0.002*still - Math.abs(wv)*0.006;
+  r.body.rotation.z = Math.sin(ph)*0.02*amt; r.body.rotation.x = 0.045*amt + (B.bodyX || 0);
+  // Kopf: sieht sich um oder schaut den Spieler an, nickt beim Reden
+  const umsehen = (Math.sin(q*0.37) + Math.sin(q*0.83)*0.5)*0.2*still;
+  r.head.rotation.y = (B.kopfY || 0)*(1 - blick) + umsehen*(1 - blick)*(1 - tk) + r.ly*0.6*blick;
+  r.head.rotation.x = (B.kopfX || 0)*(1 - blick) + Math.sin(q*0.29)*0.05*still*(1 - blick) + r.lx*0.6*blick + tk*0.05*Math.sin(q*5.2);
   if (g.userData.sync) g.userData.sync();             // realistisches Modell (figurmodell.js) folgt dem Steuergerüst
 }
 
@@ -958,9 +1010,9 @@ function drawDisplay(){
   stuhl(-11.25, U, 2.7, -Math.PI/2 + 0.3); hocker(-12.1, U, 4.1);
 }
 /* ---- Figuren ---- */
-const dok = figure(0x6d7f8f, {coat:true, hair:0x1f1a17, glasses:true}); window.figurModell(THREE, GLTFLoader, dok, 'dok');   /* MakeHuman-Modell */ dok.position.set(TXD-1.4, TY-0.93, TZ+0.25); dok.rotation.y = 1.2;
+const dok = figure(0x6d7f8f, {coat:true, hair:0x1f1a17, glasses:true}); window.figurModell(THREE, GLTFLoader, dok, 'dok');   /* MakeHuman-Modell */ dok.position.set(TXD-1.4, TY-0.93, TZ+0.25); dok.rotation.y = 1.2; dok.userData.name = 'Doktorand';
 const DOKPATH = [[TXD-1.4,TY-0.93,TZ+0.25],[-3.1,DY,TZ],[-3.1,DY,-5.0],[-0.9,DY,-5.0],[-0.7,DY,-5.62],[-3.3,0,-5.62],[-4.5,0,-2.5]]; let dokSeg = 0, dokF = 0;
-const udo = figure(0x8a2440, {hair:0x5a4634, pants:0x30333a, belly:true}); window.figurModell(THREE, GLTFLoader, udo, 'udo');   /* MakeHuman-Modell (tools/figuren.py) */ udo.position.set(-5.1, 0, 4.1); udo.rotation.y = -0.5;
+const udo = figure(0x8a2440, {hair:0x5a4634, pants:0x30333a, belly:true}); window.figurModell(THREE, GLTFLoader, udo, 'udo');   /* MakeHuman-Modell (tools/figuren.py) */ udo.position.set(-5.1, 0, 4.1); udo.rotation.y = -0.5; udo.userData.name = 'Udo';
 hit('udo', null, -5.1, 1.0, 4.1, 0.7, 2.0, 0.7);
 plate('UDO', 0.26, 0.08, udo, 0, 1.95, 0);
 
@@ -1002,7 +1054,7 @@ for (const n of NPCS) {
   g.traverse(o => { o.castShadow = false; });            // kein Schattenwurf: sonst müsste der Schatten der ganzen Halle in jedem Bild neu gerechnet werden
   const blob = new THREE.Mesh(new THREE.CircleGeometry(0.3, 20), new THREE.MeshBasicMaterial({color:0, transparent:true, opacity:0.28, depthWrite:false}));
   blob.rotation.x = -Math.PI/2; blob.position.y = 0.02; g.add(blob);
-  const label = n.name[0] + n.name.slice(1).toLowerCase();
+  const label = n.name[0] + n.name.slice(1).toLowerCase(); g.userData.name = label;
   plate(n.name, 0.26, 0.08, g, 0, 1.95, 0); hit(n.id, g, 0, 1.0, 0, 0.7, 2.0, 0.7);
   def(n.id, () => 'Mit ' + label + ' sprechen', () => msg(label + ': „' + n.say() + '“'));
 }
@@ -1013,10 +1065,8 @@ for (const [name, z, dreh] of [['kollege_karo', 16.9, -0.15]]) {
   if (!window.FIGUREN || !window.FIGUREN[name]) continue;
   const g = figure(0x666666, {}), r = g.userData.rig;
   g.position.set(-7.93, 0, z); g.rotation.y = -Math.PI/2 + dreh;           // Rücken zur Ostwand von Flur 05, Blick in den Flur
-  r.body.rotation.x = -0.07;                                              // angelehnt
-  r.arm[0].rotation.x = 0.05; r.elbow[0].rotation.x = -0.2;             // Arme locker
-  r.arm[1].rotation.x = 0.05; r.elbow[1].rotation.x = -0.25;
-  r.head.rotation.y = name === 'kollege_blond' ? 0.35 : -0.25; r.head.rotation.x = 0.12;   // schauen zueinander bzw. leicht nach unten
+  r.basis = {lehnt:true, bodyX:-0.07, armX:[0.05, 0.05], ellX:[-0.2, -0.25], kopfY:-0.25, kopfX:0.12};   // angelehnt, Arme locker, Blick leicht nach unten
+  g.userData.name = 'Yan Ravil'; pose(g, 0, 0, 0);
   window.figurModell(THREE, GLTFLoader, g, name); KOLLEGEN.push({g, name:'Yan Ravil'});
   plate('YAN RAVIL', 0.4, 0.08, g, 0, 1.95, 0); hit('yan', g, 0, 1.0, 0, 0.7, 2.0, 0.7);
   def('yan', () => 'Mit Yan Ravil sprechen', () => msg('Yan Ravil: „' + YAN[yanI++ % YAN.length] + '“'));
@@ -1039,7 +1089,7 @@ function moveNpcs(dt, now){
 /* =====================================================================
    4) STEUERUNG + HAUPTSCHLEIFE
    ===================================================================== */
-const P = {x:-8.8, z:9.6, feet:0, yaw:0, pitch:-0.02};   // Start im Vorraum 09, Blick auf die Tür in die Jumbo-Halle
+const P = {x:-8.8, z:9.6, feet:0, yaw:0, pitch:-0.02}; blickP = P;   // Start im Vorraum 09, Blick auf die Tür in die Jumbo-Halle
 const keys = {};
 const locked = () => document.pointerLockElement === canvas;
 let mouseLook = true; try { mouseLook = localStorage.getItem('jumboMouse') !== '0'; } catch(e) {}
@@ -1210,7 +1260,7 @@ function frame(now){
     dokF += dt*3.2/len; if (dokF >= 1) { dokF = 0; dokSeg++; if (dokSeg >= DOKPATH.length-1) dok.visible = false; }
     else { dok.position.set(a[0]+(b[0]-a[0])*dokF, a[1]+(b[1]-a[1])*dokF, a[2]+(b[2]-a[2])*dokF); dok.rotation.y = Math.atan2(b[0]-a[0], b[2]-a[2]); pose(dok, now*0.0147, 1, 0); }
   }
-  pose(udo, 0, 0, now*0.001); if (!S.dokGone) pose(dok, 0, 0, now*0.001);
+  pose(udo, 0, 0, now*0.001); if (!S.dokGone) pose(dok, 0, 0, now*0.001); for (const k of KOLLEGEN) pose(k.g, 0, 0, now*0.001);
   udo.rotation.y = Math.atan2(P.x - udo.position.x, P.z - udo.position.z);
   const sig = doorAnim*7 + (dok.visible ? dok.position.x + dok.position.z*3 : 50) + 0;
   if (sig !== shSig) { shSig = sig; renderer.shadowMap.needsUpdate = true; }
