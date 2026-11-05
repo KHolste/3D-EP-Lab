@@ -9,14 +9,7 @@ window.stimme = (() => {
     'Anna':      {pitch:1.15, rate:1.05, frau:true,  wunsch:/katja|seraphina|hedda/i},
     'Kalle':     {pitch:0.95, rate:1.12, frau:false, wunsch:/killian/i},
     'Doktorand': {pitch:1.1,  rate:1.18, frau:false, wunsch:/jonas|jan\b/i},
-    'Yan Ravil': {pitch:1.0,  rate:1.05, frau:false, wunsch:/florian/i, aussprache:'koelsch'}};
-  // Kölsch: Auf dem Bildschirm steht die kölsche Schreibweise; die hochdeutsche Browserstimme bekommt eine lautnähere Fassung,
-  // damit sie nicht buchstabengetreu „Hochdeutsch mit Tippfehlern“ vorliest
-  const AUSSPRACHE = {koelsch:[
-    [/\bsteiht\b/g, 'schteit'], [/\bhee\b/g, 'heh'], [/\bkoot\b/g, 'koht'], [/\bruude\b/g, 'ruhde'], [/\bVill\b/g, 'Fill'],
-    [/\bAvpumpe\b/g, 'Afpumpe'], [/\bjot\b/g, 'joht'], [/\bjejange\b/g, 'jejangeh'], [/\bDat\b/g, 'Datt'], [/\brüümst\b/g, 'rühmst'],
-    [/\bävver\b/g, 'äwwer'], [/\bop\b/g, 'opp'], [/\bem\b/g, 'emm'], [/\bzoröck\b/g, 'zo röck'], [/\baan\b/g, 'ahn'],
-    [/\bwaade\b/g, 'wahde'], [/\bun\b/g, 'unn'], [/\b09\b/g, 'null nüng'], [/\bJlöck\b/g, 'Jlöck'], [/\bDä\b/g, 'Dä']]};
+    'Yan Ravil': {pitch:1.0,  rate:1.0,  frau:false, stumm:true}};   // spricht nicht mit der Browserstimme, nur lokale Tonschnipsel (Spielseite)
   const FRAU = /katja|hedda|amala|seraphina|louisa|ingrid|elke|gisela|klarissa|maja|tanja|ketty|christel|petra|anna|marlene|vicki|female|weiblich/i;
   const MANN = /conrad|stefan|killian|florian|jonas|jan\b|kasper|ralf|bernd|christoph|klaus|lars|hans|markus|male|männlich/i;
   let an = true; try { an = localStorage.getItem('jumboStimmen') !== '0'; } catch(e) {}
@@ -42,8 +35,7 @@ window.stimme = (() => {
   function sprich(name, text){
     if (!an || !S || !text) return;
     const f = FIG[name] || {pitch:1, rate:1, frau:false, wunsch:null};
-    let t = text; for (const [re, ers] of AUSSPRACHE[f.aussprache] || []) t = t.replace(re, ers);
-    const u = new SpeechSynthesisUtterance(sprechbar(t)), v = wahl(f);
+    const u = new SpeechSynthesisUtterance(sprechbar(text)), v = wahl(f);
     if (v) u.voice = v; u.lang = v ? v.lang : 'de-DE'; u.pitch = f.pitch; u.rate = f.rate; u.volume = 1;
     const id = ++nr; u.onstart = () => { bis[name] = {t:Infinity, id}; };
     u.onend = u.onerror = () => { if (bis[name] && bis[name].id === id) bis[name] = {t:performance.now() + 300, id}; };
@@ -53,9 +45,9 @@ window.stimme = (() => {
     ausText(text){
       const re = /(Udo|Anna|Kalle|Doktorand|Yan Ravil): „([^“"]*)[“"]/g; let m, erst = true, t0 = performance.now();
       while ((m = re.exec(text))) {
-        if (erst && an && S) S.cancel(); erst = false;          // neue Rede unterbricht die alte
+        if (erst && an && S && !(FIG[m[1]] || {}).stumm) S.cancel(); erst = false;          // neue Rede unterbricht die alte
         const f = FIG[m[1]] || {rate:1}, dauer = 400 + m[2].length*65/f.rate;   // geschätzte Sprechdauer, auch ohne Stimme (für die Gesten)
-        const id = an && S ? sprich(m[1], m[2]) : ++nr; bis[m[1]] = {t:t0 + dauer, id}; t0 += dauer; }
+        const id = an && S && !f.stumm ? sprich(m[1], m[2]) : ++nr; bis[m[1]] = {t:t0 + dauer, id}; t0 += dauer; }   // stumme Figuren: nur Gesten
     },
     redet: name => !!bis[name] && performance.now() < bis[name].t,
     // Figur spricht für ms Millisekunden (z. B. während ein Tonschnipsel läuft), damit sie dabei gestikuliert

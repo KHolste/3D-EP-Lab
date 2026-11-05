@@ -1060,7 +1060,7 @@ for (const n of NPCS) {
 }
 /* ---- Yan Ravil in Flur 05: an die Wand gelehnt (Foto). Steht still, lässt sich ansprechen. ---- */
 /* Lokale Tonschnipsel für Yan Ravil (prototype/lokal/, nicht im Repo, weil fremde Rechte): „Oder wat?“ nach seinen Sätzen,
-   „Tschau“, wenn man nach dem Gespräch weggeht. Fehlen die Dateien (z. B. online), spricht er nur mit der Browserstimme. */
+   „Tschau“, wenn man nach dem Gespräch weggeht. Er hat keine Browserstimme (stimme.js); fehlen die Dateien (z. B. online), steht sein Text nur auf dem Bildschirm. */
 const YANTON = {};
 for (const [k, f] of [['oderwat', 'lokal/yan_oderwat.mp3'], ['tschau', 'lokal/yan_tschau.mp3']]) {
   const a = new Audio(); a.preload = 'auto'; a.addEventListener('loadedmetadata', () => { YANTON[k] = a; }, {once:true}); a.src = f; a.load(); }
