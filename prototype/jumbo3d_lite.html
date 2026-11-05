@@ -1053,7 +1053,7 @@ for (const n of NPCS) {
   def(n.id, () => 'Mit ' + label + ' sprechen', () => msg(label + ': „' + n.say() + '“'));
 }
 /* ---- Yan Ravil in Flur 05: an die Wand gelehnt (Foto). Steht still, lässt sich ansprechen. ---- */
-const YAN = ['Hallo! Ich waade hee nur ens koot.', 'Dä Jumbo steiht en dä Hall – durch de 09 un dann de ruude Dür.', 'Vill Jlöck beim Avpumpe! Et hätt noch immer jot jejange.']; let yanI = 0;   // Kölsch
+const YAN = ['Na Junge, hast Du Fiene, die alte Rakete, gesehen?']; let yanI = 0;
 const KOLLEGEN = [];
 for (const [name, z, dreh] of [['kollege_karo', 16.9, -0.15]]) {
   if (!window.FIGUREN || !window.FIGUREN[name]) continue;

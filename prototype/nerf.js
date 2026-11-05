@@ -84,7 +84,7 @@ window.nerfGun = function(c){
     Kalle: ['Aua! Also … eigentlich nicht aua. Aber trotzdem!', 'Gib her, ich zeig dir, wie man richtig zielt.',
             'Sammel die Pfeile bloß wieder ein, bevor einer im Tank landet!', 'Im Vakuum würde so ein Pfeil viel weiter fliegen. Kein Luftwiderstand.'],
     Doktorand: ['Hallo?! Hier drin arbeitet jemand!', 'Ich messe hier was ab, ja?'],
-    'Yan Ravil': ['Ey! Ich lehne mich hee doch nur aan!', 'Schaumstoff em Flur? Dat rüümst do ävver widder op.', 'Zwei Treffer, dann schieß ich zoröck.']};   // Kölsch
+    'Yan Ravil': ['Hey! Ich lehne hier nur!', 'Schaumstoff im Flur? Das räumst du aber auf.', 'Zwei Treffer, dann schieß ich zurück.']};
   const figs = c.figuren.map(f => ({...f, w:0, last:-9, i:0}));
 
   /* ---- Zustand ---- */
